@@ -1,11 +1,11 @@
 /**
  * Login Screen - React 19 Pattern
  *
- * Uses useActionState for form handling with automatic pending state.
- * Key changes from React 18:
- * - No manual isLoading/setIsLoading state
- * - Action function is defined outside component (no recreating on each render)
- * - isPending comes from useTransition (via useActionState)
+ * Features:
+ * - Email/password authentication
+ * - Google SSO (OAuth)
+ * - useActionState for form handling
+ * - Forgot password link
  */
 
 import { useState } from 'react';
@@ -20,36 +20,37 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, Href } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { getSupabaseBrowserClient } from '@propertycheck/database';
-import { loginSchema, formatZodError } from '@propertycheck/shared';
-import { APP_CONFIG } from '@propertycheck/shared';
+import { loginSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
+
+// Required for Google OAuth
+WebBrowser.maybeCompleteAuthSession();
 
 // Type for action state
 type LoginState = {
   errors: Record<string, string>;
 };
 
-// Initial state for the action
 const initialState: LoginState = {
   errors: {},
 };
 
-// Login action - defined outside component (React 19 best practice)
-// First param is previous state, second is the payload
+// Email/password login action
 async function loginAction(
   _prevState: LoginState,
   payload: { email: string; password: string }
 ): Promise<LoginState> {
-  // Validate input using Zod
   const result = loginSchema.safeParse(payload);
 
   if (!result.success) {
     return { errors: formatZodError(result.error) };
   }
 
-  // Attempt login
   try {
     const supabase = getSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithPassword({
@@ -62,7 +63,6 @@ async function loginAction(
       return { errors: {} };
     }
 
-    // Success - auth state change triggers redirect in _layout.tsx
     return { errors: {} };
   } catch {
     Alert.alert('Error', 'An unexpected error occurred');
@@ -71,19 +71,67 @@ async function loginAction(
 }
 
 export default function LoginScreen() {
-  // Form input state (uncontrolled would be better but RN requires controlled)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // useActionState provides: [state, dispatch, isPending]
-  // - state: current action result
-  // - dispatch: function to trigger the action
-  // - isPending: loading state (from useTransition internally)
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [state, dispatch, isPending] = useActionState(loginAction, initialState);
 
   const handleSubmit = () => {
     dispatch({ email, password });
   };
+
+  // Google OAuth Sign In
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+      const supabase = getSupabaseBrowserClient();
+
+      // Create redirect URI for Expo
+      const redirectUri = Linking.createURL('auth/callback');
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUri,
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (error) {
+        Alert.alert('Error', error.message);
+        return;
+      }
+
+      if (data.url) {
+        // Open browser for OAuth flow
+        const result = await WebBrowser.openAuthSessionAsync(
+          data.url,
+          redirectUri
+        );
+
+        if (result.type === 'success' && result.url) {
+          // Extract tokens from URL and set session
+          const url = new URL(result.url);
+          const accessToken = url.searchParams.get('access_token');
+          const refreshToken = url.searchParams.get('refresh_token');
+
+          if (accessToken && refreshToken) {
+            await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Google sign in error:', err);
+      Alert.alert('Error', 'Failed to sign in with Google');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const isLoading = isPending || googleLoading;
 
   return (
     <KeyboardAvoidingView
@@ -91,23 +139,49 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <View style={styles.content}>
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{APP_CONFIG.name}</Text>
           <Text style={styles.subtitle}>{APP_CONFIG.tagline}</Text>
         </View>
 
+        {/* Google Sign In Button */}
+        <TouchableOpacity
+          style={[styles.googleButton, isLoading && styles.buttonDisabled]}
+          onPress={handleGoogleSignIn}
+          disabled={isLoading}
+        >
+          {googleLoading ? (
+            <ActivityIndicator color="#1a1a1a" />
+          ) : (
+            <>
+              <Ionicons name="logo-google" size={20} color="#1a1a1a" />
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        {/* Divider */}
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        {/* Email/Password Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={[styles.input, state.errors.email && styles.inputError]}
               placeholder="you@example.com"
+              placeholderTextColor="#999"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
-              editable={!isPending}
+              editable={!isLoading}
             />
             {state.errors.email && (
               <Text style={styles.errorText}>{state.errors.email}</Text>
@@ -115,15 +189,23 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.label}>Password</Text>
+              <Link href={'/(auth)/forgot-password' as Href} asChild>
+                <TouchableOpacity>
+                  <Text style={styles.forgotLink}>Forgot password?</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
             <TextInput
               style={[styles.input, state.errors.password && styles.inputError]}
               placeholder="Your password"
+              placeholderTextColor="#999"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="password"
-              editable={!isPending}
+              editable={!isLoading}
             />
             {state.errors.password && (
               <Text style={styles.errorText}>{state.errors.password}</Text>
@@ -131,9 +213,9 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.button, isPending && styles.buttonDisabled]}
+            style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
-            disabled={isPending}
+            disabled={isLoading}
           >
             {isPending ? (
               <ActivityIndicator color="#fff" />
@@ -143,6 +225,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
           <Link href="/(auth)/register" asChild>
@@ -168,7 +251,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: 32,
   },
   title: {
     fontSize: 32,
@@ -180,17 +263,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 14,
+    gap: 12,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1a1a1a',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e5e5',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: '#999',
+    fontSize: 14,
+  },
   form: {
     gap: 16,
   },
   inputContainer: {
     gap: 4,
   },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   label: {
     fontSize: 14,
     fontWeight: '500',
     color: '#333',
-    marginBottom: 4,
+  },
+  forgotLink: {
+    fontSize: 14,
+    color: '#2563eb',
   },
   input: {
     borderWidth: 1,
@@ -199,6 +322,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#fafafa',
+    color: '#1a1a1a',
   },
   inputError: {
     borderColor: '#ef4444',

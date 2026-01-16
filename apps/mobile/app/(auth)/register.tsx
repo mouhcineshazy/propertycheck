@@ -1,8 +1,11 @@
 /**
  * Register Screen - React 19 Pattern
  *
- * Uses useActionState for form handling with automatic pending state.
- * Same pattern as login - action defined outside, isPending from useTransition.
+ * Features:
+ * - Email/password registration
+ * - Google SSO (OAuth)
+ * - useActionState for form handling
+ * - Confirm password validation
  */
 
 import { useState } from 'react';
@@ -18,10 +21,16 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import { getSupabaseBrowserClient } from '@propertycheck/database';
-import { registerSchema, formatZodError } from '@propertycheck/shared';
+import { registerSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
+
+// Required for Google OAuth
+WebBrowser.maybeCompleteAuthSession();
 
 // Type for action state
 type RegisterState = {
@@ -101,6 +110,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // useActionState for form handling
   const [state, dispatch, isPending] = useActionState(registerAction, initialState);
@@ -115,6 +125,56 @@ export default function RegisterScreen() {
     });
   };
 
+  // Google OAuth Sign Up
+  const handleGoogleSignUp = async () => {
+    try {
+      setGoogleLoading(true);
+      const supabase = getSupabaseBrowserClient();
+
+      const redirectUri = Linking.createURL('auth/callback');
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: redirectUri,
+          skipBrowserRedirect: true,
+        },
+      });
+
+      if (error) {
+        Alert.alert('Error', error.message);
+        return;
+      }
+
+      if (data.url) {
+        const result = await WebBrowser.openAuthSessionAsync(
+          data.url,
+          redirectUri
+        );
+
+        if (result.type === 'success' && result.url) {
+          const url = new URL(result.url);
+          const accessToken = url.searchParams.get('access_token');
+          const refreshToken = url.searchParams.get('refresh_token');
+
+          if (accessToken && refreshToken) {
+            await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Google sign up error:', err);
+      Alert.alert('Error', 'Failed to sign up with Google');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const isLoading = isPending || googleLoading;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -124,6 +184,35 @@ export default function RegisterScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Join {APP_CONFIG.name} today</Text>
+        </View>
+
+        {/* Google Sign Up Button */}
+        <TouchableOpacity
+          style={[styles.googleButton, isLoading && styles.buttonDisabled]}
+          onPress={handleGoogleSignUp}
+          disabled={isLoading}
+        >
+          {googleLoading ? (
+            <ActivityIndicator color="#1a1a1a" />
+          ) : (
+            <>
+              <Ionicons name="logo-google" size={20} color="#1a1a1a" />
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        {/* Divider */}
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Full Name</Text>
@@ -191,9 +280,9 @@ export default function RegisterScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.button, isPending && styles.buttonDisabled]}
+            style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
-            disabled={isPending}
+            disabled={isLoading}
           >
             {isPending ? (
               <ActivityIndicator color="#fff" />
@@ -206,6 +295,16 @@ export default function RegisterScreen() {
             By creating an account, you agree to our Terms of Service and Privacy
             Policy.
           </Text>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Already have an account? </Text>
+          <Link href="/(auth)/login" asChild>
+            <TouchableOpacity>
+              <Text style={styles.link}>Sign In</Text>
+            </TouchableOpacity>
+          </Link>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -221,6 +320,51 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 24,
     justifyContent: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 14,
+    gap: 12,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1a1a1a',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#e5e5e5',
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: '#999',
+    fontSize: 14,
   },
   form: {
     gap: 16,
@@ -241,6 +385,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     backgroundColor: '#fafafa',
+    color: '#1a1a1a',
   },
   inputError: {
     borderColor: '#ef4444',
@@ -271,5 +416,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
     lineHeight: 18,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 24,
+  },
+  footerText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  link: {
+    color: '#2563eb',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

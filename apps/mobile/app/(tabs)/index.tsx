@@ -8,7 +8,7 @@
  * - Cleaner component - no manual loading/error state management
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,16 +18,25 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import { useRouter, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Property } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { useProperties, useOptimistic } from '../../hooks';
 
 export default function PropertiesScreen() {
+  const router = useRouter();
   // Fetch properties using React 19 pattern (useSyncExternalStore internally)
   // No useEffect needed - data is fetched on mount via the hook
   const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Refetch properties when screen gains focus (e.g., after adding a new property)
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   // Optimistic updates - UI updates instantly, rollback on server error
   const [optimisticProperties, addOptimistic] = useOptimistic(
@@ -46,7 +55,10 @@ export default function PropertiesScreen() {
   // Render individual property card
   // Note: No useCallback wrapper needed - React 19 compiler handles memoization
   const renderProperty = ({ item }: { item: Property }) => (
-    <TouchableOpacity style={styles.propertyCard}>
+    <TouchableOpacity
+      style={styles.propertyCard}
+      onPress={() => router.push(`/property/${item.id}` as Href)}
+    >
       <View style={styles.propertyInfo}>
         <Text style={styles.propertyAddress}>{item.address}</Text>
         <View style={styles.propertyMeta}>
@@ -67,7 +79,10 @@ export default function PropertiesScreen() {
       <Text style={styles.emptyText}>
         Add your first property to start tracking inspections.
       </Text>
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push('/property/new' as Href)}
+      >
         <Ionicons name="add" size={20} color="#fff" />
         <Text style={styles.addButtonText}>Add Property</Text>
       </TouchableOpacity>
@@ -121,7 +136,10 @@ export default function PropertiesScreen() {
               />
             }
           />
-          <TouchableOpacity style={styles.fab}>
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => router.push('/property/new' as Href)}
+          >
             <Ionicons name="add" size={28} color="#fff" />
           </TouchableOpacity>
         </>
