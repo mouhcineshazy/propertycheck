@@ -1,7 +1,10 @@
 /**
- * Settings Screen
+ * Settings Screen - React 19 Pattern
  *
- * User profile, subscription status, and logout.
+ * Key React 19 changes:
+ * - useAuth hook (useSyncExternalStore) instead of manual auth state
+ * - Simpler data fetching with cleaner async patterns
+ * - No unnecessary memoization
  */
 
 import { useState, useEffect } from 'react';
@@ -17,64 +20,59 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { getSupabaseBrowserClient, User, Subscription } from '@propertycheck/database';
 import { APP_CONFIG, PRICING } from '@propertycheck/shared';
+import { useAuth } from '../../hooks';
 
 export default function SettingsScreen() {
+  // Use auth hook for signOut (React 19 pattern)
+  const { user: authUser, signOut } = useAuth();
+
+  // User profile and subscription state
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch user data on mount
   useEffect(() => {
-    fetchUserData();
-  }, []);
+    async function fetchUserData() {
+      if (!authUser) {
+        setIsLoading(false);
+        return;
+      }
 
-  const fetchUserData = async () => {
-    try {
-      const supabase = getSupabaseBrowserClient();
+      try {
+        const supabase = getSupabaseBrowserClient();
 
-      // Get current auth user
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser();
+        // Fetch user profile and subscription in parallel
+        const [userResult, subResult] = await Promise.all([
+          supabase.from('users').select('*').eq('id', authUser.id).single(),
+          supabase.from('subscriptions').select('*').eq('user_id', authUser.id).single(),
+        ]);
 
-      if (!authUser) return;
-
-      // Fetch user profile
-      const { data: userData } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single();
-
-      // Fetch subscription
-      const { data: subData } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', authUser.id)
-        .single();
-
-      setUser(userData);
-      setSubscription(subData);
-    } catch (err) {
-      console.error('Error fetching user data:', err);
-    } finally {
-      setIsLoading(false);
+        setUser(userResult.data);
+        setSubscription(subResult.data);
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  };
 
+    fetchUserData();
+  }, [authUser]);
+
+  // Handle logout with confirmation
   const handleLogout = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign Out',
         style: 'destructive',
-        onPress: async () => {
-          const supabase = getSupabaseBrowserClient();
-          await supabase.auth.signOut();
-        },
+        onPress: signOut,
       },
     ]);
   };
 
+  // Handle upgrade prompt
   const handleUpgrade = () => {
     Alert.alert(
       'Upgrade to Premium',

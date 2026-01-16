@@ -1,7 +1,11 @@
 /**
- * Login Screen
+ * Login Screen - React 19 Pattern
  *
- * Email/password authentication using Supabase Auth.
+ * Uses useActionState for form handling with automatic pending state.
+ * Key changes from React 18:
+ * - No manual isLoading/setIsLoading state
+ * - Action function is defined outside component (no recreating on each render)
+ * - isPending comes from useTransition (via useActionState)
  */
 
 import { useState } from 'react';
@@ -20,39 +24,65 @@ import { Link } from 'expo-router';
 import { getSupabaseBrowserClient } from '@propertycheck/database';
 import { loginSchema, formatZodError } from '@propertycheck/shared';
 import { APP_CONFIG } from '@propertycheck/shared';
+import { useActionState } from '../../hooks';
+
+// Type for action state
+type LoginState = {
+  errors: Record<string, string>;
+};
+
+// Initial state for the action
+const initialState: LoginState = {
+  errors: {},
+};
+
+// Login action - defined outside component (React 19 best practice)
+// First param is previous state, second is the payload
+async function loginAction(
+  _prevState: LoginState,
+  payload: { email: string; password: string }
+): Promise<LoginState> {
+  // Validate input using Zod
+  const result = loginSchema.safeParse(payload);
+
+  if (!result.success) {
+    return { errors: formatZodError(result.error) };
+  }
+
+  // Attempt login
+  try {
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: result.data.email,
+      password: result.data.password,
+    });
+
+    if (error) {
+      Alert.alert('Login Failed', error.message);
+      return { errors: {} };
+    }
+
+    // Success - auth state change triggers redirect in _layout.tsx
+    return { errors: {} };
+  } catch {
+    Alert.alert('Error', 'An unexpected error occurred');
+    return { errors: {} };
+  }
+}
 
 export default function LoginScreen() {
+  // Form input state (uncontrolled would be better but RN requires controlled)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleLogin = async () => {
-    // Validate input
-    const result = loginSchema.safeParse({ email, password });
-    if (!result.success) {
-      setErrors(formatZodError(result.error));
-      return;
-    }
-    setErrors({});
+  // useActionState provides: [state, dispatch, isPending]
+  // - state: current action result
+  // - dispatch: function to trigger the action
+  // - isPending: loading state (from useTransition internally)
+  const [state, dispatch, isPending] = useActionState(loginAction, initialState);
 
-    setIsLoading(true);
-    try {
-      const supabase = getSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: result.data.email,
-        password: result.data.password,
-      });
-
-      if (error) {
-        Alert.alert('Login Failed', error.message);
-      }
-      // Success: auth state change will trigger redirect in _layout.tsx
-    } catch (err) {
-      Alert.alert('Error', 'An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSubmit = () => {
+    dispatch({ email, password });
   };
 
   return (
@@ -70,36 +100,42 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
-              style={[styles.input, errors.email && styles.inputError]}
+              style={[styles.input, state.errors.email && styles.inputError]}
               placeholder="you@example.com"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
+              editable={!isPending}
             />
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+            {state.errors.email && (
+              <Text style={styles.errorText}>{state.errors.email}</Text>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Password</Text>
             <TextInput
-              style={[styles.input, errors.password && styles.inputError]}
+              style={[styles.input, state.errors.password && styles.inputError]}
               placeholder="Your password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="password"
+              editable={!isPending}
             />
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+            {state.errors.password && (
+              <Text style={styles.errorText}>{state.errors.password}</Text>
+            )}
           </View>
 
           <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={isLoading}
+            style={[styles.button, isPending && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={isPending}
           >
-            {isLoading ? (
+            {isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>

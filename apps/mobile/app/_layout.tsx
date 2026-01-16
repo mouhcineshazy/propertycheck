@@ -1,57 +1,37 @@
 /**
- * Root Layout
+ * Root Layout - React 19 Pattern
  *
- * Wraps the entire app with necessary providers.
- * Handles auth state and redirects users accordingly.
+ * Uses useSyncExternalStore via useAuth hook for optimal auth state management.
+ * No more useEffect + useState anti-pattern for subscriptions.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Session } from '@supabase/supabase-js';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { useAuth } from '../hooks';
 
 export default function RootLayout() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
-  useEffect(() => {
-    const supabase = getSupabaseBrowserClient();
-
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
+  // Handle navigation based on auth state
   useEffect(() => {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
-    if (!session && !inAuthGroup) {
+    if (!isAuthenticated && !inAuthGroup) {
       // Redirect to login if not authenticated
       router.replace('/(auth)/login');
-    } else if (session && inAuthGroup) {
+    } else if (isAuthenticated && inAuthGroup) {
       // Redirect to home if authenticated
       router.replace('/(tabs)');
     }
-  }, [session, segments, isLoading]);
+  }, [isAuthenticated, segments, isLoading, router]);
 
+  // Show nothing while loading (could be splash screen)
   if (isLoading) {
-    // You could show a splash screen here
     return null;
   }
 

@@ -1,7 +1,8 @@
 /**
- * Register Screen
+ * Register Screen - React 19 Pattern
  *
- * New user registration with email/password.
+ * Uses useActionState for form handling with automatic pending state.
+ * Same pattern as login - action defined outside, isPending from useTransition.
  */
 
 import { useState } from 'react';
@@ -20,62 +21,98 @@ import {
 import { useRouter } from 'expo-router';
 import { getSupabaseBrowserClient } from '@propertycheck/database';
 import { registerSchema, formatZodError } from '@propertycheck/shared';
+import { useActionState } from '../../hooks';
+
+// Type for action state
+type RegisterState = {
+  errors: Record<string, string>;
+  success: boolean;
+};
+
+// Initial state
+const initialState: RegisterState = {
+  errors: {},
+  success: false,
+};
+
+// Register payload type
+type RegisterPayload = {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  onSuccess: () => void;
+};
+
+// Register action - defined outside component
+async function registerAction(
+  _prevState: RegisterState,
+  payload: RegisterPayload
+): Promise<RegisterState> {
+  // Validate input
+  const result = registerSchema.safeParse({
+    email: payload.email,
+    password: payload.password,
+    confirmPassword: payload.confirmPassword,
+    full_name: payload.fullName,
+  });
+
+  if (!result.success) {
+    return { errors: formatZodError(result.error), success: false };
+  }
+
+  // Attempt registration
+  try {
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase.auth.signUp({
+      email: result.data.email,
+      password: result.data.password,
+      options: {
+        data: {
+          full_name: result.data.full_name,
+        },
+      },
+    });
+
+    if (error) {
+      Alert.alert('Registration Failed', error.message);
+      return { errors: {}, success: false };
+    }
+
+    // Show success alert and call success callback
+    Alert.alert(
+      'Check Your Email',
+      'We sent you a confirmation link. Please check your email to verify your account.',
+      [{ text: 'OK', onPress: payload.onSuccess }]
+    );
+
+    return { errors: {}, success: true };
+  } catch {
+    Alert.alert('Error', 'An unexpected error occurred');
+    return { errors: {}, success: false };
+  }
+}
 
 export default function RegisterScreen() {
   const router = useRouter();
+
+  // Form state
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleRegister = async () => {
-    // Validate input
-    const result = registerSchema.safeParse({
+  // useActionState for form handling
+  const [state, dispatch, isPending] = useActionState(registerAction, initialState);
+
+  const handleSubmit = () => {
+    dispatch({
+      fullName,
       email,
       password,
       confirmPassword,
-      full_name: fullName,
+      onSuccess: () => router.back(),
     });
-    if (!result.success) {
-      setErrors(formatZodError(result.error));
-      return;
-    }
-    setErrors({});
-
-    setIsLoading(true);
-    try {
-      const supabase = getSupabaseBrowserClient();
-      const { error } = await supabase.auth.signUp({
-        email: result.data.email,
-        password: result.data.password,
-        options: {
-          data: {
-            full_name: result.data.full_name,
-          },
-        },
-      });
-
-      if (error) {
-        Alert.alert('Registration Failed', error.message);
-      } else {
-        Alert.alert(
-          'Check Your Email',
-          'We sent you a confirmation link. Please check your email to verify your account.',
-          [
-            {
-              text: 'OK',
-              onPress: () => router.back(),
-            },
-          ]
-        );
-      }
-    } catch (err) {
-      Alert.alert('Error', 'An unexpected error occurred');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -91,68 +128,74 @@ export default function RegisterScreen() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Full Name</Text>
             <TextInput
-              style={[styles.input, errors.full_name && styles.inputError]}
+              style={[styles.input, state.errors.full_name && styles.inputError]}
               placeholder="John Doe"
               value={fullName}
               onChangeText={setFullName}
               autoCapitalize="words"
               autoComplete="name"
+              editable={!isPending}
             />
-            {errors.full_name && (
-              <Text style={styles.errorText}>{errors.full_name}</Text>
+            {state.errors.full_name && (
+              <Text style={styles.errorText}>{state.errors.full_name}</Text>
             )}
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
-              style={[styles.input, errors.email && styles.inputError]}
+              style={[styles.input, state.errors.email && styles.inputError]}
               placeholder="you@example.com"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
               autoComplete="email"
+              editable={!isPending}
             />
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+            {state.errors.email && (
+              <Text style={styles.errorText}>{state.errors.email}</Text>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Password</Text>
             <TextInput
-              style={[styles.input, errors.password && styles.inputError]}
+              style={[styles.input, state.errors.password && styles.inputError]}
               placeholder="At least 6 characters"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="new-password"
+              editable={!isPending}
             />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
+            {state.errors.password && (
+              <Text style={styles.errorText}>{state.errors.password}</Text>
             )}
           </View>
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Confirm Password</Text>
             <TextInput
-              style={[styles.input, errors.confirmPassword && styles.inputError]}
+              style={[styles.input, state.errors.confirmPassword && styles.inputError]}
               placeholder="Repeat your password"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
               autoComplete="new-password"
+              editable={!isPending}
             />
-            {errors.confirmPassword && (
-              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+            {state.errors.confirmPassword && (
+              <Text style={styles.errorText}>{state.errors.confirmPassword}</Text>
             )}
           </View>
 
           <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleRegister}
-            disabled={isLoading}
+            style={[styles.button, isPending && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={isPending}
           >
-            {isLoading ? (
+            {isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.buttonText}>Create Account</Text>
