@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
 
 // Animation variants
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -16,22 +16,22 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
 
-const errorVariants = {
+const errorVariants: Variants = {
   hidden: { opacity: 0, y: -10, height: 0 },
   visible: {
     opacity: 1,
     y: 0,
     height: 'auto',
-    transition: { duration: 0.3, ease: 'easeOut' },
+    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] },
   },
   exit: {
     opacity: 0,
@@ -41,48 +41,48 @@ const errorVariants = {
   },
 };
 
-const successVariants = {
+const successVariants: Variants = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.5, ease: 'easeOut' },
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
 
-const floatVariants = {
+const floatVariants: Variants = {
   animate: {
     y: [0, -20, 0],
     rotate: [0, 5, -5, 0],
     transition: {
       duration: 6,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: [0.45, 0.05, 0.55, 0.95],
     },
   },
 };
 
-const floatVariants2 = {
+const floatVariants2: Variants = {
   animate: {
     y: [0, 15, 0],
     rotate: [0, -3, 3, 0],
     transition: {
       duration: 8,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: [0.45, 0.05, 0.55, 0.95],
       delay: 1,
     },
   },
 };
 
-const floatVariants3 = {
+const floatVariants3: Variants = {
   animate: {
     y: [0, -10, 0],
     x: [0, 10, 0],
     transition: {
       duration: 7,
       repeat: Infinity,
-      ease: 'easeInOut',
+      ease: [0.45, 0.05, 0.55, 0.95],
       delay: 2,
     },
   },

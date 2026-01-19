@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 
@@ -35,7 +35,7 @@ interface RecentActivity {
 // ============================================
 // ANIMATION VARIANTS
 // ============================================
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -46,21 +46,21 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
 
-const cardHoverVariants = {
+const cardHoverVariants: Variants = {
   rest: { y: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
   hover: {
     y: -8,
     boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-    transition: { duration: 0.3, ease: 'easeOut' },
+    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
 
