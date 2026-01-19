@@ -1,11 +1,28 @@
 import Stripe from 'stripe';
 
-// Initialize Stripe with the API version that matches installed types
-// Update this when updating the stripe package
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-  typescript: true,
-});
+// Lazy-initialized Stripe client to avoid errors during build time
+// when environment variables aren't available
+let stripeInstance: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!stripeInstance) {
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2023-10-16',
+      typescript: true,
+    });
+  }
+  return stripeInstance;
+}
+
+// Keep backward compatibility with existing imports
+// This getter will throw at build time if accessed, but that's expected
+// API routes should use getStripe() instead
+export const stripe = {
+  get checkout() { return getStripe().checkout; },
+  get subscriptions() { return getStripe().subscriptions; },
+  get customers() { return getStripe().customers; },
+  get webhooks() { return getStripe().webhooks; },
+} as unknown as Stripe;
 
 // Plan configuration with pricing and feature details
 // Price IDs should be created in Stripe Dashboard and stored in env vars

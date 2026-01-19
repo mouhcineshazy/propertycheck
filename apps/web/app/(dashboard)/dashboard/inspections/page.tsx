@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -14,7 +14,7 @@ interface Inspection {
   photo_count: number;
 }
 
-export default function InspectionsPage() {
+function InspectionsContent() {
   const searchParams = useSearchParams();
   const statusFilter = searchParams.get('status') || 'all';
 
@@ -248,5 +248,26 @@ export default function InspectionsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function InspectionsFallback() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-8 w-48 bg-gray-200 rounded mb-8" />
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-gray-200 rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function InspectionsPage() {
+  return (
+    <Suspense fallback={<InspectionsFallback />}>
+      <InspectionsContent />
+    </Suspense>
   );
 }

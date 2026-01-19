@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, getPlanByPriceId, isAnnualPrice } from '@/lib/stripe/config';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
-// Use Supabase admin client with service role to bypass RLS
+// Lazy-initialized Supabase admin client with service role to bypass RLS
 // This is required because webhooks don't have user context
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// We use lazy initialization to avoid errors during build time when env vars aren't available
+let supabaseAdmin: SupabaseClient | null = null;
+
+function getSupabaseAdmin(): SupabaseClient {
+  if (!supabaseAdmin) {
+    supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return supabaseAdmin;
+}
 
 // Webhook handler for Stripe events
 // Stripe sends events here when subscription status changes
@@ -131,7 +139,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Upsert subscription record
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('user_subscriptions')
     .upsert({
       user_id: userId,
@@ -158,7 +166,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   if (!userId) {
     // Try to find user by subscription ID
-    const { data } = await supabaseAdmin
+    const { data } = await getSupabaseAdmin()
       .from('user_subscriptions')
       .select('user_id')
       .eq('stripe_subscription_id', subscription.id)
@@ -191,7 +199,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   console.log(`🔄 Subscription updated: ${subscription.id}, status: ${status}`);
 
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('user_subscriptions')
     .update({
       plan: plan,
@@ -214,7 +222,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   console.log(`❌ Subscription deleted: ${subscription.id}`);
 
   // Downgrade to free plan
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('user_subscriptions')
     .update({
       plan: 'free',
@@ -236,7 +244,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   console.log(`✅ Invoice paid for subscription: ${invoice.subscription}`);
 
   // Update period end date
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('user_subscriptions')
     .update({
       status: 'active',
@@ -258,7 +266,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   console.log(`⚠️ Invoice payment failed for subscription: ${invoice.subscription}`);
 
   // Mark subscription as past due
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from('user_subscriptions')
     .update({
       status: 'past_due',
