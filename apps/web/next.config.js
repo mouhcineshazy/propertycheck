@@ -12,6 +12,16 @@ const nextConfig = {
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/**',
       },
+      {
+        // Unsplash images
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        // Pravatar for avatars
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+      },
     ],
   },
 

@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Android Adaptive Icon Foreground Layer -->
+  <!-- Should work on any background color -->
+
+  <!-- Shield shape -->
+  <path
+    d="M512 128L192 296V504C192 738.4 361.6 931.2 512 992C662.4 931.2 832 738.4 832 504V296L512 128Z"
+    fill="#1a1a1a"
+  />
+
+  <!-- House silhouette (negative space) -->
+  <path
+    d="M512 288L352 432V736H448V576H576V736H672V432L512 288Z"
+    fill="white"
+  />
+
+  <!-- Checkmark -->
+  <path
+    d="M416 528L488 600L608 480"
+    stroke="#1a1a1a"
+    stroke-width="48"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

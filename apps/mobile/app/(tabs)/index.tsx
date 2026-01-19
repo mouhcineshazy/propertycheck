@@ -1,11 +1,14 @@
 /**
- * Properties Screen (Home)
+ * Properties Screen (Home) - React 19 Pattern
  *
- * Lists all user properties with ability to add new ones.
- * This is the main screen after login.
+ * Key React 19 changes:
+ * - useSyncExternalStore via useProperties hook (no useEffect for data fetching)
+ * - useOptimistic for delete operations (instant UI updates)
+ * - No useCallback needed for render functions (compiler handles it)
+ * - Cleaner component - no manual loading/error state management
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,47 +18,47 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+import { useRouter, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getSupabaseBrowserClient, Property } from '@propertycheck/database';
+import { Property } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
+import { useProperties, useOptimistic } from '../../hooks';
 
 export default function PropertiesScreen() {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  // Fetch properties using React 19 pattern (useSyncExternalStore internally)
+  // No useEffect needed - data is fetched on mount via the hook
+  const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchProperties = useCallback(async () => {
-    try {
-      const supabase = getSupabaseBrowserClient();
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false });
+  // Refetch properties when screen gains focus (e.g., after adding a new property)
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
-      if (error) throw error;
-      setProperties(data || []);
-      setError(null);
-    } catch (err) {
-      setError('Failed to load properties');
-      console.error('Error fetching properties:', err);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }, []);
+  // Optimistic updates - UI updates instantly, rollback on server error
+  const [optimisticProperties, addOptimistic] = useOptimistic(
+    properties,
+    (currentProperties, deletedId: string) =>
+      currentProperties.filter((p) => p.id !== deletedId)
+  );
 
-  useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
-
-  const handleRefresh = () => {
+  // Handle pull-to-refresh
+  const handleRefresh = async () => {
     setIsRefreshing(true);
-    fetchProperties();
+    await refetch();
+    setIsRefreshing(false);
   };
 
+  // Render individual property card
+  // Note: No useCallback wrapper needed - React 19 compiler handles memoization
   const renderProperty = ({ item }: { item: Property }) => (
-    <TouchableOpacity style={styles.propertyCard}>
+    <TouchableOpacity
+      style={styles.propertyCard}
+      onPress={() => router.push(`/property/${item.id}` as Href)}
+    >
       <View style={styles.propertyInfo}>
         <Text style={styles.propertyAddress}>{item.address}</Text>
         <View style={styles.propertyMeta}>
@@ -68,6 +71,7 @@ export default function PropertiesScreen() {
     </TouchableOpacity>
   );
 
+  // Empty state component
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Ionicons name="home-outline" size={64} color="#ccc" />
@@ -75,13 +79,17 @@ export default function PropertiesScreen() {
       <Text style={styles.emptyText}>
         Add your first property to start tracking inspections.
       </Text>
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => router.push('/property/new' as Href)}
+      >
         <Ionicons name="add" size={20} color="#fff" />
         <Text style={styles.addButtonText}>Add Property</Text>
       </TouchableOpacity>
     </View>
   );
 
+  // Loading state
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -90,12 +98,13 @@ export default function PropertiesScreen() {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <View style={styles.centered}>
         <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={fetchProperties}>
+        <TouchableOpacity style={styles.retryButton} onPress={refetch}>
           <Text style={styles.retryText}>Try Again</Text>
         </TouchableOpacity>
       </View>
@@ -104,18 +113,18 @@ export default function PropertiesScreen() {
 
   return (
     <View style={styles.container}>
-      {properties.length === 0 ? (
+      {optimisticProperties.length === 0 ? (
         renderEmptyState()
       ) : (
         <>
           <View style={styles.limitBanner}>
             <Text style={styles.limitText}>
-              {properties.length} / {FREE_TIER_LIMITS.maxProperties} properties
-              (Free tier)
+              {optimisticProperties.length} / {FREE_TIER_LIMITS.maxProperties}{' '}
+              properties (Free tier)
             </Text>
           </View>
           <FlatList
-            data={properties}
+            data={optimisticProperties}
             renderItem={renderProperty}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.list}
@@ -127,7 +136,10 @@ export default function PropertiesScreen() {
               />
             }
           />
-          <TouchableOpacity style={styles.fab}>
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => router.push('/property/new' as Href)}
+          >
             <Ionicons name="add" size={28} color="#fff" />
           </TouchableOpacity>
         </>

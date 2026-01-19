@@ -48,3 +48,6 @@ export {
   type RegisterInput,
   type ResetPasswordInput,
 } from './schemas';
+
+// Logo components
+export { Logo, LogoWithText, LogoAppIcon } from './components/Logo';

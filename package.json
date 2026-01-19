@@ -17,11 +17,15 @@
     "db:generate-types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" > packages/database/src/types.ts"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "turbo": "^2.0.0",
     "typescript": "^5.3.3"
   },
   "engines": {
     "node": ">=20.0.0"
   },
-  "packageManager": "npm@10.2.0"
+  "packageManager": "npm@10.2.0",
+  "dependencies": {
+    "canvas-confetti": "^1.9.4"
+  }
 }

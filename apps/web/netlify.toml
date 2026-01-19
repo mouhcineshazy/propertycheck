@@ -1,0 +1,191 @@
+# Netlify Configuration for PropertyCheck Web App
+# Next.js 15 with App Router deployment
+
+[build]
+  # Build command - uses workspace build
+  command = "npm run build"
+  # Output directory for Next.js
+  publish = ".next"
+
+# Next.js runtime plugin - enables SSR, ISR, and API routes
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  # Node.js version - use LTS for stability
+  NODE_VERSION = "20"
+  # Handle peer dependency issues in monorepo
+  NPM_FLAGS = "--legacy-peer-deps"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# REDIRECTS
+# ─────────────────────────────────────────────────────────────────────────────
+
+# API routes handled by Next.js serverless functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECURITY HEADERS
+# All responses include security headers to protect against common attacks
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Prevent MIME type sniffing
+    X-Content-Type-Options = "nosniff"
+
+    # Prevent clickjacking attacks
+    X-Frame-Options = "DENY"
+
+    # Enable XSS filtering (legacy browsers)
+    X-XSS-Protection = "1; mode=block"
+
+    # Force HTTPS for 1 year, include subdomains, allow preload list
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+    # Control referrer information sent with requests
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Disable dangerous browser features
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+    # Content Security Policy - controls which resources can be loaded
+    # This CSP allows:
+    # - Self-hosted scripts, styles, images, fonts
+    # - Stripe.js for payment processing
+    # - Supabase for backend services
+    # - Google Fonts for typography
+    # - Inline styles/scripts (required by Next.js and Framer Motion)
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.supabase.co https://www.googletagmanager.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      img-src 'self' data: https: blob:;
+      font-src 'self' data: https://fonts.gstatic.com;
+      connect-src 'self' https://*.supabase.co https://api.stripe.com wss://*.supabase.co https://www.google-analytics.com;
+      frame-src https://js.stripe.com https://hooks.stripe.com;
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+    """
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CACHE HEADERS
+# Optimize caching for different asset types
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Next.js static assets - immutable, cache forever
+# These files have content hashes in their names
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Public static assets
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Favicon and app icons - cache for 1 week
+[[headers]]
+  for = "/favicon.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, must-revalidate"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, must-revalidate"
+
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, must-revalidate"
+
+[[headers]]
+  for = "/*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, must-revalidate"
+
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, must-revalidate"
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, must-revalidate"
+
+# Web fonts - cache for 1 year
+[[headers]]
+  for = "/*.woff"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SERVERLESS FUNCTIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+[functions]
+  # Directory for Netlify functions
+  directory = ".netlify/functions"
+  # Use esbuild for faster builds
+  node_bundler = "esbuild"
+  # Include external dependencies
+  included_files = ["node_modules/**"]
+
+[functions.environment]
+  NODE_ENV = "production"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEVELOPMENT SERVER
+# ─────────────────────────────────────────────────────────────────────────────
+
+[dev]
+  # Use Next.js dev server
+  command = "npm run dev"
+  # Port for Netlify Dev
+  port = 8888
+  # Next.js default port
+  targetPort = 3000
+  # Don't auto-open browser
+  autoLaunch = false
+  # Custom framework detection
+  framework = "#custom"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CONTEXT-SPECIFIC SETTINGS
+# Different settings for production, staging, and previews
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Production-specific settings
+[context.production]
+  [context.production.environment]
+    NODE_ENV = "production"
+    NEXT_TELEMETRY_DISABLED = "1"
+
+# Deploy preview settings (for pull requests)
+[context.deploy-preview]
+  [context.deploy-preview.environment]
+    NODE_ENV = "production"
+    NEXT_TELEMETRY_DISABLED = "1"
+
+# Branch deploy settings (staging, develop, etc.)
+[context.branch-deploy]
+  [context.branch-deploy.environment]
+    NODE_ENV = "production"
+    NEXT_TELEMETRY_DISABLED = "1"
