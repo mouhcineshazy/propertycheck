@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./schemas": "./src/schemas.ts",
-    "./constants": "./src/constants.ts"
+    "./constants": "./src/constants.ts",
+    "./components/Logo": "./src/components/Logo.tsx"
   },
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -17,7 +18,11 @@
   "dependencies": {
     "zod": "^3.22.4"
   },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
   "devDependencies": {
+    "@types/react": "^19.0.0",
     "typescript": "^5.3.3"
   }
 }
