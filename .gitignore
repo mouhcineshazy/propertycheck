@@ -33,6 +33,7 @@ web-build/
 
 # Environment files (NEVER commit these - contains secrets)
 .env
+.env.qual
 .env.local
 .env.development.local
 .env.test.local
