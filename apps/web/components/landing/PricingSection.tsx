@@ -5,21 +5,23 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { FREE_TIER_LIMITS, PRICING } from '@propertycheck/shared';
 
 const plans = [
   {
     name: 'Free',
-    description: 'Perfect for trying out PropertyCheck',
+    description: 'Complete your move-in & move-out inspections',
     price: { monthly: 0, annual: 0 },
     features: [
-      'Up to 2 properties',
-      'Up to 5 inspections total',
+      `${FREE_TIER_LIMITS.maxProperties} property`,
+      `${FREE_TIER_LIMITS.maxInspectionsTotal} inspections (move-in + move-out)`,
       'Basic PDF reports',
       'Photo documentation',
-      '7-day cloud storage',
+      `${FREE_TIER_LIMITS.pdfRetentionDays}-day cloud storage`,
     ],
     limitations: [
-      'Limited report customization',
+      'No shareable links',
+      'Watermarked comparison reports',
       'No priority support',
     ],
     cta: 'Start Free',
@@ -27,20 +29,23 @@ const plans = [
   },
   {
     name: 'Premium',
-    description: 'For serious renters who move often',
-    price: { monthly: 9.99, annual: 7.99 },
+    description: 'For renters who want legally defensible evidence',
+    price: {
+      monthly: parseFloat(PRICING.monthly.displayPrice.replace('$', '')),
+      annual: parseFloat(PRICING.annual.displayPrice.replace('$', '')),
+    },
     features: [
+      'Share secure timestamped links with landlords', // LEAD with this
+      'Legally defensible evidence for disputes',
       'Unlimited properties',
       'Unlimited inspections',
+      'Comparison reports without watermarks',
       'Professional PDF reports',
-      'Timestamped photos with GPS',
       'Unlimited cloud storage',
       'Priority email support',
-      'Report customization',
-      'Shareable secure links',
     ],
     limitations: [],
-    cta: 'Get Premium',
+    cta: 'Start 7-Day Free Trial',
     popular: true,
   },
 ];
@@ -72,7 +77,7 @@ export function PricingSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Start free, upgrade when you need more. No hidden fees, cancel anytime.
+            Document your move-in & move-out for free. Upgrade to share evidence landlords trust.
           </p>
         </motion.div>
 
@@ -93,28 +98,28 @@ export function PricingSection() {
           </span>
           <button
             onClick={() => setIsAnnual(!isAnnual)}
-            className={cn(
-              'relative w-14 h-7 rounded-full transition-colors',
-              isAnnual ? 'bg-primary-600' : 'bg-gray-300'
-            )}
+            className="bg-gray-200 p-1 rounded-lg flex"
           >
-            <motion.div
-              className="absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow-sm"
-              animate={{ x: isAnnual ? 28 : 0 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            />
+            <span
+              className={cn(
+                'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+                !isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+              )}
+            >
+              Monthly
+            </span>
+            <span
+              className={cn(
+                'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
+                isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+              )}
+            >
+              Annual
+            </span>
           </button>
-          <span
-            className={cn(
-              'text-sm font-medium transition-colors',
-              isAnnual ? 'text-gray-900' : 'text-gray-500'
-            )}
-          >
-            Annual
-          </span>
           {isAnnual && (
             <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded-full">
-              Save 20%
+              {PRICING.annual.savings}
             </span>
           )}
         </motion.div>
@@ -158,7 +163,7 @@ export function PricingSection() {
                   </div>
                   {isAnnual && plan.price.monthly > 0 && (
                     <p className="text-sm text-gray-500 mt-1">
-                      Billed annually (${(plan.price.annual * 12).toFixed(0)}/year)
+                      Billed annually ({PRICING.annual.annualTotal})
                     </p>
                   )}
                 </div>
@@ -185,7 +190,11 @@ export function PricingSection() {
                     {plan.features.map((feature, j) => (
                       <li key={j} className="flex items-start gap-3">
                         <svg
-                          className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5"
+                          className={cn(
+                            'w-5 h-5 flex-shrink-0 mt-0.5',
+                            // Highlight first premium feature (shareable links)
+                            plan.popular && j === 0 ? 'text-primary-600' : 'text-green-500'
+                          )}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -197,7 +206,12 @@ export function PricingSection() {
                             d="M5 13l4 4L19 7"
                           />
                         </svg>
-                        <span className="text-gray-700">{feature}</span>
+                        <span className={cn(
+                          'text-gray-700',
+                          plan.popular && j === 0 && 'font-semibold text-gray-900'
+                        )}>
+                          {feature}
+                        </span>
                       </li>
                     ))}
                     {plan.limitations.map((limitation, j) => (

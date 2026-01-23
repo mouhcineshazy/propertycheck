@@ -16,8 +16,15 @@ apps/web/
 │   │   └── reset-password/
 │   ├── (dashboard)/            # Dashboard route group
 │   │   └── dashboard/
+│   │       ├── page.tsx            # Main dashboard
 │   │       ├── inspections/
+│   │       │   ├── page.tsx        # Inspections list
+│   │       │   ├── new/page.tsx    # Create inspection
+│   │       │   └── [id]/page.tsx   # Inspection detail
 │   │       ├── properties/
+│   │       │   ├── page.tsx        # Properties list
+│   │       │   ├── new/page.tsx    # Add property
+│   │       │   └── [id]/page.tsx   # Property detail
 │   │       ├── reports/
 │   │       └── settings/
 │   ├── api/                    # API routes
@@ -456,6 +463,154 @@ const floatVariants: Variants = {
   <motion.p variants={itemVariants}>Description</motion.p>
   <motion.button variants={itemVariants}>CTA</motion.button>
 </motion.div>
+```
+
+## Dashboard Pages
+
+The dashboard provides full property and inspection management functionality.
+
+### Main Dashboard (`/dashboard`)
+
+Displays overview statistics, recent properties, and recent inspections.
+
+```typescript
+interface DashboardStats {
+  totalProperties: number;
+  totalInspections: number;
+  completedInspections: number;
+  pendingInspections: number;
+}
+```
+
+Features:
+- Property cards with inspection counts
+- Quick actions (add property, new inspection)
+- Empty state for new users with onboarding tips
+
+### Properties Pages
+
+**Add Property (`/dashboard/properties/new`)**
+```typescript
+interface FormData {
+  address: string;
+  property_type: 'apartment' | 'house' | 'condo';
+  notes: string;
+}
+```
+
+Features:
+- Visual property type selector with icons
+- Address input with validation
+- Optional notes field
+- Redirects to property detail on success
+
+**Property Detail (`/dashboard/properties/[id]`)**
+
+Displays property information and all inspections for that property.
+
+Features:
+- Property address, type, and creation date
+- List of inspections with status badges
+- Photo count per inspection
+- "New Inspection" button (pre-fills property)
+- Delete property with confirmation modal
+
+### Inspections Pages
+
+**New Inspection (`/dashboard/inspections/new`)**
+
+Create a new inspection with optional photo uploads.
+
+```typescript
+interface UploadedPhoto {
+  id: string;
+  file: File;
+  preview: string;      // Object URL for preview
+  caption: string;
+  uploading: boolean;
+  uploaded: boolean;
+  error?: string;
+}
+```
+
+Features:
+- Property selector dropdown (pre-filled if from property page)
+- Date picker (defaults to today)
+- Notes textarea
+- **Photo upload area**:
+  - Click/drop to select multiple images
+  - Preview thumbnails with captions
+  - Upload progress indicators
+  - Photos stored in Supabase Storage
+- Status auto-set to "completed" if photos added, "draft" otherwise
+
+**Inspection Detail (`/dashboard/inspections/[id]`)**
+
+View and manage inspection photos.
+
+```typescript
+interface Photo {
+  id: string;
+  storage_path: string;   // Path in Supabase Storage
+  photo_url: string;      // Public URL (computed)
+  caption: string | null;
+  created_at: string;
+}
+```
+
+Features:
+- Inspection date, property link, status badge
+- Photo gallery grid
+- **Lightbox viewer** for full-size photos
+- Add more photos button
+- Delete individual photos
+- Delete inspection with confirmation
+
+### Photo Upload Flow
+
+```typescript
+// 1. Upload file to Supabase Storage
+const fileName = `${inspectionId}/${crypto.randomUUID()}.${fileExt}`;
+await supabase.storage
+  .from('inspection-photos')
+  .upload(fileName, file);
+
+// 2. Create database record with storage_path
+await supabase
+  .from('inspection_photos')
+  .insert({
+    inspection_id: inspectionId,
+    storage_path: fileName,
+    caption: caption || null,
+  });
+
+// 3. Get public URL for display
+const { data } = supabase.storage
+  .from('inspection-photos')
+  .getPublicUrl(storagePath);
+```
+
+### Type Casting for Supabase
+
+Due to TypeScript inference with Supabase's generated types, explicit type assertions are needed:
+
+```typescript
+import type { Property, Inspection, InspectionPhoto } from '@propertycheck/database';
+
+// Insert with type assertion
+const { data } = await supabase
+  .from('properties')
+  .insert({
+    user_id: userId,
+    address: formData.address,
+    property_type: formData.property_type as PropertyType,
+    notes: formData.notes || null,
+  } as never)  // Cast insert object
+  .select()
+  .single();
+
+// Cast result
+const property = data as unknown as Property;
 ```
 
 ## State Management

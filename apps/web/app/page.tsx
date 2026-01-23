@@ -6,6 +6,7 @@ import {
   FeaturesSection,
   HowItWorksSection,
   TestimonialsSection,
+  CaseStudiesSection,
   PricingSection,
   CTASection,
   Footer,
@@ -19,6 +20,7 @@ export default function HomePage() {
       <FeaturesSection />
       <HowItWorksSection />
       <TestimonialsSection />
+      <CaseStudiesSection />
       <PricingSection />
       <CTASection />
       <Footer />

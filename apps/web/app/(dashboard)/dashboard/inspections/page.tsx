@@ -35,18 +35,18 @@ function InspectionsContent() {
           properties (
             address
           ),
-          photos (id)
+          inspection_photos (id)
         `)
         .order('inspection_date', { ascending: false });
 
       if (!error && data) {
         setInspections(
-          data.map((i: { id: string; inspection_date: string; status: string; properties: { address: string } | null; photos: { id: string }[] }) => ({
+          data.map((i: { id: string; inspection_date: string; status: string; properties: { address: string } | null; inspection_photos: { id: string }[] }) => ({
             id: i.id,
             property_address: i.properties?.address || 'Unknown',
             inspection_date: i.inspection_date,
             status: i.status,
-            photo_count: i.photos?.length || 0,
+            photo_count: i.inspection_photos?.length || 0,
           }))
         );
       }

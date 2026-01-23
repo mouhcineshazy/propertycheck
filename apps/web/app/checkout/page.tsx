@@ -5,8 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { PLANS } from '@/lib/stripe/config';
 import { Logo } from '@/components/ui/Logo';
+import { PRICING, FREE_TIER_LIMITS } from '@propertycheck/shared';
 
 // Animation variants for staggered entrance
 const containerVariants: Variants = {
@@ -26,68 +26,45 @@ const itemVariants: Variants = {
   },
 };
 
-// Floating animation for decorative elements
-const floatVariants: Variants = {
-  animate: {
-    y: [0, -15, 0],
-    rotate: [0, 3, -3, 0],
-    transition: {
-      duration: 6,
-      repeat: Infinity,
-      ease: [0.45, 0.05, 0.55, 0.95],
-    },
-  },
-};
+// Free tier features (what they have)
+const FREE_FEATURES = [
+  { text: `${FREE_TIER_LIMITS.maxProperties} property`, included: true },
+  { text: `${FREE_TIER_LIMITS.maxInspectionsTotal} inspections (move-in + move-out)`, included: true },
+  { text: 'Basic PDF reports', included: true },
+  { text: 'Photo documentation', included: true },
+  { text: `${FREE_TIER_LIMITS.pdfRetentionDays}-day cloud storage`, included: true },
+];
 
-// Extended plan details for checkout display
-const planDetails = {
-  premium: {
-    name: 'Premium',
-    tagline: 'Perfect for landlords & tenants',
-    price: 9.99,
-    annualPrice: 99.99, // ~17% savings
-    features: [
-      { text: 'Unlimited properties', highlight: true },
-      { text: 'Unlimited inspections', highlight: true },
-      { text: 'Professional PDF reports', highlight: false },
-      { text: 'Priority email support', highlight: false },
-      { text: 'Comparison reports', highlight: false },
-      { text: 'Share reports with landlords', highlight: false },
-    ],
-    gradient: 'from-primary-600 via-primary-700 to-blue-700',
-    badge: null,
-  },
-  pro: {
-    name: 'Pro',
-    tagline: 'For property managers & agencies',
-    price: 19.99,
-    annualPrice: 199.99, // ~17% savings
-    features: [
-      { text: 'Everything in Premium', highlight: false },
-      { text: 'Team collaboration (up to 5)', highlight: true },
-      { text: 'API access', highlight: true },
-      { text: 'Custom branding on reports', highlight: true },
-      { text: 'Bulk property import', highlight: false },
-      { text: 'Dedicated account manager', highlight: false },
-      { text: 'Phone support', highlight: false },
-    ],
-    gradient: 'from-violet-600 via-purple-700 to-indigo-800',
-    badge: 'Most Popular',
-  },
-};
+// Premium-only features (X marks for free) - lead with shareable links
+const PREMIUM_ONLY_FEATURES = [
+  { text: 'Shareable secure links landlords trust', included: false },
+  { text: 'Comparison reports without watermarks', included: false },
+  { text: 'Unlimited properties', included: false },
+  { text: 'Unlimited inspections', included: false },
+  { text: 'Unlimited cloud storage', included: false },
+  { text: 'Professional PDF reports', included: false },
+  { text: 'Priority email support', included: false },
+];
+
+// Premium plan features (all included) - lead with shareable links
+const PREMIUM_FEATURES = [
+  { text: 'Shareable secure links landlords trust', highlight: true },
+  { text: 'Legally defensible evidence for disputes', highlight: true },
+  { text: 'Unlimited properties', highlight: false },
+  { text: 'Unlimited inspections', highlight: false },
+  { text: 'Comparison reports without watermarks', highlight: true },
+  { text: 'Professional PDF reports', highlight: false },
+  { text: 'Unlimited cloud storage', highlight: false },
+  { text: 'Priority email support', highlight: false },
+];
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const planParam = searchParams.get('plan') || 'premium';
   const canceled = searchParams.get('canceled');
 
-  // Validate plan parameter - default to premium if invalid
-  const plan = planParam in planDetails ? planParam : 'premium';
-  const selectedPlan = planDetails[plan as keyof typeof planDetails];
-
   const [isLoading, setIsLoading] = useState(false);
-  const [isAnnual, setIsAnnual] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(true); // Default to annual for better value
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
@@ -98,14 +75,13 @@ function CheckoutContent() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        // Redirect to login with return URL
-        router.push(`/login?redirect=/checkout?plan=${plan}`);
+        router.push('/login?redirect=/checkout');
       } else {
         setIsAuthenticated(true);
       }
     };
     checkAuth();
-  }, [router, plan]);
+  }, [router]);
 
   const handleCheckout = async () => {
     setIsLoading(true);
@@ -116,7 +92,6 @@ function CheckoutContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          plan: plan,
           billingCycle: isAnnual ? 'annual' : 'monthly',
         }),
       });
@@ -127,7 +102,6 @@ function CheckoutContent() {
         throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      // Redirect to Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       }
@@ -137,29 +111,23 @@ function CheckoutContent() {
     }
   };
 
-  // Calculate prices
-  const monthlyPrice = selectedPlan.price;
-  const annualPrice = selectedPlan.annualPrice;
-  const displayPrice = isAnnual ? annualPrice : monthlyPrice;
-  const monthlySavings = isAnnual ? ((monthlyPrice * 12 - annualPrice) / 12).toFixed(2) : null;
-
   // Show loading while checking auth
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50">
-        <div className="w-8 h-8 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="p-6"
+        className="p-6 bg-white border-b border-gray-100"
       >
         <Link href="/" className="flex items-center gap-2.5 w-fit">
           <Logo size={36} color="#1a1a1a" />
@@ -168,7 +136,7 @@ function CheckoutContent() {
       </motion.header>
 
       {/* Main content */}
-      <main className="pb-16 px-4 sm:px-6">
+      <main className="py-12 px-4 sm:px-6">
         <motion.div
           className="max-w-5xl mx-auto"
           variants={containerVariants}
@@ -178,10 +146,10 @@ function CheckoutContent() {
           {/* Page header */}
           <motion.div variants={itemVariants} className="text-center mb-10">
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
-              Upgrade to {selectedPlan.name}
+              Upgrade to Premium
             </h1>
             <p className="text-lg text-gray-600">
-              {selectedPlan.tagline} • 14-day free trial • Cancel anytime
+              Unlock unlimited properties and inspections with a 7-day free trial
             </p>
           </motion.div>
 
@@ -204,173 +172,137 @@ function CheckoutContent() {
 
           {/* Main checkout card */}
           <div className="grid lg:grid-cols-5 gap-8">
-            {/* Left side - Plan comparison */}
+            {/* Left side - Current Plan (Free) */}
             <motion.div variants={itemVariants} className="lg:col-span-2 order-2 lg:order-1">
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Compare plans</h2>
-
-                {/* Free plan */}
-                <div className="pb-4 mb-4 border-b border-gray-100">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="font-medium text-gray-700">Free</span>
-                    <span className="text-gray-500">$0/mo</span>
-                  </div>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    {PLANS.free.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+              <div className="bg-white rounded-2xl border border-gray-200 p-6 sticky top-6">
+                {/* Current plan badge */}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full uppercase tracking-wide">
+                    Your Current Plan
+                  </span>
                 </div>
 
-                {/* Premium plan */}
-                <div className={`pb-4 ${plan === 'pro' ? 'mb-4 border-b border-gray-100' : ''}`}>
-                  <div className="flex justify-between items-center mb-3">
-                    <span className={`font-medium ${plan === 'premium' ? 'text-primary-600' : 'text-gray-700'}`}>
-                      Premium
-                    </span>
-                    <span className={plan === 'premium' ? 'text-primary-600 font-medium' : 'text-gray-500'}>
-                      ${planDetails.premium.price}/mo
-                    </span>
-                  </div>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    {planDetails.premium.features.slice(0, 4).map((feature) => (
-                      <li key={feature.text} className="flex items-center gap-2">
-                        <svg className={`w-4 h-4 ${feature.highlight ? 'text-primary-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        {feature.text}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-1">Free</h2>
+                <p className="text-gray-500 text-sm mb-6">Great for getting started</p>
 
-                {/* Pro plan (only show if available) */}
-                {plan === 'pro' && (
-                  <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-violet-600">Pro</span>
-                        <span className="px-2 py-0.5 bg-violet-100 text-violet-700 text-xs font-medium rounded-full">
-                          Popular
-                        </span>
-                      </div>
-                      <span className="text-violet-600 font-medium">${planDetails.pro.price}/mo</span>
-                    </div>
-                    <ul className="space-y-2 text-sm text-gray-600">
-                      {planDetails.pro.features.slice(0, 4).map((feature) => (
-                        <li key={feature.text} className="flex items-center gap-2">
-                          <svg className={`w-4 h-4 ${feature.highlight ? 'text-violet-500' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          {feature.text}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Switch plan link */}
-                <div className="mt-6 pt-4 border-t border-gray-100">
-                  <p className="text-sm text-gray-500 text-center">
-                    {plan === 'premium' ? (
-                      <>
-                        Need team features?{' '}
-                        <Link href="/checkout?plan=pro" className="text-violet-600 font-medium hover:text-violet-700">
-                          Try Pro →
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        Just need basics?{' '}
-                        <Link href="/checkout?plan=premium" className="text-primary-600 font-medium hover:text-primary-700">
-                          ← Go Premium
-                        </Link>
-                      </>
-                    )}
+                {/* What you have */}
+                <div className="mb-6">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Included
                   </p>
+                  <ul className="space-y-2.5">
+                    {FREE_FEATURES.map((feature) => (
+                      <li key={feature.text} className="flex items-center gap-3 text-sm">
+                        <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-600">{feature.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-gray-100 my-6" />
+
+                {/* What you're missing */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                    Not included
+                  </p>
+                  <ul className="space-y-2.5">
+                    {PREMIUM_ONLY_FEATURES.map((feature) => (
+                      <li key={feature.text} className="flex items-center gap-3 text-sm">
+                        <div className="w-5 h-5 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                          <svg className="w-3 h-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-400">{feature.text}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </motion.div>
 
-            {/* Right side - Checkout form */}
+            {/* Right side - Premium Plan */}
             <motion.div variants={itemVariants} className="lg:col-span-3 order-1 lg:order-2">
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                {/* Plan header with gradient */}
-                <div className={`bg-gradient-to-r ${selectedPlan.gradient} p-6 text-white relative overflow-hidden`}>
-                  {/* Floating decorative shapes */}
-                  <motion.div
-                    variants={floatVariants}
-                    animate="animate"
-                    className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"
-                  />
-                  <motion.div
-                    variants={floatVariants}
-                    animate="animate"
-                    style={{ animationDelay: '2s' }}
-                    className="absolute right-20 bottom-0 w-20 h-20 bg-white/5 rounded-full blur-xl"
-                  />
-
-                  <div className="relative">
-                    {selectedPlan.badge && (
-                      <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold mb-3">
-                        {selectedPlan.badge}
-                      </span>
-                    )}
-                    <h2 className="text-2xl font-bold mb-1">{selectedPlan.name} Plan</h2>
-                    <p className="text-white/80">{selectedPlan.tagline}</p>
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+                {/* Plan header - neutral colors */}
+                <div className="bg-gray-900 p-6 text-white">
+                  <div className="flex items-center gap-2 mb-2">
+                    <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                    </svg>
+                    <span className="text-amber-400 text-sm font-semibold uppercase tracking-wide">
+                      Recommended
+                    </span>
                   </div>
+                  <h2 className="text-2xl font-bold">Premium Plan</h2>
+                  <p className="text-gray-400 mt-1">Perfect for landlords & tenants</p>
                 </div>
 
                 <div className="p-6">
-                  {/* Billing toggle */}
-                  <div className="flex items-center justify-center gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
-                    <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
-                      Monthly
-                    </span>
-                    <button
-                      onClick={() => setIsAnnual(!isAnnual)}
-                      className={`relative w-14 h-7 rounded-full transition-colors ${
-                        isAnnual ? 'bg-green-500' : 'bg-gray-300'
-                      }`}
-                      aria-label={isAnnual ? 'Switch to monthly billing' : 'Switch to annual billing'}
-                    >
-                      <motion.span
-                        className="absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md"
-                        animate={{ x: isAnnual ? 28 : 2 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                      />
-                    </button>
-                    <span className={`text-sm font-medium transition-colors ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
-                      Annual
-                      <span className="ml-1.5 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                        Save 17%
+                  {/* Billing toggle - segmented control style */}
+                  <div className="flex flex-col items-center mb-6">
+                    <div className="bg-gray-100 p-1 rounded-lg flex">
+                      <button
+                        onClick={() => setIsAnnual(false)}
+                        className={`px-5 py-2.5 rounded-md text-sm font-medium transition-all ${
+                          !isAnnual
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        onClick={() => setIsAnnual(true)}
+                        className={`px-5 py-2.5 rounded-md text-sm font-medium transition-all ${
+                          isAnnual
+                            ? 'bg-white text-gray-900 shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                      >
+                        Annual
+                      </button>
+                    </div>
+                    {isAnnual && (
+                      <span className="mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                        {PRICING.annual.savings}
                       </span>
-                    </span>
+                    )}
                   </div>
 
                   {/* Price display */}
-                  <div className="text-center mb-6">
+                  <div className="text-center mb-6 pb-6 border-b border-gray-100">
                     <div className="flex items-baseline justify-center gap-1">
                       <span className="text-5xl font-bold text-gray-900">
-                        ${displayPrice.toFixed(2)}
+                        {isAnnual ? PRICING.annual.displayPrice : PRICING.monthly.displayPrice}
                       </span>
-                      <span className="text-gray-500 text-lg">/{isAnnual ? 'year' : 'month'}</span>
+                      <span className="text-gray-500 text-lg">/month</span>
                     </div>
-                    {isAnnual && monthlySavings && (
-                      <p className="text-sm text-green-600 mt-2">
-                        You save ${monthlySavings}/month (${(parseFloat(monthlySavings) * 12).toFixed(2)}/year)
+                    {isAnnual && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        Billed annually ({PRICING.annual.annualTotal})
+                      </p>
+                    )}
+                    {!isAnnual && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        Billed monthly
                       </p>
                     )}
                   </div>
 
                   {/* Features list */}
                   <div className="space-y-3 mb-6">
-                    {selectedPlan.features.map((feature, index) => (
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                      Everything included
+                    </p>
+                    {PREMIUM_FEATURES.map((feature, index) => (
                       <motion.div
                         key={feature.text}
                         initial={{ opacity: 0, x: -10 }}
@@ -387,7 +319,7 @@ function CheckoutContent() {
                             stroke="currentColor"
                             viewBox="0 0 24 24"
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
                         <span className={feature.highlight ? 'text-gray-900 font-medium' : 'text-gray-700'}>
@@ -414,32 +346,28 @@ function CheckoutContent() {
                     )}
                   </AnimatePresence>
 
-                  {/* Checkout button */}
+                  {/* Checkout button - only blue element */}
                   <motion.button
                     onClick={handleCheckout}
                     disabled={isLoading}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
-                    className={`w-full py-4 rounded-xl font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg ${
-                      plan === 'pro'
-                        ? 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-600/25 hover:shadow-xl hover:shadow-violet-600/30'
-                        : 'bg-primary-600 text-white hover:bg-primary-700 shadow-primary-600/25 hover:shadow-xl hover:shadow-primary-600/30'
-                    }`}
+                    className="w-full py-4 rounded-xl font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30"
                   >
                     {isLoading ? (
                       <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        Start 14-Day Free Trial
+                        Start 7-Day Free Trial
                       </>
                     )}
                   </motion.button>
 
                   <p className="text-center text-sm text-gray-500 mt-3">
-                    You won&apos;t be charged until your trial ends
+                    No charge until your trial ends. Cancel anytime.
                   </p>
 
                   {/* Trust indicators */}
@@ -449,13 +377,13 @@ function CheckoutContent() {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
-                        <span>SSL secured</span>
+                        <span>Secure checkout</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        <span>GDPR compliant</span>
+                        <span>30-day guarantee</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -471,18 +399,18 @@ function CheckoutContent() {
               {/* Money back guarantee */}
               <motion.div
                 variants={itemVariants}
-                className="mt-6 p-4 bg-green-50 border border-green-100 rounded-xl"
+                className="mt-6 p-4 bg-gray-100 border border-gray-200 rounded-xl"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-medium text-green-900">30-Day Money-Back Guarantee</h3>
-                    <p className="text-sm text-green-700 mt-1">
-                      Try {selectedPlan.name} risk-free. If you&apos;re not satisfied, get a full refund within 30 days—no questions asked.
+                    <h3 className="font-medium text-gray-900">30-Day Money-Back Guarantee</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Try Premium risk-free. If you&apos;re not satisfied, get a full refund within 30 days—no questions asked.
                     </p>
                   </div>
                 </div>
@@ -510,7 +438,7 @@ function CheckoutContent() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="py-6 text-center text-sm text-gray-400"
+        className="py-6 text-center text-sm text-gray-400 border-t border-gray-100"
       >
         <p>&copy; {new Date().getFullYear()} PropertyCheck. All rights reserved.</p>
       </motion.footer>
@@ -522,8 +450,8 @@ function CheckoutContent() {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-blue-50">
-        <div className="w-8 h-8 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-600 rounded-full animate-spin" />
       </div>
     }>
       <CheckoutContent />

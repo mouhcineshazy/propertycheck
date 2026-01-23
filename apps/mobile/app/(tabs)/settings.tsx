@@ -16,11 +16,13 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getSupabaseBrowserClient, User, Subscription } from '@propertycheck/database';
-import { APP_CONFIG, PRICING } from '@propertycheck/shared';
+import { APP_CONFIG, PRICING, FREE_TIER_LIMITS, getProvince } from '@propertycheck/shared';
 import { useAuth } from '../../hooks';
+import { UpgradeModal } from '../../components';
 
 export default function SettingsScreen() {
   // Use auth hook for signOut (React 19 pattern)
@@ -30,6 +32,8 @@ export default function SettingsScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isManagingSubscription, setIsManagingSubscription] = useState(false);
 
   // Fetch user data on mount
   useEffect(() => {
@@ -72,22 +76,44 @@ export default function SettingsScreen() {
     ]);
   };
 
-  // Handle upgrade prompt
+  // Handle upgrade prompt - show modal
   const handleUpgrade = () => {
-    Alert.alert(
-      'Upgrade to Premium',
-      `Get unlimited properties and inspections for ${PRICING.premium.displayPrice}`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Upgrade',
-          onPress: () => {
-            // TODO: Implement Stripe checkout
-            Alert.alert('Coming Soon', 'Payment integration will be added soon.');
-          },
+    setShowUpgradeModal(true);
+  };
+
+  // Handle manage subscription - open Stripe portal
+  const handleManageSubscription = async () => {
+    setIsManagingSubscription(true);
+    try {
+      const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'http://localhost:3000';
+      const response = await fetch(`${appUrl}/api/stripe/create-portal-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ]
-    );
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to open subscription portal');
+      }
+
+      if (data.url) {
+        const supported = await Linking.canOpenURL(data.url);
+        if (supported) {
+          await Linking.openURL(data.url);
+        } else {
+          throw new Error('Cannot open subscription portal');
+        }
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An error occurred';
+      Alert.alert('Error', message);
+    } finally {
+      setIsManagingSubscription(false);
+    }
   };
 
   if (isLoading) {
@@ -99,6 +125,7 @@ export default function SettingsScreen() {
   }
 
   const isPremium = subscription?.status === 'premium';
+  const userProvince = user?.province ? getProvince(user.province) : null;
 
   return (
     <ScrollView style={styles.container}>
@@ -121,6 +148,14 @@ export default function SettingsScreen() {
               <Text style={styles.profileEmail}>{user?.email}</Text>
             </View>
           </View>
+          {/* Province */}
+          <View style={styles.divider} />
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Province</Text>
+            <Text style={styles.infoValue}>
+              {userProvince?.name || 'Not set'}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -136,7 +171,7 @@ export default function SettingsScreen() {
               <Text style={styles.planDescription}>
                 {isPremium
                   ? 'Unlimited properties and inspections'
-                  : 'Up to 2 properties, 5 inspections'}
+                  : `Up to ${FREE_TIER_LIMITS.maxProperties} property, ${FREE_TIER_LIMITS.maxInspectionsTotal} inspection`}
               </Text>
             </View>
             <View
@@ -153,13 +188,37 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          {!isPremium && (
+          {!isPremium ? (
             <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade}>
               <Ionicons name="star" size={18} color="#fff" />
               <Text style={styles.upgradeButtonText}>
-                Upgrade to Premium - {PRICING.premium.displayPrice}
+                Upgrade to Premium
               </Text>
             </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.manageButton}
+              onPress={handleManageSubscription}
+              disabled={isManagingSubscription}
+            >
+              {isManagingSubscription ? (
+                <ActivityIndicator size="small" color="#2563eb" />
+              ) : (
+                <>
+                  <Ionicons name="settings-outline" size={18} color="#2563eb" />
+                  <Text style={styles.manageButtonText}>Manage Subscription</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
+
+          {/* Show renewal date for premium users */}
+          {isPremium && subscription?.current_period_end && (
+            <Text style={styles.renewalInfo}>
+              {subscription.cancel_at_period_end
+                ? `Expires: ${new Date(subscription.current_period_end).toLocaleDateString()}`
+                : `Renews: ${new Date(subscription.current_period_end).toLocaleDateString()}`}
+            </Text>
           )}
         </View>
       </View>
@@ -187,6 +246,14 @@ export default function SettingsScreen() {
       </TouchableOpacity>
 
       <View style={styles.bottomPadding} />
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason="general"
+        userProvince={user?.province || undefined}
+      />
     </ScrollView>
   );
 }
@@ -295,6 +362,27 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '600',
+  },
+  manageButton: {
+    backgroundColor: '#eff6ff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    gap: 8,
+  },
+  manageButtonText: {
+    color: '#2563eb',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  renewalInfo: {
+    fontSize: 13,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 12,
   },
   infoRow: {
     flexDirection: 'row',

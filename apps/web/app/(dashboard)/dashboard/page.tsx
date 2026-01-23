@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion, type Variants } from 'framer-motion';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 
@@ -12,7 +13,7 @@ import { User } from '@supabase/supabase-js';
 interface Property {
   id: string;
   address: string;
-  city: string;
+  property_type: string;
   created_at: string;
   inspection_count: number;
 }
@@ -184,7 +185,7 @@ function PropertyCard({ property, delay = 0 }: { property: Property; delay?: num
           {/* Property Info */}
           <div className="p-5">
             <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{property.address}</h3>
-            <p className="text-sm text-gray-500 mb-3">{property.city}</p>
+            <p className="text-sm text-gray-500 mb-3 capitalize">{property.property_type}</p>
 
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-400">
@@ -339,6 +340,8 @@ function DashboardSkeleton() {
 // MAIN DASHBOARD COMPONENT
 // ============================================
 export default function DashboardPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
@@ -349,6 +352,34 @@ export default function DashboardPage() {
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [notification, setNotification] = useState<{ type: 'success' | 'info' | 'error'; message: string } | null>(null);
+
+  // Handle checkout query params
+  useEffect(() => {
+    const checkout = searchParams.get('checkout');
+    if (checkout === 'success') {
+      setNotification({
+        type: 'success',
+        message: 'Welcome to Premium! Your subscription is now active.',
+      });
+      // Remove query param from URL without refresh
+      router.replace('/dashboard', { scroll: false });
+    } else if (checkout === 'canceled') {
+      setNotification({
+        type: 'info',
+        message: 'Checkout canceled. You can upgrade anytime from Settings.',
+      });
+      router.replace('/dashboard', { scroll: false });
+    }
+  }, [searchParams, router]);
+
+  // Auto-dismiss notification after 5 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -366,7 +397,7 @@ export default function DashboardPage() {
           .select(`
             id,
             address,
-            city,
+            property_type,
             created_at,
             inspections (id)
           `)
@@ -375,13 +406,13 @@ export default function DashboardPage() {
         const formattedProperties: Property[] = (propertiesData || []).map((p: {
           id: string;
           address: string;
-          city: string;
+          property_type: string;
           created_at: string;
           inspections: { id: string }[];
         }) => ({
           id: p.id,
           address: p.address,
-          city: p.city,
+          property_type: p.property_type,
           created_at: p.created_at,
           inspection_count: p.inspections?.length || 0,
         }));
@@ -465,6 +496,39 @@ export default function DashboardPage() {
       initial="hidden"
       animate="visible"
     >
+      {/* Checkout notification */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`mb-6 p-4 rounded-xl flex items-center justify-between ${
+              notification.type === 'success'
+                ? 'bg-green-50 border border-green-200 text-green-800'
+                : notification.type === 'error'
+                ? 'bg-red-50 border border-red-200 text-red-800'
+                : 'bg-blue-50 border border-blue-200 text-blue-800'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl">
+                {notification.type === 'success' ? '🎉' : notification.type === 'error' ? '❌' : 'ℹ️'}
+              </span>
+              <span className="font-medium">{notification.message}</span>
+            </div>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-gray-500 hover:text-gray-700 p-1"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>

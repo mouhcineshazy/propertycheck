@@ -45,14 +45,14 @@ export async function POST(request: NextRequest) {
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('⚠️ Webhook signature verification failed:', message);
+    console.error('Webhook signature verification failed:', message);
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
     );
   }
 
-  console.log('✅ Webhook verified:', event.type);
+  console.log('Webhook verified:', event.type);
 
   try {
     // Handle different event types
@@ -120,35 +120,35 @@ export async function POST(request: NextRequest) {
 // Handle successful checkout session
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = session.metadata?.userId;
-  const plan = session.metadata?.plan || 'premium';
-  const billingCycle = session.metadata?.billingCycle || 'monthly';
 
   if (!userId) {
     console.error('No userId in checkout session metadata');
     return;
   }
 
-  console.log(`💰 Checkout completed for user ${userId}, plan: ${plan}`);
+  console.log(`Checkout completed for user ${userId}`);
 
   // Get subscription details for period end date
-  let currentPeriodEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // Default to trial end
+  let currentPeriodEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Default to trial end (7 days)
 
   if (session.subscription) {
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
     currentPeriodEnd = new Date(subscription.current_period_end * 1000);
   }
 
-  // Upsert subscription record
+  // Map to database status: 'free', 'premium', 'canceled', 'past_due'
+  const status = 'premium'; // After checkout, user is premium (even if trialing)
+
+  // Upsert subscription record (using correct table name: subscriptions)
   const { error } = await getSupabaseAdmin()
-    .from('user_subscriptions')
+    .from('subscriptions')
     .upsert({
       user_id: userId,
       stripe_customer_id: session.customer as string,
       stripe_subscription_id: session.subscription as string,
-      plan: plan,
-      billing_cycle: billingCycle,
-      status: 'trialing', // Starts with trial
+      status: status,
       current_period_end: currentPeriodEnd.toISOString(),
+      cancel_at_period_end: false,
       updated_at: new Date().toISOString(),
     }, {
       onConflict: 'user_id',
@@ -162,48 +162,26 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
 // Handle subscription updates (status changes, plan changes)
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  const userId = subscription.metadata?.userId;
-
-  if (!userId) {
-    // Try to find user by subscription ID
-    const { data } = await getSupabaseAdmin()
-      .from('user_subscriptions')
-      .select('user_id')
-      .eq('stripe_subscription_id', subscription.id)
-      .single();
-
-    if (!data) {
-      console.error('Could not find user for subscription:', subscription.id);
-      return;
-    }
-  }
-
-  // Determine plan from price ID
-  const priceId = subscription.items.data[0]?.price.id;
-  const plan = priceId ? getPlanByPriceId(priceId) || 'premium' : 'premium';
-  const billingCycle = priceId && isAnnualPrice(priceId) ? 'annual' : 'monthly';
-
-  // Map Stripe status to our status
+  // Map Stripe status to our database status
+  // Database allows: 'free', 'premium', 'canceled', 'past_due'
   const statusMap: Record<string, string> = {
-    active: 'active',
-    trialing: 'trialing',
+    active: 'premium',
+    trialing: 'premium', // Trialing users get premium features
     past_due: 'past_due',
     canceled: 'canceled',
-    unpaid: 'unpaid',
-    incomplete: 'incomplete',
-    incomplete_expired: 'expired',
-    paused: 'paused',
+    unpaid: 'past_due',
+    incomplete: 'free',
+    incomplete_expired: 'free',
+    paused: 'free',
   };
 
-  const status = statusMap[subscription.status] || 'active';
+  const status = statusMap[subscription.status] || 'free';
 
-  console.log(`🔄 Subscription updated: ${subscription.id}, status: ${status}`);
+  console.log(`Subscription updated: ${subscription.id}, status: ${status}`);
 
   const { error } = await getSupabaseAdmin()
-    .from('user_subscriptions')
+    .from('subscriptions')
     .update({
-      plan: plan,
-      billing_cycle: billingCycle,
       status: status,
       current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
       cancel_at_period_end: subscription.cancel_at_period_end,
@@ -219,14 +197,15 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 // Handle subscription cancellation
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.log(`❌ Subscription deleted: ${subscription.id}`);
+  console.log(`Subscription deleted: ${subscription.id}`);
 
-  // Downgrade to free plan
+  // Downgrade to free
   const { error } = await getSupabaseAdmin()
-    .from('user_subscriptions')
+    .from('subscriptions')
     .update({
-      plan: 'free',
-      status: 'canceled',
+      status: 'free',
+      stripe_subscription_id: null, // Clear the subscription ID
+      cancel_at_period_end: false,
       updated_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', subscription.id);
@@ -241,13 +220,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
   if (!invoice.subscription) return;
 
-  console.log(`✅ Invoice paid for subscription: ${invoice.subscription}`);
+  console.log(`Invoice paid for subscription: ${invoice.subscription}`);
 
-  // Update period end date
+  // Update period end date and ensure status is premium
   const { error } = await getSupabaseAdmin()
-    .from('user_subscriptions')
+    .from('subscriptions')
     .update({
-      status: 'active',
+      status: 'premium',
       current_period_end: new Date((invoice.lines.data[0]?.period?.end || 0) * 1000).toISOString(),
       updated_at: new Date().toISOString(),
     })
@@ -263,11 +242,11 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   if (!invoice.subscription) return;
 
-  console.log(`⚠️ Invoice payment failed for subscription: ${invoice.subscription}`);
+  console.log(`Invoice payment failed for subscription: ${invoice.subscription}`);
 
   // Mark subscription as past due
   const { error } = await getSupabaseAdmin()
-    .from('user_subscriptions')
+    .from('subscriptions')
     .update({
       status: 'past_due',
       updated_at: new Date().toISOString(),
@@ -280,18 +259,16 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   }
 
   // TODO: Send email notification about payment failure
-  // This would integrate with your email service (Resend, SendGrid, etc.)
 }
 
 // Handle trial ending soon notification
 async function handleTrialWillEnd(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.userId;
 
-  console.log(`⏰ Trial ending soon for subscription: ${subscription.id}`);
+  console.log(`Trial ending soon for subscription: ${subscription.id}`);
 
   if (userId) {
     // TODO: Send email reminder about trial ending
-    // Get user email from Supabase auth and send notification
     console.log(`Would send trial ending reminder to user: ${userId}`);
   }
 }

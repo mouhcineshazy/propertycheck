@@ -23,8 +23,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { Inspection } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
-import { fetchPropertyWithInspections, deleteProperty } from '../../lib';
+import { fetchPropertyWithInspections, deleteProperty, checkFreeTierLimits } from '../../lib';
 import type { PropertyWithInspections } from '../../lib';
+import { UpgradeModal } from '../../components';
 
 export default function PropertyDetailScreen() {
   const router = useRouter();
@@ -33,14 +34,27 @@ export default function PropertyDetailScreen() {
   const [property, setProperty] = useState<PropertyWithInspections | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [totalInspections, setTotalInspections] = useState(0);
+  const [canAddInspection, setCanAddInspection] = useState(true);
 
   useEffect(() => {
     async function loadProperty() {
       if (!id) return;
 
       try {
-        const data = await fetchPropertyWithInspections(id);
+        // Load property and check limits in parallel
+        const [data, limitsResult] = await Promise.all([
+          fetchPropertyWithInspections(id),
+          checkFreeTierLimits(),
+        ]);
+
         setProperty(data);
+
+        if (limitsResult.data) {
+          setTotalInspections(limitsResult.data.inspectionCount);
+          setCanAddInspection(limitsResult.data.canAddInspection);
+        }
       } catch (err) {
         console.error('Error loading property:', err);
         Alert.alert('Error', 'Failed to load property', [
@@ -85,13 +99,9 @@ export default function PropertyDetailScreen() {
   const handleStartInspection = () => {
     if (!property) return;
 
-    // Check free tier limits (total inspections across all properties)
-    const inspectionCount = property.inspections?.length || 0;
-    if (inspectionCount >= FREE_TIER_LIMITS.maxInspectionsTotal) {
-      Alert.alert(
-        'Limit Reached',
-        `Free tier allows ${FREE_TIER_LIMITS.maxInspectionsTotal} total inspections. Upgrade to Premium for unlimited inspections.`
-      );
+    // Check free tier limits (total inspections across ALL properties)
+    if (!canAddInspection) {
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -194,8 +204,9 @@ export default function PropertyDetailScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Inspections</Text>
-            <Text style={styles.inspectionCount}>
-              {inspectionCount} / {FREE_TIER_LIMITS.maxInspectionsTotal}
+            <Text style={[styles.inspectionCount, !canAddInspection && styles.inspectionCountWarning]}>
+              {totalInspections} / {FREE_TIER_LIMITS.maxInspectionsTotal} total
+              {!canAddInspection && ' (limit reached)'}
             </Text>
           </View>
 
@@ -220,11 +231,27 @@ export default function PropertyDetailScreen() {
 
       {/* Start Inspection Button */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.startButton} onPress={handleStartInspection}>
-          <Ionicons name="camera-outline" size={22} color="#fff" />
-          <Text style={styles.startButtonText}>Start New Inspection</Text>
+        <TouchableOpacity
+          style={[styles.startButton, !canAddInspection && styles.startButtonWarning]}
+          onPress={handleStartInspection}
+        >
+          <Ionicons
+            name={canAddInspection ? 'camera-outline' : 'star'}
+            size={22}
+            color="#fff"
+          />
+          <Text style={styles.startButtonText}>
+            {canAddInspection ? 'Start New Inspection' : 'Upgrade to Add More'}
+          </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason="inspections_limit"
+      />
     </View>
   );
 }
@@ -352,6 +379,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
   },
+  inspectionCountWarning: {
+    color: '#f59e0b',
+    fontWeight: '500',
+  },
   inspectionCard: {
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -437,5 +468,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  startButtonWarning: {
+    backgroundColor: '#f59e0b',
   },
 });

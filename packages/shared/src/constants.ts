@@ -28,12 +28,15 @@ export const ROOM_TYPES = [
 export type RoomTypeValue = (typeof ROOM_TYPES)[number]['value'];
 
 // Free tier limits - single source of truth
+// 2 inspections = complete move-in & move-out cycle for 1 property
 export const FREE_TIER_LIMITS = {
-  maxProperties: 2,
-  maxInspectionsTotal: 5,
+  maxProperties: 1,
+  maxInspectionsTotal: 2, // Move-in + move-out
   maxPhotosPerInspection: 20,
-  maxPdfExportsPerMonth: 3,
-  maxStorageMb: 100,
+  maxPdfExportsPerMonth: 1,
+  maxStorageMb: 50,
+  pdfRetentionDays: 7, // Free users: PDFs expire after 7 days
+  comparisonReportWatermarked: true, // Free tier shows watermarked comparison
 } as const;
 
 // Premium tier limits
@@ -43,13 +46,37 @@ export const PREMIUM_TIER_LIMITS = {
   maxPhotosPerInspection: 50,
   maxPdfExportsPerMonth: -1,
   maxStorageMb: 1024, // 1GB
+  pdfRetentionDays: -1, // Unlimited (never expires)
 } as const;
 
 // Stripe pricing (CAD)
+// Annual plan: 20% discount
+// Monthly: $9.99/month = $119.88/year
+// Annual: $95.88/year ($7.99/month × 12) = 20% savings
 export const PRICING = {
-  premium: {
-    priceId: '', // Fill with your Stripe Price ID
+  monthly: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || '',
     amount: 999, // $9.99 CAD in cents
+    currency: 'cad',
+    interval: 'month' as const,
+    displayPrice: '$9.99',
+    displayInterval: '/month',
+  },
+  annual: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID || '',
+    amount: 9588, // $95.88 CAD in cents (20% discount)
+    currency: 'cad',
+    interval: 'year' as const,
+    displayPrice: '$7.99',
+    displayInterval: '/month',
+    annualTotal: '$95.88/year',
+    savings: 'Save 20%',
+    savingsPercent: 20,
+  },
+  // Legacy support - default to monthly
+  premium: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || '',
+    amount: 999,
     currency: 'cad',
     interval: 'month' as const,
     displayPrice: '$9.99 CAD/month',

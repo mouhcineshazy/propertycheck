@@ -230,11 +230,32 @@ CREATE TABLE public.inspection_photos (
 |--------|------|----------|---------|-------------|
 | id | UUID | No | gen_random_uuid() | Primary key |
 | inspection_id | UUID | No | - | Inspection reference |
-| storage_path | TEXT | No | - | Supabase storage path |
+| storage_path | TEXT | No | - | Supabase storage path (see below) |
 | caption | TEXT | Yes | NULL | Photo description |
-| room_type | TEXT | No | - | Room category |
+| room_type | TEXT | Yes | - | Room category |
 | sort_order | INTEGER | No | 0 | Display order |
 | created_at | TIMESTAMPTZ | No | NOW() | Upload timestamp |
+
+**Storage Path Convention**:
+
+The `storage_path` column stores the relative path in the Supabase Storage bucket `inspection-photos`:
+
+```
+{inspection_id}/{uuid}.{extension}
+```
+
+Example: `a1b2c3d4-5678-90ab-cdef-123456789abc/f47ac10b-58cc-4372-a567-0e02b2c3d479.jpg`
+
+**Getting Public URLs**:
+
+The public URL is not stored in the database. It's generated on-demand:
+
+```typescript
+const { data } = supabase.storage
+  .from('inspection-photos')
+  .getPublicUrl(photo.storage_path);
+const publicUrl = data.publicUrl;
+```
 
 **Indexes**:
 - `inspection_photos_pkey` (id)

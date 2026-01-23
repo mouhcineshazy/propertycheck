@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { stripe, PLANS, PlanType } from '@/lib/stripe/config';
+import { stripe, PLANS } from '@/lib/stripe/config';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -43,15 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
-    const { plan, billingCycle = 'monthly' } = body;
-
-    // Validate plan type
-    if (!plan || !['premium', 'pro'].includes(plan)) {
-      return NextResponse.json(
-        { error: 'Invalid plan. Choose premium or pro.' },
-        { status: 400 }
-      );
-    }
+    const { billingCycle = 'monthly' } = body;
 
     // Validate billing cycle
     if (!['monthly', 'annual'].includes(billingCycle)) {
@@ -61,24 +53,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the correct price ID based on plan and billing cycle
-    const planConfig = PLANS[plan as PlanType];
+    // Get the correct price ID based on billing cycle (MVP: only premium plan)
     const priceId = billingCycle === 'annual'
-      ? planConfig.annualPriceId
-      : planConfig.priceId;
+      ? PLANS.premium.annualPriceId
+      : PLANS.premium.priceId;
 
     if (!priceId) {
       // Price ID not configured - this is a setup issue
-      console.error(`Price ID not configured for ${plan} (${billingCycle})`);
+      console.error(`Price ID not configured for premium (${billingCycle})`);
       return NextResponse.json(
         { error: 'This plan is not available yet. Please contact support.' },
         { status: 500 }
       );
     }
 
-    // Check if user already has a Stripe customer ID
+    // Check if user already has a Stripe customer ID (using correct table name)
     const { data: existingSubscription } = await supabase
-      .from('user_subscriptions')
+      .from('subscriptions')
       .select('stripe_customer_id')
       .eq('user_id', user.id)
       .single();
@@ -94,23 +85,23 @@ export async function POST(request: NextRequest) {
         },
       ],
       // URLs for redirect after checkout
-      success_url: `${request.nextUrl.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.nextUrl.origin}/checkout?plan=${plan}&canceled=true`,
+      success_url: `${request.nextUrl.origin}/dashboard?checkout=success`,
+      cancel_url: `${request.nextUrl.origin}/dashboard?checkout=canceled`,
       // Store user info for webhook processing
       metadata: {
         userId: user.id,
-        plan: plan,
+        plan: 'premium',
         billingCycle: billingCycle,
       },
       // Also store on subscription for future reference
       subscription_data: {
         metadata: {
           userId: user.id,
-          plan: plan,
+          plan: 'premium',
           billingCycle: billingCycle,
         },
-        // 14-day free trial
-        trial_period_days: 14,
+        // 7-day free trial
+        trial_period_days: 7,
       },
       // Allow promotion codes for marketing
       allow_promotion_codes: true,
