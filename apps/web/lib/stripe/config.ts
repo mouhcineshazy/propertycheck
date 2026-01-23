@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { PRICING, FREE_TIER_LIMITS, PREMIUM_TIER_LIMITS } from '@propertycheck/shared';
 
 // Lazy-initialized Stripe client to avoid errors during build time
 // when environment variables aren't available
@@ -22,72 +23,43 @@ export const stripe = {
   get subscriptions() { return getStripe().subscriptions; },
   get customers() { return getStripe().customers; },
   get webhooks() { return getStripe().webhooks; },
+  get billingPortal() { return getStripe().billingPortal; },
 } as unknown as Stripe;
 
-// Plan configuration with pricing and feature details
-// Price IDs should be created in Stripe Dashboard and stored in env vars
+// MVP Plan configuration - simplified to Free and Premium only
+// Price IDs are created in Stripe Dashboard
 export const PLANS = {
   free: {
     name: 'Free',
-    description: 'Get started with basic features',
+    description: 'Try PropertyCheck with basic features',
     price: 0,
     annualPrice: 0,
     priceId: null,
     annualPriceId: null,
     features: [
-      '3 properties',
-      '5 inspections per property',
-      'Basic PDF reports',
+      `${FREE_TIER_LIMITS.maxProperties} property`,
+      `${FREE_TIER_LIMITS.maxInspectionsTotal} inspection`,
+      `PDF reports (${FREE_TIER_LIMITS.pdfRetentionDays}-day storage)`,
       'Email support',
     ],
-    limits: {
-      properties: 3,
-      inspectionsPerProperty: 5,
-      teamMembers: 1,
-    },
+    limits: FREE_TIER_LIMITS,
   },
   premium: {
     name: 'Premium',
-    description: 'Perfect for landlords & tenants',
-    price: 9.99,
-    annualPrice: 99.99, // ~17% savings (vs $119.88 yearly)
-    priceId: process.env.STRIPE_PREMIUM_PRICE_ID,
-    annualPriceId: process.env.STRIPE_PREMIUM_ANNUAL_PRICE_ID,
+    description: 'Unlimited properties and inspections',
+    price: PRICING.monthly.amount / 100,
+    annualPrice: PRICING.annual.amount / 100,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID || null,
+    annualPriceId: process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID || null,
     features: [
       'Unlimited properties',
       'Unlimited inspections',
-      'Professional PDF reports',
+      'Permanent PDF storage',
       'Priority support',
       'Comparison reports',
       'Share with landlords',
     ],
-    limits: {
-      properties: -1, // -1 = unlimited
-      inspectionsPerProperty: -1,
-      teamMembers: 1,
-    },
-  },
-  pro: {
-    name: 'Pro',
-    description: 'For property managers & agencies',
-    price: 19.99,
-    annualPrice: 199.99, // ~17% savings (vs $239.88 yearly)
-    priceId: process.env.STRIPE_PRO_PRICE_ID,
-    annualPriceId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID,
-    features: [
-      'Everything in Premium',
-      'Team collaboration (up to 5)',
-      'API access',
-      'Custom branding on reports',
-      'Bulk property import',
-      'Dedicated account manager',
-      'Phone support',
-    ],
-    limits: {
-      properties: -1,
-      inspectionsPerProperty: -1,
-      teamMembers: 5,
-    },
+    limits: PREMIUM_TIER_LIMITS,
   },
 } as const;
 
@@ -95,20 +67,14 @@ export type PlanType = keyof typeof PLANS;
 
 // Helper to get plan by price ID (useful for webhook handling)
 export function getPlanByPriceId(priceId: string): PlanType | null {
-  for (const [planKey, planConfig] of Object.entries(PLANS)) {
-    if (planConfig.priceId === priceId || planConfig.annualPriceId === priceId) {
-      return planKey as PlanType;
-    }
+  const premiumPlan = PLANS.premium;
+  if (premiumPlan.priceId === priceId || premiumPlan.annualPriceId === priceId) {
+    return 'premium';
   }
   return null;
 }
 
 // Check if a price ID is for annual billing
 export function isAnnualPrice(priceId: string): boolean {
-  for (const planConfig of Object.values(PLANS)) {
-    if (planConfig.annualPriceId === priceId) {
-      return true;
-    }
-  }
-  return false;
+  return PLANS.premium.annualPriceId === priceId;
 }

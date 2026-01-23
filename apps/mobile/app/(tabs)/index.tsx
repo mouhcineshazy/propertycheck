@@ -23,6 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Property } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { useProperties, useOptimistic } from '../../hooks';
+import { UpgradeModal } from '../../components';
 
 export default function PropertiesScreen() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function PropertiesScreen() {
   // No useEffect needed - data is fetched on mount via the hook
   const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Refetch properties when screen gains focus (e.g., after adding a new property)
   useFocusEffect(
@@ -111,18 +113,37 @@ export default function PropertiesScreen() {
     );
   }
 
+  // Check if at property limit
+  const isAtLimit = optimisticProperties.length >= FREE_TIER_LIMITS.maxProperties;
+
+  // Handle add property with limit check
+  const handleAddProperty = () => {
+    if (isAtLimit) {
+      setShowUpgradeModal(true);
+    } else {
+      router.push('/property/new' as Href);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {optimisticProperties.length === 0 ? (
         renderEmptyState()
       ) : (
         <>
-          <View style={styles.limitBanner}>
-            <Text style={styles.limitText}>
+          <TouchableOpacity
+            style={[styles.limitBanner, isAtLimit && styles.limitBannerWarning]}
+            onPress={isAtLimit ? () => setShowUpgradeModal(true) : undefined}
+          >
+            <Text style={[styles.limitText, isAtLimit && styles.limitTextWarning]}>
               {optimisticProperties.length} / {FREE_TIER_LIMITS.maxProperties}{' '}
               properties (Free tier)
+              {isAtLimit && ' - Tap to upgrade'}
             </Text>
-          </View>
+            {isAtLimit && (
+              <Ionicons name="star" size={14} color="#f59e0b" style={{ marginLeft: 4 }} />
+            )}
+          </TouchableOpacity>
           <FlatList
             data={optimisticProperties}
             renderItem={renderProperty}
@@ -137,13 +158,20 @@ export default function PropertiesScreen() {
             }
           />
           <TouchableOpacity
-            style={styles.fab}
-            onPress={() => router.push('/property/new' as Href)}
+            style={[styles.fab, isAtLimit && styles.fabWarning]}
+            onPress={handleAddProperty}
           >
-            <Ionicons name="add" size={28} color="#fff" />
+            <Ionicons name={isAtLimit ? 'star' : 'add'} size={28} color="#fff" />
           </TouchableOpacity>
         </>
       )}
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        reason="properties_limit"
+      />
     </View>
   );
 }
@@ -168,10 +196,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fef3c7',
     padding: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  limitBannerWarning: {
+    backgroundColor: '#fef3c7',
   },
   limitText: {
     fontSize: 12,
     color: '#92400e',
+  },
+  limitTextWarning: {
+    fontWeight: '600',
+  },
+  fabWarning: {
+    backgroundColor: '#f59e0b',
   },
   propertyCard: {
     backgroundColor: '#fff',

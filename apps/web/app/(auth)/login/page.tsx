@@ -105,18 +105,26 @@ function LoginContent() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      router.push(redirect);
-      router.refresh();
+      // Verify we actually got a session
+      if (!data.session) {
+        throw new Error('No session returned from login');
+      }
+
+      // Small delay to ensure cookies are set before redirect
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Use window.location for a full page reload to ensure cookies are sent
+      // router.push doesn't always trigger middleware re-evaluation with new cookies
+      window.location.href = redirect;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in');
-    } finally {
       setIsLoading(false);
     }
   };

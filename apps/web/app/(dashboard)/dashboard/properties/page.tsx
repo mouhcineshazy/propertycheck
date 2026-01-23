@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 interface Property {
   id: string;
   address: string;
-  city: string;
+  property_type: string;
   created_at: string;
   inspection_count: number;
 }
@@ -26,7 +26,7 @@ export default function PropertiesPage() {
         .select(`
           id,
           address,
-          city,
+          property_type,
           created_at,
           inspections (id)
         `)
@@ -34,10 +34,10 @@ export default function PropertiesPage() {
 
       if (!error && data) {
         setProperties(
-          data.map((p: { id: string; address: string; city: string; created_at: string; inspections: { id: string }[] }) => ({
+          data.map((p: { id: string; address: string; property_type: string; created_at: string; inspections: { id: string }[] }) => ({
             id: p.id,
             address: p.address,
-            city: p.city,
+            property_type: p.property_type,
             created_at: p.created_at,
             inspection_count: p.inspections?.length || 0,
           }))
@@ -53,7 +53,7 @@ export default function PropertiesPage() {
   const filteredProperties = properties.filter(
     (p) =>
       p.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.city.toLowerCase().includes(searchQuery.toLowerCase())
+      p.property_type.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (isLoading) {
@@ -159,7 +159,7 @@ export default function PropertiesPage() {
                 </span>
               </div>
               <h3 className="font-semibold text-gray-900 mt-4 line-clamp-2">{property.address}</h3>
-              <p className="text-sm text-gray-500 mt-1">{property.city}</p>
+              <p className="text-sm text-gray-500 mt-1 capitalize">{property.property_type}</p>
               <p className="text-xs text-gray-400 mt-3">
                 Added {new Date(property.created_at).toLocaleDateString()}
               </p>

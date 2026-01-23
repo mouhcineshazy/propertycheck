@@ -51,3 +51,15 @@ export {
 
 // Logo components
 export { Logo, LogoWithText, LogoAppIcon } from './components/Logo';
+
+// Province configuration
+export {
+  PROVINCES,
+  PROVINCE_CODES,
+  CASE_STUDIES,
+  getProvince,
+  getProvinceOptions,
+  getCaseStudiesByProvince,
+  type ProvinceConfig,
+  type CaseStudy,
+} from './provinces';

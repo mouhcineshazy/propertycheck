@@ -50,9 +50,21 @@ export async function updateSession(request: NextRequest) {
 
   // Refresh session if expired - critical for Server Components
   // This must run before any protected route checks
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getUser() validates the JWT with Supabase servers (secure but slower)
+  // We use this to ensure the session is valid
+  let user = null;
+
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data.user) {
+      user = data.user;
+    }
+  } catch {
+    // If getUser fails (network issue, etc.), check session from cookies as fallback
+    // This is less secure but allows the app to work offline
+    const { data: sessionData } = await supabase.auth.getSession();
+    user = sessionData.session?.user ?? null;
+  }
 
   const pathname = request.nextUrl.pathname;
 

@@ -24,6 +24,20 @@
 - **Shared Packages**: `packages/` - Database client and shared utilities
 - **Database Migrations**: `supabase/migrations/`
 
+## Key Features
+
+### Web Dashboard
+- **Properties**: Add, view, edit, and delete rental properties
+- **Inspections**: Create inspections with photo uploads, view photo galleries
+- **Photo Management**: Upload from browser, lightbox viewer, delete individual photos
+- **Status Tracking**: Draft vs completed inspections
+
+### Mobile App
+- **Camera Integration**: Take inspection photos directly
+- **Gallery Access**: Import existing photos
+- **Offline Support**: Local storage before upload
+- **PDF Reports**: Generate and share inspection reports
+
 ## Tech Stack Summary
 
 | Layer | Technology |
