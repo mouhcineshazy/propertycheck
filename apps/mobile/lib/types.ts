@@ -52,3 +52,27 @@ export type ApiResponse<T> = {
   data: T | null;
   error: string | null;
 };
+
+// Comparison report types
+export type ComparisonPhoto = {
+  moveIn: {
+    url: string;
+    caption: string | null;
+    date: string;
+  } | null;
+  moveOut: {
+    url: string;
+    caption: string | null;
+    date: string;
+  } | null;
+  roomType: 'bedroom' | 'bathroom' | 'kitchen' | 'living_room' | 'other';
+};
+
+export type ComparisonReport = {
+  propertyAddress: string;
+  propertyId: string;
+  moveInInspection: InspectionWithPhotos;
+  moveOutInspection: InspectionWithPhotos;
+  photoComparisons: ComparisonPhoto[];
+  generatedAt: string;
+};

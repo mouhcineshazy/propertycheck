@@ -8,7 +8,7 @@
  * - Delete inspection
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import {
   Image,
   Modal,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Sharing from 'expo-sharing';
 import * as MailComposer from 'expo-mail-composer';
@@ -32,6 +32,7 @@ import {
   deleteInspection,
   generateInspectionPdf,
   getPhotoUrl,
+  canGenerateComparison,
 } from '../../lib';
 import type { InspectionWithPhotos } from '../../lib';
 
@@ -105,25 +106,28 @@ export default function InspectionDetailScreen() {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
 
-  useEffect(() => {
-    async function loadInspection() {
-      if (!id) return;
+  // Refetch data when screen gains focus (after completing/editing inspection elsewhere)
+  useFocusEffect(
+    useCallback(() => {
+      async function loadInspection() {
+        if (!id) return;
 
-      try {
-        const data = await fetchInspectionWithPhotos(id);
-        setInspection(data);
-      } catch (err) {
-        console.error('Error loading inspection:', err);
-        Alert.alert('Error', 'Failed to load inspection', [
-          { text: 'OK', onPress: () => router.back() },
-        ]);
-      } finally {
-        setIsLoading(false);
+        try {
+          const data = await fetchInspectionWithPhotos(id);
+          setInspection(data);
+        } catch (err) {
+          console.error('Error loading inspection:', err);
+          Alert.alert('Error', 'Failed to load inspection', [
+            { text: 'OK', onPress: () => router.back() },
+          ]);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
 
-    loadInspection();
-  }, [id, router]);
+      loadInspection();
+    }, [id, router])
+  );
 
   const handleComplete = async () => {
     if (!id || !inspection) return;
@@ -140,7 +144,29 @@ export default function InspectionDetailScreen() {
             try {
               await completeInspection(id);
               setInspection({ ...inspection, status: 'completed' });
-              Alert.alert('Success', 'Inspection marked as complete');
+
+              // Check if we can now generate a comparison report
+              const propertyId = inspection.property?.id || inspection.property_id;
+              const comparisonStatus = await canGenerateComparison(propertyId);
+
+              if (comparisonStatus.canCompare) {
+                // Show comparison prompt
+                Alert.alert(
+                  'Comparison Report Ready!',
+                  'You now have 2 completed inspections. Would you like to view a side-by-side comparison of move-in vs move-out?',
+                  [
+                    { text: 'Maybe Later', style: 'cancel' },
+                    {
+                      text: 'View Comparison',
+                      onPress: () => {
+                        router.push(`/inspection/compare?propertyId=${propertyId}` as Href);
+                      },
+                    },
+                  ]
+                );
+              } else {
+                Alert.alert('Success', 'Inspection marked as complete');
+              }
             } catch (err) {
               console.error('Error completing inspection:', err);
               Alert.alert('Error', 'Failed to complete inspection');

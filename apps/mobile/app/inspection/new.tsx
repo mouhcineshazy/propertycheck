@@ -6,9 +6,10 @@
  * - Multiple photos with captions
  * - Room type selection
  * - Notes input
+ * - Free tier limit enforcement
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,8 +26,10 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import { createInspection } from '../../lib';
+import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { createInspection, checkFreeTierLimits } from '../../lib';
 import type { LocalPhoto } from '../../lib';
+import { UpgradeModal } from '../../components';
 
 // Room types for photo categorization
 const ROOM_TYPES = [
@@ -48,6 +51,48 @@ export default function NewInspectionScreen() {
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+
+  // Free tier limit enforcement
+  const [isCheckingLimits, setIsCheckingLimits] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [userProvince, setUserProvince] = useState<string | undefined>();
+
+  // Check free tier limits on mount - block access if limit reached
+  useEffect(() => {
+    async function checkLimits() {
+      try {
+        const supabase = getSupabaseBrowserClient();
+
+        // Check limits and get user province in parallel
+        const [limitsResult, userResult] = await Promise.all([
+          checkFreeTierLimits(),
+          supabase.from('users').select('province').single(),
+        ]);
+
+        setUserProvince(userResult.data?.province || undefined);
+
+        // If can't add inspection, show upgrade modal
+        if (!limitsResult.data?.canAddInspection) {
+          setShowUpgradeModal(true);
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking limits:', err);
+        // On error, block access to be safe
+        setShowUpgradeModal(true);
+      } finally {
+        setIsCheckingLimits(false);
+      }
+    }
+
+    checkLimits();
+  }, []);
+
+  // Handle upgrade modal close - go back since they can't create inspection
+  const handleUpgradeModalClose = () => {
+    setShowUpgradeModal(false);
+    router.back();
+  };
 
   // Request camera permission
   const handleOpenCamera = async () => {
@@ -137,6 +182,30 @@ export default function NewInspectionScreen() {
       setIsSubmitting(false);
     }
   };
+
+  // Loading state while checking limits
+  if (isCheckingLimits) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text style={styles.loadingText}>Checking limits...</Text>
+      </View>
+    );
+  }
+
+  // Show upgrade modal if limit reached (will redirect on close)
+  if (showUpgradeModal) {
+    return (
+      <View style={styles.container}>
+        <UpgradeModal
+          visible={true}
+          onClose={handleUpgradeModalClose}
+          reason="inspections_limit"
+          userProvince={userProvince}
+        />
+      </View>
+    );
+  }
 
   // Camera view
   if (isCameraActive) {
@@ -333,6 +402,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#666',
   },
   header: {
     flexDirection: 'row',

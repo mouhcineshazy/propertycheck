@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { stripe, PLANS } from '@/lib/stripe/config';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 interface CookieToSet {
@@ -12,26 +13,46 @@ interface CookieToSet {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the authenticated user using Supabase SSR
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet: CookieToSet[]) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-            });
-          },
-        },
-      }
-    );
+    // Check for Bearer token first (mobile app authentication)
+    const authHeader = request.headers.get('Authorization');
+    let user = null;
+    let authError = null;
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authHeader?.startsWith('Bearer ')) {
+      // Mobile app: Use Bearer token authentication
+      const token = authHeader.substring(7);
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      const { data, error } = await supabase.auth.getUser(token);
+      user = data?.user;
+      authError = error;
+    } else {
+      // Web app: Use cookie-based authentication
+      const cookieStore = await cookies();
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll();
+            },
+            setAll(cookiesToSet: CookieToSet[]) {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                cookieStore.set(name, value, options);
+              });
+            },
+          },
+        }
+      );
+
+      const { data, error } = await supabase.auth.getUser();
+      user = data?.user;
+      authError = error;
+    }
 
     // Require authentication - checkout is for logged-in users only
     if (authError || !user) {
@@ -67,8 +88,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already has a Stripe customer ID (using correct table name)
-    const { data: existingSubscription } = await supabase
+    // Check if user already has a Stripe customer ID (using service role for DB query)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const { data: existingSubscription } = await supabaseAdmin
       .from('subscriptions')
       .select('stripe_customer_id')
       .eq('user_id', user.id)
