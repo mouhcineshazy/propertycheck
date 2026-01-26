@@ -7,7 +7,7 @@
  * - Edit/Delete property
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,12 +18,13 @@ import {
   ScrollView,
   FlatList,
 } from 'react-native';
-import { useRouter, useLocalSearchParams, Href } from 'expo-router';
+import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { Inspection } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
-import { fetchPropertyWithInspections, deleteProperty, checkFreeTierLimits } from '../../lib';
+import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { fetchPropertyWithInspections, deleteProperty, checkFreeTierLimits, canGenerateComparison } from '../../lib';
 import type { PropertyWithInspections } from '../../lib';
 import { UpgradeModal } from '../../components';
 
@@ -36,37 +37,54 @@ export default function PropertyDetailScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [totalInspections, setTotalInspections] = useState(0);
-  const [canAddInspection, setCanAddInspection] = useState(true);
+  // Default to false (blocked) until we confirm user can add - prevents bypass on API errors
+  const [canAddInspection, setCanAddInspection] = useState(false);
+  const [canCompare, setCanCompare] = useState(false);
+  const [userProvince, setUserProvince] = useState<string | undefined>();
 
-  useEffect(() => {
-    async function loadProperty() {
-      if (!id) return;
+  // Refetch data when screen gains focus (after creating/editing/deleting inspections)
+  useFocusEffect(
+    useCallback(() => {
+      async function loadProperty() {
+        if (!id) return;
 
-      try {
-        // Load property and check limits in parallel
-        const [data, limitsResult] = await Promise.all([
-          fetchPropertyWithInspections(id),
-          checkFreeTierLimits(),
-        ]);
+        try {
+          const supabase = getSupabaseBrowserClient();
 
-        setProperty(data);
+          // Load property, limits, comparison status, and user province in parallel
+          const [data, limitsResult, comparisonResult, userResult] = await Promise.all([
+            fetchPropertyWithInspections(id),
+            checkFreeTierLimits(),
+            canGenerateComparison(id),
+            supabase.from('users').select('province').single(),
+          ]);
 
-        if (limitsResult.data) {
-          setTotalInspections(limitsResult.data.inspectionCount);
-          setCanAddInspection(limitsResult.data.canAddInspection);
+          setProperty(data);
+          setCanCompare(comparisonResult.canCompare);
+          setUserProvince(userResult.data?.province || undefined);
+
+          // Update inspection limits - default to blocked if API fails
+          if (limitsResult.data) {
+            setTotalInspections(limitsResult.data.inspectionCount);
+            setCanAddInspection(limitsResult.data.canAddInspection);
+          } else {
+            // API error - keep blocked state to prevent bypassing limits
+            console.warn('Failed to check limits:', limitsResult.error);
+            setCanAddInspection(false);
+          }
+        } catch (err) {
+          console.error('Error loading property:', err);
+          Alert.alert('Error', 'Failed to load property', [
+            { text: 'OK', onPress: () => router.back() },
+          ]);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (err) {
-        console.error('Error loading property:', err);
-        Alert.alert('Error', 'Failed to load property', [
-          { text: 'OK', onPress: () => router.back() },
-        ]);
-      } finally {
-        setIsLoading(false);
       }
-    }
 
-    loadProperty();
-  }, [id, router]);
+      loadProperty();
+    }, [id, router])
+  );
 
   const handleDelete = () => {
     Alert.alert(
@@ -106,6 +124,10 @@ export default function PropertyDetailScreen() {
     }
 
     router.push(`/inspection/new?propertyId=${id}` as Href);
+  };
+
+  const handleViewComparison = () => {
+    router.push(`/inspection/compare?propertyId=${id}` as Href);
   };
 
   const renderInspection = ({ item }: { item: Inspection }) => (
@@ -229,10 +251,23 @@ export default function PropertyDetailScreen() {
         </View>
       </ScrollView>
 
-      {/* Start Inspection Button */}
+      {/* Bottom Actions */}
       <View style={styles.bottomBar}>
+        {canCompare && (
+          <TouchableOpacity
+            style={styles.compareButton}
+            onPress={handleViewComparison}
+          >
+            <Ionicons name="git-compare-outline" size={22} color="#2563eb" />
+            <Text style={styles.compareButtonText}>Compare</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
-          style={[styles.startButton, !canAddInspection && styles.startButtonWarning]}
+          style={[
+            styles.startButton,
+            !canAddInspection && styles.startButtonWarning,
+            canCompare && styles.startButtonFlex,
+          ]}
           onPress={handleStartInspection}
         >
           <Ionicons
@@ -251,6 +286,7 @@ export default function PropertyDetailScreen() {
         visible={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         reason="inspections_limit"
+        userProvince={userProvince}
       />
     </View>
   );
@@ -454,6 +490,8 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     borderTopWidth: 1,
     borderTopColor: '#e5e5e5',
+    flexDirection: 'row',
+    gap: 12,
   },
   startButton: {
     backgroundColor: '#2563eb',
@@ -464,6 +502,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 8,
   },
+  startButtonFlex: {
+    flex: 1,
+  },
   startButtonText: {
     color: '#fff',
     fontSize: 16,
@@ -471,5 +512,20 @@ const styles = StyleSheet.create({
   },
   startButtonWarning: {
     backgroundColor: '#f59e0b',
+  },
+  compareButton: {
+    backgroundColor: '#eff6ff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 10,
+    gap: 8,
+    marginRight: 12,
+  },
+  compareButtonText: {
+    color: '#2563eb',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

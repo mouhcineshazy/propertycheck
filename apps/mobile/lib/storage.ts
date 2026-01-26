@@ -2,10 +2,11 @@
  * Supabase Storage Utilities
  *
  * Helper functions for uploading and managing inspection photos.
+ * Uses expo-file-system/legacy for SDK 54 compatibility.
  */
 
 import { getSupabaseBrowserClient, INSPECTION_PHOTOS_BUCKET } from '@propertycheck/database';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 
 /**
@@ -66,7 +67,6 @@ export function getPhotoUrl(storagePath: string): string {
   const { data } = supabase.storage
     .from(INSPECTION_PHOTOS_BUCKET)
     .getPublicUrl(storagePath);
-  console.log('getPhotoUrl:', { storagePath, publicUrl: data.publicUrl });
   return data.publicUrl;
 }
 

@@ -20,6 +20,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getSupabaseBrowserClient } from '@propertycheck/database';
 import {
   PRICING,
   FREE_TIER_LIMITS,
@@ -107,14 +108,23 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
   const handleUpgrade = async () => {
     setIsLoading(true);
     try {
-      const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'http://localhost:3000';
+      // Get the current session token for API authentication
+      const supabase = getSupabaseBrowserClient();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        throw new Error('Please log in to upgrade your account.');
+      }
+
+      const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'http://localhost:3001';
+    
       const response = await fetch(`${appUrl}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ billingCycle }),
-        credentials: 'include',
       });
 
       const data = await response.json();

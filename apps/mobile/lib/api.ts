@@ -201,6 +201,7 @@ export async function fetchInspectionWithPhotos(
 
 /**
  * Create a new inspection with photos
+ * Includes server-side free tier limit enforcement
  */
 export async function createInspection(
   propertyId: string,
@@ -208,6 +209,19 @@ export async function createInspection(
   photos: LocalPhoto[]
 ): Promise<Inspection> {
   const supabase = getSupabaseBrowserClient();
+
+  // CRITICAL: Server-side enforcement of free tier limits
+  // This is the final guard - even if client-side checks are bypassed
+  const { data: limitsData, error: limitsError } = await supabase.rpc('check_free_tier_limits');
+
+  if (limitsError) {
+    throw new Error('Failed to verify account limits. Please try again.');
+  }
+
+  const limits = limitsData?.[0];
+  if (!limits?.can_create_inspection) {
+    throw new Error('Inspection limit reached. Please upgrade to Premium to add more inspections.');
+  }
 
   // Create inspection record
   const { data: inspection, error: inspError } = await supabase
@@ -365,5 +379,121 @@ export async function checkFreeTierLimits(): Promise<{
     };
   } catch (err) {
     return { data: null, error: 'Failed to check limits' };
+  }
+}
+
+// ============================================
+// COMPARISON REPORTS
+// ============================================
+
+/**
+ * Fetch comparison data for a property's two inspections
+ */
+export async function fetchComparisonData(propertyId: string): Promise<{
+  data: {
+    property: Property;
+    moveInInspection: InspectionWithPhotos;
+    moveOutInspection: InspectionWithPhotos;
+  } | null;
+  error: string | null;
+}> {
+  try {
+    const supabase = getSupabaseBrowserClient();
+
+    // Fetch property
+    const { data: property, error: propError } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('id', propertyId)
+      .single();
+
+    if (propError) {
+      return { data: null, error: propError.message };
+    }
+
+    // Fetch completed inspections ordered by date
+    const { data: inspections, error: inspError } = await supabase
+      .from('inspections')
+      .select('*')
+      .eq('property_id', propertyId)
+      .eq('status', 'completed')
+      .order('inspection_date', { ascending: true });
+
+    if (inspError) {
+      return { data: null, error: inspError.message };
+    }
+
+    if (!inspections || inspections.length < 2) {
+      return { data: null, error: 'Need at least 2 completed inspections to compare' };
+    }
+
+    // Get the first and last completed inspections (move-in and move-out)
+    const moveInInsp = inspections[0];
+    const moveOutInsp = inspections[inspections.length - 1];
+
+    // Fetch photos for both inspections
+    const [moveInPhotos, moveOutPhotos] = await Promise.all([
+      supabase
+        .from('inspection_photos')
+        .select('*')
+        .eq('inspection_id', moveInInsp.id)
+        .order('sort_order', { ascending: true }),
+      supabase
+        .from('inspection_photos')
+        .select('*')
+        .eq('inspection_id', moveOutInsp.id)
+        .order('sort_order', { ascending: true }),
+    ]);
+
+    if (moveInPhotos.error || moveOutPhotos.error) {
+      return { data: null, error: 'Failed to load inspection photos' };
+    }
+
+    return {
+      data: {
+        property,
+        moveInInspection: {
+          ...moveInInsp,
+          photos: moveInPhotos.data || [],
+          property,
+        },
+        moveOutInspection: {
+          ...moveOutInsp,
+          photos: moveOutPhotos.data || [],
+          property,
+        },
+      },
+      error: null,
+    };
+  } catch (err) {
+    return { data: null, error: 'Failed to fetch comparison data' };
+  }
+}
+
+/**
+ * Check if a property has enough inspections for comparison
+ */
+export async function canGenerateComparison(propertyId: string): Promise<{
+  canCompare: boolean;
+  completedCount: number;
+}> {
+  try {
+    const supabase = getSupabaseBrowserClient();
+    const { count, error } = await supabase
+      .from('inspections')
+      .select('*', { count: 'exact', head: true })
+      .eq('property_id', propertyId)
+      .eq('status', 'completed');
+
+    if (error) {
+      return { canCompare: false, completedCount: 0 };
+    }
+
+    return {
+      canCompare: (count || 0) >= 2,
+      completedCount: count || 0,
+    };
+  } catch {
+    return { canCompare: false, completedCount: 0 };
   }
 }
