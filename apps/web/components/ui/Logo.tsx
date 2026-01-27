@@ -1,194 +1,176 @@
+/**
+ * PropertyCheck Logo System - Web
+ *
+ * Text-only branding - "PropertyCheck"
+ */
+
+// Brand colors
+const BRAND = {
+  primary: '#2563eb',
+  primaryLight: '#3b82f6',
+  primaryDark: '#1d4ed8',
+  dark: '#0f172a',
+  gray: '#64748b',
+  lightGray: '#94a3b8',
+  white: '#ffffff',
+};
+
 interface LogoProps {
-  size?: number;
+  size?: number | 'sm' | 'md' | 'lg' | 'xl';
   color?: string;
   className?: string;
+  variant?: 'default' | 'light' | 'dark';
 }
 
-/**
- * PropertyCheck Logo - Professional Design
- *
- * Concept: A modern shield shape containing a house silhouette with a checkmark,
- * representing property protection and verification.
- *
- * Design principles:
- * - Geometric precision with golden ratio proportions
- * - Negative space creates the house form
- * - Integrated checkmark conveys trust and verification
- * - Works at all sizes (favicon to billboard)
- */
-export function Logo({ size = 32, color = 'currentColor', className = '' }: LogoProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      {/* Shield/House combined shape */}
-      <path
-        d="M24 2L6 10V22C6 33.1 13.8 43.3 24 46C34.2 43.3 42 33.1 42 22V10L24 2Z"
-        fill={color}
-      />
+// Map named sizes to font sizes
+const NAMED_SIZES: Record<string, number> = {
+  sm: 16,
+  md: 24,
+  lg: 32,
+  xl: 48,
+};
 
-      {/* House cutout (negative space) */}
-      <path
-        d="M24 12L14 19V34H20V26H28V34H34V19L24 12Z"
-        fill="white"
-      />
-
-      {/* Checkmark inside house */}
-      <path
-        d="M19 24L22.5 27.5L29 21"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/**
- * Alternate Logo - Minimal Line Version
- * For use on dark backgrounds or when a lighter touch is needed
- */
-export function LogoOutline({ size = 32, color = 'currentColor', className = '' }: LogoProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      {/* Shield outline */}
-      <path
-        d="M24 4L8 11V21C8 31.2 14.9 40.4 24 43C33.1 40.4 40 31.2 40 21V11L24 4Z"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-
-      {/* House roof */}
-      <path
-        d="M15 22L24 15L33 22"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* House body */}
-      <path
-        d="M17 21V32H31V21"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Door */}
-      <path
-        d="M22 32V26H26V32"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-/**
- * Logomark only - Square version for app icons
- */
-export function LogoMark({ size = 32, color = 'currentColor', className = '' }: LogoProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      {/* Rounded square background */}
-      <rect
-        x="4"
-        y="4"
-        width="40"
-        height="40"
-        rx="10"
-        fill={color}
-      />
-
-      {/* House icon */}
-      <path
-        d="M24 14L13 22V35H19V28H29V35H35V22L24 14Z"
-        fill="white"
-      />
-
-      {/* Small checkmark badge */}
-      <circle cx="35" cy="13" r="7" fill="#22c55e" />
-      <path
-        d="M32 13L34 15L38 11"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-interface LogoWithTextProps extends LogoProps {
-  textColor?: string;
-  variant?: 'default' | 'stacked';
-}
-
-export function LogoWithText({
-  size = 32,
-  color = 'currentColor',
-  textColor,
-  className = '',
-  variant = 'default'
-}: LogoWithTextProps) {
-  if (variant === 'stacked') {
-    return (
-      <div className={`flex flex-col items-center gap-2 ${className}`}>
-        <Logo size={size * 1.5} color={color} />
-        <span
-          className="font-semibold tracking-tight"
-          style={{
-            color: textColor || color,
-            fontSize: size * 0.5
-          }}
-        >
-          PropertyCheck
-        </span>
-      </div>
-    );
+// Get font size from size prop (handles both number and string)
+function getFontSize(size: number | string): number {
+  if (typeof size === 'number') {
+    // If number provided, use it directly as font size basis
+    return size * 0.5;
   }
+  return NAMED_SIZES[size] || 24;
+}
+
+/**
+ * Primary Logo - Text only
+ */
+export function Logo({ size = 'md', color, className = '', variant = 'default' }: LogoProps) {
+  const textColor = color || (variant === 'light' ? BRAND.white : BRAND.dark);
+  const fontSize = getFontSize(size);
 
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
-      <Logo size={size} color={color} />
+    <span
+      className={`font-bold tracking-tight ${className}`}
+      style={{ color: textColor, fontSize }}
+    >
+      Property<span className="font-extrabold" style={{ color: BRAND.primary }}>Check</span>
+    </span>
+  );
+}
+
+/**
+ * Logo for Splash/Hero - Large version
+ */
+export function LogoSplash({ size = 120, className = '' }: { size?: number; className?: string }) {
+  const fontSize = size * 0.35;
+
+  return (
+    <span
+      className={`font-bold tracking-tight ${className}`}
+      style={{ fontSize, color: BRAND.dark }}
+    >
+      Property<span className="font-extrabold" style={{ color: BRAND.primary }}>Check</span>
+    </span>
+  );
+}
+
+/**
+ * Logo with Tagline
+ */
+export function LogoWithTagline({
+  size = 'md',
+  color,
+  className = '',
+  variant = 'default',
+}: LogoProps) {
+  const textColor = color || (variant === 'light' ? BRAND.white : BRAND.dark);
+  const taglineColor = variant === 'light' ? 'rgba(255,255,255,0.7)' : BRAND.gray;
+  const fontSize = getFontSize(size);
+
+  return (
+    <div className={`flex flex-col ${className}`}>
       <span
-        className="font-semibold tracking-tight"
-        style={{
-          color: textColor || color,
-          fontSize: size * 0.6
-        }}
+        className="font-bold tracking-tight"
+        style={{ color: textColor, fontSize }}
       >
-        PropertyCheck
+        Property<span className="font-extrabold" style={{ color: BRAND.primary }}>Check</span>
+      </span>
+      <span className="text-sm font-medium mt-1" style={{ color: taglineColor }}>
+        Protect Your Deposit
       </span>
     </div>
   );
 }
+
+/**
+ * Logo with Text - Horizontal layout with optional tagline
+ */
+export function LogoWithText({
+  size = 'md',
+  textColor = BRAND.dark,
+  className = '',
+  showTagline = false,
+}: {
+  size?: number | 'sm' | 'md' | 'lg' | 'xl';
+  textColor?: string;
+  className?: string;
+  showTagline?: boolean;
+}) {
+  return showTagline ? (
+    <LogoWithTagline size={size} color={textColor} className={className} />
+  ) : (
+    <Logo size={size} color={textColor} className={className} />
+  );
+}
+
+/**
+ * Stacked Logo - Vertical layout with tagline
+ */
+export function LogoStacked({
+  size = 'lg',
+  textColor = BRAND.dark,
+  className = '',
+  showTagline = true,
+}: {
+  size?: number | 'sm' | 'md' | 'lg' | 'xl';
+  textColor?: string;
+  className?: string;
+  showTagline?: boolean;
+}) {
+  const fontSize = getFontSize(size);
+
+  return (
+    <div className={`flex flex-col items-center gap-2 ${className}`}>
+      <span
+        className="font-bold tracking-tight"
+        style={{ color: textColor, fontSize }}
+      >
+        Property<span className="font-extrabold" style={{ color: BRAND.primary }}>Check</span>
+      </span>
+      {showTagline && (
+        <span className="text-sm font-medium" style={{ color: BRAND.gray }}>
+          Protect Your Deposit
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Footer Logo - Simplified for footers
+ */
+export function LogoFooter({ className = '' }: { className?: string }) {
+  return (
+    <span className={`text-sm font-semibold text-slate-500 ${className}`}>
+      Property<span className="font-bold text-blue-600">Check</span>
+    </span>
+  );
+}
+
+// Backward compatibility exports
+export const LogoIcon = Logo;
+export const LogoMark = Logo;
+export const LogoOutline = Logo;
+export const AppIcon = Logo;
+
+export { BRAND };
 
 export default Logo;

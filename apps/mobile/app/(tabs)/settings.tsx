@@ -7,7 +7,7 @@
  * - No unnecessary memoization
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,11 @@ import {
   ActivityIndicator,
   ScrollView,
   Linking,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getSupabaseBrowserClient, User, Subscription } from '@propertycheck/database';
+import { User, Subscription } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { APP_CONFIG, PRICING, FREE_TIER_LIMITS, getProvince } from '@propertycheck/shared';
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
@@ -32,37 +34,49 @@ export default function SettingsScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
 
-  // Fetch user data on mount
-  useEffect(() => {
-    async function fetchUserData() {
-      if (!authUser) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const supabase = getSupabaseBrowserClient();
-
-        // Fetch user profile and subscription in parallel
-        const [userResult, subResult] = await Promise.all([
-          supabase.from('users').select('*').eq('id', authUser.id).single(),
-          supabase.from('subscriptions').select('*').eq('user_id', authUser.id).single(),
-        ]);
-
-        setUser(userResult.data);
-        setSubscription(subResult.data);
-      } catch (err) {
-        console.error('Error fetching user data:', err);
-      } finally {
-        setIsLoading(false);
-      }
+  // Fetch user data function (reusable for refresh)
+  const fetchUserData = useCallback(async (showRefreshIndicator = false) => {
+    if (!authUser) {
+      setIsLoading(false);
+      return;
     }
 
-    fetchUserData();
+    if (showRefreshIndicator) {
+      setIsRefreshing(true);
+    }
+
+    try {
+      const supabase = getMobileSupabaseClient();
+
+      // Fetch user profile and subscription in parallel
+      const [userResult, subResult] = await Promise.all([
+        supabase.from('users').select('*').eq('id', authUser.id).single(),
+        supabase.from('subscriptions').select('*').eq('user_id', authUser.id).single(),
+      ]);
+
+      setUser(userResult.data);
+      setSubscription(subResult.data);
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
   }, [authUser]);
+
+  // Fetch user data on mount
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(() => {
+    fetchUserData(true);
+  }, [fetchUserData]);
 
   // Handle logout with confirmation
   const handleLogout = () => {
@@ -128,7 +142,12 @@ export default function SettingsScreen() {
   const userProvince = user?.province ? getProvince(user.province) : null;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+      }
+    >
       {/* Profile Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>

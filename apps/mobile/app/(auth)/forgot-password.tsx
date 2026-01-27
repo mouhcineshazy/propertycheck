@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { z } from 'zod';
 import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
@@ -54,7 +54,7 @@ async function forgotPasswordAction(
   }
 
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     const { error } = await supabase.auth.resetPasswordForEmail(result.data.email, {
       redirectTo: 'propertycheck://auth/reset-password',
     });

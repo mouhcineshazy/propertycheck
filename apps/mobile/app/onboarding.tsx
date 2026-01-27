@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../lib/supabase';
 import { getProvinceOptions, getProvince, APP_CONFIG } from '@propertycheck/shared';
 import { useAuth } from '../hooks';
 
@@ -34,7 +34,7 @@ export default function OnboardingScreen() {
 
     setIsLoading(true);
     try {
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMobileSupabaseClient();
 
       // Update user profile with province
       const { error } = await supabase
@@ -65,7 +65,7 @@ export default function OnboardingScreen() {
 
     setIsLoading(true);
     try {
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMobileSupabaseClient();
 
       // Mark onboarding as complete without province
       const { error } = await supabase

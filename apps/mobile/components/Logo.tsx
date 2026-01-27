@@ -1,172 +1,180 @@
+/**
+ * PropertyCheck Logo System
+ *
+ * Text-only branding - "PropertyCheck"
+ */
+
 import React from 'react';
-import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { View, Text, StyleSheet } from 'react-native';
 
+// Brand colors
+const BRAND = {
+  primary: '#2563eb',      // Royal blue
+  primaryLight: '#3b82f6', // Blue 500
+  primaryDark: '#1d4ed8',  // Blue 700
+  dark: '#0f172a',         // Slate 900
+  gray: '#64748b',         // Slate 500
+  lightGray: '#94a3b8',    // Slate 400
+  white: '#ffffff',
+};
+
 interface LogoProps {
-  size?: number;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   color?: string;
+  variant?: 'default' | 'light' | 'dark';
 }
 
+const SIZES = {
+  sm: { fontSize: 16, fontWeight: '700' as const },
+  md: { fontSize: 24, fontWeight: '700' as const },
+  lg: { fontSize: 32, fontWeight: '700' as const },
+  xl: { fontSize: 48, fontWeight: '700' as const },
+};
+
 /**
- * PropertyCheck Logo - Professional Design
- *
- * Shield shape containing a house silhouette with a checkmark
- * Represents property protection and verification
+ * Primary Logo - Text only
  */
-export function Logo({ size = 32, color = '#1a1a1a' }: LogoProps) {
+export function Logo({ size = 'md', color, variant = 'default' }: LogoProps) {
+  const sizeStyle = SIZES[size];
+  const textColor = color || (variant === 'light' ? BRAND.white : BRAND.dark);
+
   return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-    >
-      {/* Shield shape */}
-      <Path
-        d="M24 2L6 10V22C6 33.1 13.8 43.3 24 46C34.2 43.3 42 33.1 42 22V10L24 2Z"
-        fill={color}
-      />
-
-      {/* House cutout (negative space) */}
-      <Path
-        d="M24 12L14 19V34H20V26H28V34H34V19L24 12Z"
-        fill="white"
-      />
-
-      {/* Checkmark */}
-      <Path
-        d="M19 24L22.5 27.5L29 21"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
+    <Text style={[styles.logo, { fontSize: sizeStyle.fontSize, color: textColor }]}>
+      Property<Text style={styles.accent}>Check</Text>
+    </Text>
   );
 }
 
 /**
- * Outline variant for dark backgrounds
+ * Logo for Splash Screen - Large centered version
  */
-export function LogoOutline({ size = 32, color = '#ffffff' }: LogoProps) {
+export function LogoSplash({ size = 140 }: { size?: number }) {
+  const fontSize = size * 0.3;
+
   return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-    >
-      {/* Shield outline */}
-      <Path
-        d="M24 4L8 11V21C8 31.2 14.9 40.4 24 43C33.1 40.4 40 31.2 40 21V11L24 4Z"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-
-      {/* House roof */}
-      <Path
-        d="M15 22L24 15L33 22"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* House body */}
-      <Path
-        d="M17 21V32H31V21"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Door */}
-      <Path
-        d="M22 32V26H26V32"
-        stroke={color}
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-/**
- * App icon variant with rounded square background
- */
-export function LogoMark({ size = 48, color = '#1a1a1a' }: LogoProps) {
-  return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-    >
-      {/* Background */}
-      <Rect
-        x="4"
-        y="4"
-        width="40"
-        height="40"
-        rx="10"
-        fill={color}
-      />
-
-      {/* House */}
-      <Path
-        d="M24 14L13 22V35H19V28H29V35H35V22L24 14Z"
-        fill="white"
-      />
-
-      {/* Check badge */}
-      <Circle cx="35" cy="13" r="7" fill="#22c55e" />
-      <Path
-        d="M32 13L34 15L38 11"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-interface LogoWithTextProps extends LogoProps {
-  textColor?: string;
-  fontSize?: number;
-}
-
-export function LogoWithText({
-  size = 32,
-  color = '#1a1a1a',
-  textColor,
-  fontSize = 20
-}: LogoWithTextProps) {
-  return (
-    <View style={styles.container}>
-      <Logo size={size} color={color} />
-      <Text style={[styles.text, { color: textColor || color, fontSize }]}>
-        PropertyCheck
+    <View style={styles.splashContainer}>
+      <Text style={[styles.splashLogo, { fontSize }]}>
+        Property<Text style={styles.splashAccent}>Check</Text>
       </Text>
     </View>
   );
 }
 
+/**
+ * Logo with Tagline
+ */
+export function LogoWithTagline({
+  size = 'md',
+  color,
+  variant = 'default',
+}: LogoProps) {
+  const sizeStyle = SIZES[size];
+  const textColor = color || (variant === 'light' ? BRAND.white : BRAND.dark);
+  const taglineColor = variant === 'light' ? 'rgba(255,255,255,0.7)' : BRAND.gray;
+
+  return (
+    <View style={styles.taglineContainer}>
+      <Text style={[styles.logo, { fontSize: sizeStyle.fontSize, color: textColor }]}>
+        Property<Text style={styles.accent}>Check</Text>
+      </Text>
+      <Text style={[styles.tagline, { color: taglineColor }]}>
+        Protect Your Deposit
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * Stacked Logo - Vertical layout with tagline
+ */
+export function LogoStacked({
+  size = 'lg',
+  textColor = BRAND.dark,
+  showTagline = true,
+}: {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  textColor?: string;
+  showTagline?: boolean;
+}) {
+  const sizeStyle = SIZES[size];
+
+  return (
+    <View style={styles.stackedContainer}>
+      <Text style={[styles.logo, { fontSize: sizeStyle.fontSize, color: textColor }]}>
+        Property<Text style={styles.accent}>Check</Text>
+      </Text>
+      {showTagline && (
+        <Text style={[styles.stackedTagline, { color: BRAND.gray }]}>
+          Protect Your Deposit
+        </Text>
+      )}
+    </View>
+  );
+}
+
+/**
+ * Logo with Text - Alias for Logo (for backward compatibility)
+ */
+export function LogoWithText({
+  size = 'md',
+  textColor = BRAND.dark,
+  showTagline = false,
+}: {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  textColor?: string;
+  fontSize?: number;
+  showTagline?: boolean;
+}) {
+  return showTagline ? (
+    <LogoWithTagline size={size} color={textColor} />
+  ) : (
+    <Logo size={size} color={textColor} />
+  );
+}
+
+// Backward compatibility exports
+export const LogoIcon = Logo;
+export const LogoMark = Logo;
+export const LogoOutline = Logo;
+
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  text: {
-    fontWeight: '600',
+  logo: {
+    fontWeight: '700',
     letterSpacing: -0.5,
+  },
+  accent: {
+    fontWeight: '800',
+    color: BRAND.primary,
+  },
+  taglineContainer: {
+    alignItems: 'flex-start',
+  },
+  tagline: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  stackedContainer: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  stackedTagline: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  splashContainer: {
+    alignItems: 'center',
+  },
+  splashLogo: {
+    fontWeight: '700',
+    color: BRAND.dark,
+    letterSpacing: -1,
+  },
+  splashAccent: {
+    fontWeight: '800',
+    color: BRAND.primary,
   },
 });
 
+export { BRAND };
 export default Logo;

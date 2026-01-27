@@ -4,22 +4,40 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 
+interface Subscription {
+  status: string;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+}
+
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    const getUser = async () => {
+    const getUserAndSubscription = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
         setFullName(user.user_metadata?.full_name || '');
+
+        // Fetch subscription status
+        const { data: subData } = await supabase
+          .from('subscriptions')
+          .select('status, current_period_end, cancel_at_period_end')
+          .eq('user_id', user.id)
+          .single();
+
+        setSubscription(subData);
       }
+      setIsLoadingSubscription(false);
     };
-    getUser();
+    getUserAndSubscription();
   }, []);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -113,28 +131,63 @@ export default function SettingsPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Subscription</h2>
 
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4">
-            <div>
-              <p className="font-medium text-gray-900">Free Plan</p>
-              <p className="text-sm text-gray-500">Basic features for personal use</p>
+          {isLoadingSubscription ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
             </div>
-            <span className="px-3 py-1 bg-gray-200 text-gray-700 text-sm font-medium rounded-full">
-              Current
-            </span>
-          </div>
+          ) : subscription?.status === 'premium' ? (
+            <>
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg mb-4">
+                <div>
+                  <p className="font-medium text-gray-900">Premium Plan</p>
+                  <p className="text-sm text-gray-600">Unlimited inspections, priority support, and more</p>
+                  {subscription.current_period_end && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {subscription.cancel_at_period_end ? 'Expires' : 'Renews'}: {new Date(subscription.current_period_end).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+                <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                  Active
+                </span>
+              </div>
+              <a
+                href="/api/stripe/create-portal-session"
+                className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Manage Subscription
+              </a>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg mb-4">
+                <div>
+                  <p className="font-medium text-gray-900">Free Plan</p>
+                  <p className="text-sm text-gray-500">Basic features for personal use</p>
+                </div>
+                <span className="px-3 py-1 bg-gray-200 text-gray-700 text-sm font-medium rounded-full">
+                  Current
+                </span>
+              </div>
 
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-100 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">Premium Plan</p>
-              <p className="text-sm text-gray-600">Unlimited inspections, priority support, and more</p>
-            </div>
-            <a
-              href="/checkout?plan=premium"
-              className="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
-            >
-              Upgrade
-            </a>
-          </div>
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-100 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900">Premium Plan</p>
+                  <p className="text-sm text-gray-600">Unlimited inspections, priority support, and more</p>
+                </div>
+                <a
+                  href="/checkout?plan=premium"
+                  className="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                  Upgrade
+                </a>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Danger Zone */}

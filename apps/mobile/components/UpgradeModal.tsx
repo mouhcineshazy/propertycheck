@@ -20,7 +20,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../lib/supabase';
 import {
   PRICING,
   FREE_TIER_LIMITS,
@@ -109,7 +109,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
     setIsLoading(true);
     try {
       // Get the current session token for API authentication
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMobileSupabaseClient();
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError || !session?.access_token) {

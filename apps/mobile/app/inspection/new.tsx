@@ -26,7 +26,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { createInspection, checkFreeTierLimits } from '../../lib';
 import type { LocalPhoto } from '../../lib';
 import { UpgradeModal } from '../../components';
@@ -61,7 +61,7 @@ export default function NewInspectionScreen() {
   useEffect(() => {
     async function checkLimits() {
       try {
-        const supabase = getSupabaseBrowserClient();
+        const supabase = getMobileSupabaseClient();
 
         // Check limits and get user province in parallel
         const [limitsResult, userResult] = await Promise.all([

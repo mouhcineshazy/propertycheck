@@ -133,10 +133,9 @@ export async function POST(request: NextRequest) {
       allow_promotion_codes: true,
       // Collect billing address for tax purposes
       billing_address_collection: 'auto',
-      // Auto-collect tax if configured in Stripe
-      automatic_tax: {
-        enabled: true,
-      },
+      // Note: automatic_tax requires Stripe Tax to be enabled in Dashboard
+      // Uncomment if you've enabled Stripe Tax:
+      // automatic_tax: { enabled: true },
     };
 
     // Use existing customer if available, otherwise set email for new customer
@@ -156,12 +155,19 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    // Log error details for debugging (not exposed to client)
+    // Log full error details for debugging
     console.error('Stripe checkout error:', error);
 
-    // Return generic error to client
+    // Log specific error details
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+
+    // Return more specific error in development
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to create checkout session. Please try again.' },
+      { error: `Failed to create checkout session: ${errorMessage}` },
       { status: 500 }
     );
   }

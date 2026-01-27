@@ -23,7 +23,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { Inspection } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { fetchPropertyWithInspections, deleteProperty, checkFreeTierLimits, canGenerateComparison } from '../../lib';
 import type { PropertyWithInspections } from '../../lib';
 import { UpgradeModal } from '../../components';
@@ -41,6 +41,7 @@ export default function PropertyDetailScreen() {
   const [canAddInspection, setCanAddInspection] = useState(false);
   const [canCompare, setCanCompare] = useState(false);
   const [userProvince, setUserProvince] = useState<string | undefined>();
+  const [isPremium, setIsPremium] = useState(false);
 
   // Refetch data when screen gains focus (after creating/editing/deleting inspections)
   useFocusEffect(
@@ -49,28 +50,34 @@ export default function PropertyDetailScreen() {
         if (!id) return;
 
         try {
-          const supabase = getSupabaseBrowserClient();
+          const supabase = getMobileSupabaseClient();
 
-          // Load property, limits, comparison status, and user province in parallel
-          const [data, limitsResult, comparisonResult, userResult] = await Promise.all([
+          // Load property, limits, comparison status, user province, and subscription in parallel
+          const [data, limitsResult, comparisonResult, userResult, subResult] = await Promise.all([
             fetchPropertyWithInspections(id),
             checkFreeTierLimits(),
             canGenerateComparison(id),
             supabase.from('users').select('province').single(),
+            supabase.from('subscriptions').select('status').single(),
           ]);
 
           setProperty(data);
           setCanCompare(comparisonResult.canCompare);
           setUserProvince(userResult.data?.province || undefined);
 
+          // Check if user is premium
+          const userIsPremium = subResult.data?.status === 'premium';
+          setIsPremium(userIsPremium);
+
           // Update inspection limits - default to blocked if API fails
           if (limitsResult.data) {
             setTotalInspections(limitsResult.data.inspectionCount);
-            setCanAddInspection(limitsResult.data.canAddInspection);
+            // Premium users can always add inspections
+            setCanAddInspection(userIsPremium || limitsResult.data.canAddInspection);
           } else {
-            // API error - keep blocked state to prevent bypassing limits
+            // API error - premium users still get access, free users blocked
             console.warn('Failed to check limits:', limitsResult.error);
-            setCanAddInspection(false);
+            setCanAddInspection(userIsPremium);
           }
         } catch (err) {
           console.error('Error loading property:', err);
@@ -226,10 +233,17 @@ export default function PropertyDetailScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Inspections</Text>
-            <Text style={[styles.inspectionCount, !canAddInspection && styles.inspectionCountWarning]}>
-              {totalInspections} / {FREE_TIER_LIMITS.maxInspectionsTotal} total
-              {!canAddInspection && ' (limit reached)'}
-            </Text>
+            {/* Only show limit count for free users */}
+            {isPremium ? (
+              <Text style={styles.inspectionCount}>
+                {totalInspections} total
+              </Text>
+            ) : (
+              <Text style={[styles.inspectionCount, !canAddInspection && styles.inspectionCountWarning]}>
+                {totalInspections} / {FREE_TIER_LIMITS.maxInspectionsTotal} total
+                {!canAddInspection && ' (limit reached)'}
+              </Text>
+            )}
           </View>
 
           {inspectionCount === 0 ? (

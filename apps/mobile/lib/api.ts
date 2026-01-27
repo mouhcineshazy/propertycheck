@@ -5,7 +5,7 @@
  * Uses the shared database client with proper error handling.
  */
 
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from './supabase';
 import type { Property, Inspection, InspectionPhoto } from '@propertycheck/database';
 import type {
   PropertyFormData,
@@ -27,7 +27,7 @@ export async function fetchProperties(): Promise<{
   error: string | null;
 }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     const { data, error } = await supabase
       .from('properties')
       .select('*')
@@ -48,7 +48,7 @@ export async function fetchProperties(): Promise<{
 export async function fetchPropertyWithInspections(
   propertyId: string
 ): Promise<PropertyWithInspections> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
 
   // Fetch property
   const { data: property, error: propError } = await supabase
@@ -79,7 +79,7 @@ export async function fetchPropertyWithInspections(
  * Create a new property
  */
 export async function createProperty(data: PropertyFormData): Promise<Property> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -112,7 +112,7 @@ export async function updateProperty(
   propertyId: string,
   data: Partial<PropertyFormData>
 ): Promise<Property> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
   const { data: property, error } = await supabase
     .from('properties')
     .update({
@@ -133,7 +133,7 @@ export async function updateProperty(
  * Delete a property and all its inspections
  */
 export async function deleteProperty(propertyId: string): Promise<void> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
 
   // First, get all inspections to delete their photos
   const { data: inspections } = await supabase
@@ -169,7 +169,7 @@ export async function deleteProperty(propertyId: string): Promise<void> {
 export async function fetchInspectionWithPhotos(
   inspectionId: string
 ): Promise<InspectionWithPhotos> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
 
   // Fetch inspection with property
   const { data: inspection, error: inspError } = await supabase
@@ -208,7 +208,7 @@ export async function createInspection(
   notes: string | undefined,
   photos: LocalPhoto[]
 ): Promise<Inspection> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
 
   // CRITICAL: Server-side enforcement of free tier limits
   // This is the final guard - even if client-side checks are bypassed
@@ -280,7 +280,7 @@ export async function createInspection(
  * Update inspection status to completed
  */
 export async function completeInspection(inspectionId: string): Promise<void> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
   const { error } = await supabase
     .from('inspections')
     .update({ status: 'completed' })
@@ -295,7 +295,7 @@ export async function completeInspection(inspectionId: string): Promise<void> {
  * Delete an inspection and its photos
  */
 export async function deleteInspection(inspectionId: string): Promise<void> {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
 
   // Delete photos from storage
   await deleteInspectionPhotos(inspectionId);
@@ -318,7 +318,7 @@ export async function getShareableLink(
   inspectionId: string
 ): Promise<{ url: string | null; error: string | null }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
 
     // Get or refresh share token
     const { data, error } = await supabase
@@ -358,7 +358,7 @@ export async function checkFreeTierLimits(): Promise<{
   error: string | null;
 }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
 
     // Call the database function
     const { data, error } = await supabase.rpc('check_free_tier_limits');
@@ -398,7 +398,7 @@ export async function fetchComparisonData(propertyId: string): Promise<{
   error: string | null;
 }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
 
     // Fetch property
     const { data: property, error: propError } = await supabase
@@ -478,7 +478,7 @@ export async function canGenerateComparison(propertyId: string): Promise<{
   completedCount: number;
 }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     const { count, error } = await supabase
       .from('inspections')
       .select('*', { count: 'exact', head: true })

@@ -1,15 +1,19 @@
 /**
- * Animated Splash Screen Component
+ * PropertyCheck Splash Screen
  *
- * Displays the PropertyCheck logo with animations during app initialization.
- * Uses Animated API for smooth transitions.
+ * Clean white background with animated text logo entry.
+ * Simple, professional design.
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
-import { Logo } from './Logo';
-
-const { width } = Dimensions.get('window');
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Easing,
+} from 'react-native';
+import { BRAND } from './Logo';
 
 interface SplashScreenProps {
   onAnimationComplete?: () => void;
@@ -17,158 +21,116 @@ interface SplashScreenProps {
 
 export function SplashScreen({ onAnimationComplete }: SplashScreenProps) {
   // Animation values
-  const logoScale = useRef(new Animated.Value(0)).current;
-  const logoRotate = useRef(new Animated.Value(0)).current;
-  const textOpacity = useRef(new Animated.Value(0)).current;
-  const textTranslateY = useRef(new Animated.Value(20)).current;
-  const checkmarkScale = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.8)).current;
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoTranslateY = useRef(new Animated.Value(30)).current;
+
+  const taglineOpacity = useRef(new Animated.Value(0)).current;
+
   const fadeOut = useRef(new Animated.Value(1)).current;
 
+  // Store callback ref
+  const onCompleteRef = useRef(onAnimationComplete);
+  onCompleteRef.current = onAnimationComplete;
+
   useEffect(() => {
-    // Sequence of animations
-    Animated.sequence([
-      // 1. Logo appears with bounce
-      Animated.spring(logoScale, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
-      // 2. Logo slight rotation for dynamic feel
-      Animated.timing(logoRotate, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      // 3. Checkmark pops in
-      Animated.spring(checkmarkScale, {
-        toValue: 1,
-        tension: 100,
-        friction: 8,
-        useNativeDriver: true,
-      }),
-      // 4. Text fades in and slides up
+    console.log('[SplashScreen] Starting animations');
+
+    // Main animation sequence
+    const mainAnimation = Animated.sequence([
+      // Small delay before starting
+      Animated.delay(200),
+
+      // Phase 1: Logo text enters with scale and fade (500ms)
       Animated.parallel([
-        Animated.timing(textOpacity, {
+        Animated.spring(logoScale, {
+          toValue: 1,
+          tension: 50,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoOpacity, {
           toValue: 1,
           duration: 400,
           useNativeDriver: true,
         }),
-        Animated.spring(textTranslateY, {
+        Animated.spring(logoTranslateY, {
           toValue: 0,
           tension: 50,
           friction: 8,
           useNativeDriver: true,
         }),
       ]),
-      // 5. Hold for a moment
-      Animated.delay(800),
-      // 6. Fade out everything
-      Animated.timing(fadeOut, {
-        toValue: 0,
+
+      // Small pause
+      Animated.delay(200),
+
+      // Phase 2: Tagline fades in (300ms)
+      Animated.timing(taglineOpacity, {
+        toValue: 1,
         duration: 300,
         useNativeDriver: true,
       }),
-    ]).start(() => {
-      onAnimationComplete?.();
-    });
-  }, [logoScale, logoRotate, textOpacity, textTranslateY, checkmarkScale, fadeOut, onAnimationComplete]);
 
-  const rotateInterpolate = logoRotate.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: ['0deg', '-5deg', '0deg'],
-  });
+      // Hold for a moment
+      Animated.delay(800),
+
+      // Phase 3: Everything fades out (300ms)
+      Animated.timing(fadeOut, {
+        toValue: 0,
+        duration: 300,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]);
+
+    mainAnimation.start(({ finished }) => {
+      console.log('[SplashScreen] Animation finished:', finished);
+      if (onCompleteRef.current) {
+        console.log('[SplashScreen] Calling onAnimationComplete');
+        onCompleteRef.current();
+      }
+    });
+
+    return () => {
+      console.log('[SplashScreen] Cleanup');
+      mainAnimation.stop();
+    };
+  }, []);
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeOut }]}>
-      {/* Background gradient effect */}
-      <View style={styles.backgroundGradient} />
-
-      {/* Animated logo */}
-      <Animated.View
-        style={[
-          styles.logoContainer,
-          {
-            transform: [
-              { scale: logoScale },
-              { rotate: rotateInterpolate },
-            ],
-          },
-        ]}
-      >
-        <Logo size={100} color="#2563eb" />
-
-        {/* Animated checkmark badge */}
+      {/* Main content */}
+      <View style={styles.content}>
+        {/* Logo text */}
         <Animated.View
           style={[
-            styles.checkmarkBadge,
+            styles.logoContainer,
             {
-              transform: [{ scale: checkmarkScale }],
+              opacity: logoOpacity,
+              transform: [
+                { scale: logoScale },
+                { translateY: logoTranslateY },
+              ],
             },
           ]}
         >
-          <View style={styles.checkmarkCircle}>
-            <Text style={styles.checkmarkIcon}>✓</Text>
-          </View>
+          <Text style={styles.logoText}>
+            Property<Text style={styles.logoAccent}>Check</Text>
+          </Text>
         </Animated.View>
-      </Animated.View>
 
-      {/* App name */}
-      <Animated.View
-        style={[
-          styles.textContainer,
-          {
-            opacity: textOpacity,
-            transform: [{ translateY: textTranslateY }],
-          },
-        ]}
-      >
-        <Text style={styles.appName}>PropertyCheck</Text>
-        <Text style={styles.tagline}>Protect Your Deposit</Text>
-      </Animated.View>
+        {/* Tagline */}
+        <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
+          Protect Your Deposit
+        </Animated.Text>
+      </View>
 
-      {/* Loading dots */}
-      <Animated.View style={[styles.loadingContainer, { opacity: textOpacity }]}>
-        <LoadingDots />
+      {/* Bottom branding */}
+      <Animated.View style={[styles.bottomBranding, { opacity: taglineOpacity }]}>
+        <Text style={styles.bottomText}>Secure • Simple • Smart</Text>
       </Animated.View>
     </Animated.View>
-  );
-}
-
-// Animated loading dots
-function LoadingDots() {
-  const dot1 = useRef(new Animated.Value(0)).current;
-  const dot2 = useRef(new Animated.Value(0)).current;
-  const dot3 = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const animateDots = () => {
-      Animated.loop(
-        Animated.stagger(150, [
-          Animated.sequence([
-            Animated.timing(dot1, { toValue: 1, duration: 300, useNativeDriver: true }),
-            Animated.timing(dot1, { toValue: 0, duration: 300, useNativeDriver: true }),
-          ]),
-          Animated.sequence([
-            Animated.timing(dot2, { toValue: 1, duration: 300, useNativeDriver: true }),
-            Animated.timing(dot2, { toValue: 0, duration: 300, useNativeDriver: true }),
-          ]),
-          Animated.sequence([
-            Animated.timing(dot3, { toValue: 1, duration: 300, useNativeDriver: true }),
-            Animated.timing(dot3, { toValue: 0, duration: 300, useNativeDriver: true }),
-          ]),
-        ])
-      ).start();
-    };
-    animateDots();
-  }, [dot1, dot2, dot3]);
-
-  return (
-    <View style={styles.dotsContainer}>
-      <Animated.View style={[styles.dot, { opacity: dot1 }]} />
-      <Animated.View style={[styles.dot, { opacity: dot2 }]} />
-      <Animated.View style={[styles.dot, { opacity: dot3 }]} />
-    </View>
   );
 }
 
@@ -176,72 +138,52 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+  },
+
+  // Main content
+  content: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingBottom: 60,
   },
-  backgroundGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#f8fafc',
-  },
+
   logoContainer: {
-    position: 'relative',
-    marginBottom: 24,
+    marginBottom: 16,
   },
-  checkmarkBadge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-  },
-  checkmarkCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#22c55e',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#22c55e',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  checkmarkIcon: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  textContainer: {
-    alignItems: 'center',
-  },
-  appName: {
-    fontSize: 32,
+
+  // Logo text styles
+  logoText: {
+    fontSize: 42,
     fontWeight: '700',
-    color: '#1a1a1a',
-    letterSpacing: -0.5,
+    color: BRAND.dark,
+    letterSpacing: -1,
+  },
+  logoAccent: {
+    fontWeight: '800',
+    color: BRAND.primary,
   },
   tagline: {
     fontSize: 16,
-    color: '#6b7280',
-    marginTop: 8,
+    color: BRAND.gray,
     fontWeight: '500',
   },
-  loadingContainer: {
+
+  // Bottom branding
+  bottomBranding: {
     position: 'absolute',
-    bottom: 100,
+    bottom: 50,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
-  dotsContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#2563eb',
+  bottomText: {
+    fontSize: 12,
+    color: BRAND.lightGray,
+    fontWeight: '600',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
 });
 

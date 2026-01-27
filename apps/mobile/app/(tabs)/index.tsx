@@ -8,7 +8,7 @@
  * - Cleaner component - no manual loading/error state management
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,17 +21,35 @@ import {
 import { useRouter, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Property } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
-import { useProperties, useOptimistic } from '../../hooks';
+import { useProperties, useOptimistic, useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 
 export default function PropertiesScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   // Fetch properties using React 19 pattern (useSyncExternalStore internally)
   // No useEffect needed - data is fetched on mount via the hook
   const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
+
+  // Fetch subscription status
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (!user) return;
+      const supabase = getMobileSupabaseClient();
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('user_id', user.id)
+        .single();
+      setIsPremium(data?.status === 'premium');
+    };
+    fetchSubscription();
+  }, [user]);
 
   // Refetch properties when screen gains focus (e.g., after adding a new property)
   useFocusEffect(
@@ -113,8 +131,8 @@ export default function PropertiesScreen() {
     );
   }
 
-  // Check if at property limit
-  const isAtLimit = optimisticProperties.length >= FREE_TIER_LIMITS.maxProperties;
+  // Check if at property limit (premium users have no limit)
+  const isAtLimit = !isPremium && optimisticProperties.length >= FREE_TIER_LIMITS.maxProperties;
 
   // Handle add property with limit check
   const handleAddProperty = () => {
@@ -131,19 +149,22 @@ export default function PropertiesScreen() {
         renderEmptyState()
       ) : (
         <>
-          <TouchableOpacity
-            style={[styles.limitBanner, isAtLimit && styles.limitBannerWarning]}
-            onPress={isAtLimit ? () => setShowUpgradeModal(true) : undefined}
-          >
-            <Text style={[styles.limitText, isAtLimit && styles.limitTextWarning]}>
-              {optimisticProperties.length} / {FREE_TIER_LIMITS.maxProperties}{' '}
-              properties (Free tier)
-              {isAtLimit && ' - Tap to upgrade'}
-            </Text>
-            {isAtLimit && (
-              <Ionicons name="star" size={14} color="#f59e0b" style={{ marginLeft: 4 }} />
-            )}
-          </TouchableOpacity>
+          {/* Only show limit banner for free users */}
+          {!isPremium && (
+            <TouchableOpacity
+              style={[styles.limitBanner, isAtLimit && styles.limitBannerWarning]}
+              onPress={isAtLimit ? () => setShowUpgradeModal(true) : undefined}
+            >
+              <Text style={[styles.limitText, isAtLimit && styles.limitTextWarning]}>
+                {optimisticProperties.length} / {FREE_TIER_LIMITS.maxProperties}{' '}
+                properties (Free tier)
+                {isAtLimit && ' - Tap to upgrade'}
+              </Text>
+              {isAtLimit && (
+                <Ionicons name="star" size={14} color="#f59e0b" style={{ marginLeft: 4 }} />
+              )}
+            </TouchableOpacity>
+          )}
           <FlatList
             data={optimisticProperties}
             renderItem={renderProperty}

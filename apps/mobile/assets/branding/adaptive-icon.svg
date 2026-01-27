@@ -1,0 +1,7 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Property - dark color -->
+  <text x="512" y="450" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="120" font-weight="700" fill="#0f172a">Property</text>
+
+  <!-- Check - blue color, larger and bolder to match Property length -->
+  <text x="512" y="600" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="190" font-weight="800" fill="#2563eb">Check</text>
+</svg>

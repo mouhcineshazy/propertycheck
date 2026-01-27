@@ -1,0 +1,19 @@
+<svg width="1284" height="2778" viewBox="0 0 1284 2778" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- White Background -->
+  <rect width="1284" height="2778" fill="#ffffff"/>
+
+  <!-- PropertyCheck Text Logo -->
+  <text x="642" y="1350" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="100" font-weight="700" fill="#0f172a">
+    Property<tspan fill="#2563eb" font-weight="800">Check</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <text x="642" y="1450" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="40" font-weight="500" fill="#64748b">
+    Protect Your Deposit
+  </text>
+
+  <!-- Bottom text -->
+  <text x="642" y="2650" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="28" font-weight="600" fill="#94a3b8" letter-spacing="4">
+    SECURE • SIMPLE • SMART
+  </text>
+</svg>

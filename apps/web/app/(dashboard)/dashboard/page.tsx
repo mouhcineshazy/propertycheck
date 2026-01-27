@@ -23,6 +23,7 @@ interface DashboardStats {
   totalInspections: number;
   completedInspections: number;
   depositsProtected: string;
+  isPremium: boolean;
 }
 
 interface RecentActivity {
@@ -349,6 +350,7 @@ export default function DashboardPage() {
     totalInspections: 0,
     completedInspections: 0,
     depositsProtected: '$0',
+    isPremium: false,
   });
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -383,12 +385,17 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const loadDashboardData = async () => {
+      console.log('=== DASHBOARD LOADING DATA ===');
       try {
         const supabase = createClient();
 
         // Get authenticated user
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        console.log('Dashboard - Auth user:', user?.id, user?.email);
+        if (!user) {
+          console.log('Dashboard - No user found, returning');
+          return;
+        }
         setUser(user);
 
         // Fetch properties with inspection count
@@ -430,11 +437,28 @@ export default function DashboardPage() {
         // Calculate deposits protected (mock calculation)
         const depositsProtected = completedInspections * 1500;
 
+        // Fetch subscription status
+        const { data: subscriptionData, error: subError } = await supabase
+          .from('subscriptions')
+          .select('status')
+          .eq('user_id', user.id)
+          .single();
+
+        console.log('Dashboard - Subscription query:', {
+          subscriptionData,
+          subError,
+          userId: user.id
+        });
+
+        const isPremium = subscriptionData?.status === 'premium';
+        console.log('Dashboard - isPremium:', isPremium);
+
         setStats({
           totalProperties: formattedProperties.length,
           totalInspections,
           completedInspections,
           depositsProtected: `$${depositsProtected.toLocaleString()}`,
+          isPremium,
         });
 
         // Build recent activity from inspections
@@ -578,10 +602,10 @@ export default function DashboardPage() {
         <StatsCard
           icon="⭐"
           label="Account Status"
-          value="Free"
-          trend="Upgrade →"
-          color="bg-amber-500"
-          href="/checkout?plan=premium"
+          value={stats.isPremium ? 'Premium' : 'Free'}
+          trend={stats.isPremium ? 'Active' : 'Upgrade →'}
+          color={stats.isPremium ? 'bg-green-500' : 'bg-amber-500'}
+          href={stats.isPremium ? '/dashboard/settings' : '/checkout?plan=premium'}
         />
       </motion.div>
 
@@ -700,26 +724,28 @@ export default function DashboardPage() {
           </div>
 
           {/* Upgrade CTA - Only show for free users */}
-          <motion.div
-            className="bg-gradient-to-br from-primary-600 to-blue-600 rounded-2xl p-6 text-white"
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">⭐</span>
-              <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">PRO</span>
-            </div>
-            <h3 className="font-bold text-lg mb-2">Upgrade to Premium</h3>
-            <p className="text-sm text-blue-100 mb-4">
-              Unlimited properties, professional reports, and priority support.
-            </p>
-            <Link
-              href="/checkout?plan=premium"
-              className="block w-full bg-white text-primary-600 text-center py-2.5 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+          {!stats.isPremium && (
+            <motion.div
+              className="bg-gradient-to-br from-primary-600 to-blue-600 rounded-2xl p-6 text-white"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
             >
-              Upgrade Now
-            </Link>
-          </motion.div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">⭐</span>
+                <span className="text-xs font-semibold bg-white/20 px-2 py-1 rounded-full">PRO</span>
+              </div>
+              <h3 className="font-bold text-lg mb-2">Upgrade to Premium</h3>
+              <p className="text-sm text-blue-100 mb-4">
+                Unlimited properties, professional reports, and priority support.
+              </p>
+              <Link
+                href="/checkout?plan=premium"
+                className="block w-full bg-white text-primary-600 text-center py-2.5 rounded-xl font-semibold hover:bg-blue-50 transition-colors"
+              >
+                Upgrade Now
+              </Link>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 

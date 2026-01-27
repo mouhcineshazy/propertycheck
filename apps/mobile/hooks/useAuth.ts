@@ -3,11 +3,14 @@
  *
  * Manages authentication state using useSyncExternalStore for optimal performance.
  * This pattern avoids the useEffect + useState anti-pattern for external subscriptions.
+ *
+ * Uses the mobile-specific Supabase client with expo-secure-store for
+ * proper session persistence across app restarts.
  */
 
 import { useSyncExternalStore, useCallback } from 'react';
 import { Session } from '@supabase/supabase-js';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../lib/supabase';
 
 type AuthState = {
   session: Session | null;
@@ -25,28 +28,39 @@ function emitChange() {
 
 // Initialize auth listener (runs once)
 let initialized = false;
+let authInitPromise: Promise<void> | null = null;
+
 function initializeAuth() {
   if (initialized) return;
   initialized = true;
 
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
 
-  // Get initial session
-  supabase.auth.getSession().then(({ data: { session } }) => {
+  // Get initial session - this restores the persisted session
+  authInitPromise = supabase.auth.getSession().then(({ data: { session } }) => {
+    console.log('[useAuth] Session restored:', session ? 'authenticated' : 'not authenticated');
     authState = { session, isLoading: false };
+    emitChange();
+  }).catch((error) => {
+    console.error('[useAuth] Failed to restore session:', error);
+    authState = { session: null, isLoading: false };
     emitChange();
   });
 
-  // Listen for auth changes
-  supabase.auth.onAuthStateChange((_event, session) => {
+  // Listen for auth changes (login, logout, token refresh)
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log('[useAuth] Auth state changed:', event, session ? 'authenticated' : 'not authenticated');
     authState = { session, isLoading: false };
     emitChange();
   });
 }
 
+// Initialize immediately when module loads (not lazily on first subscribe)
+// This ensures session restoration starts as early as possible
+initializeAuth();
+
 // Subscribe function for useSyncExternalStore
 function subscribe(callback: () => void) {
-  initializeAuth();
   listeners.add(callback);
   return () => listeners.delete(callback);
 }
@@ -71,7 +85,7 @@ export function useAuth() {
   const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const signOut = useCallback(async () => {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     await supabase.auth.signOut();
   }, []);
 

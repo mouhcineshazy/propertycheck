@@ -6,7 +6,8 @@
  */
 
 import { useSyncExternalStore, useCallback } from 'react';
-import { getSupabaseBrowserClient, Property } from '@propertycheck/database';
+import { Property } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../lib/supabase';
 
 type PropertiesState = {
   properties: Property[];
@@ -29,7 +30,7 @@ function emitChange() {
 
 async function fetchPropertiesInternal() {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     const { data, error } = await supabase
       .from('properties')
       .select('*')
@@ -100,7 +101,7 @@ export function useProperties() {
     emitChange();
 
     try {
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMobileSupabaseClient();
       const { error } = await supabase.from('properties').delete().eq('id', id);
 
       if (error) {

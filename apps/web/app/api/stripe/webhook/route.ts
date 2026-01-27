@@ -21,9 +21,14 @@ function getSupabaseAdmin(): SupabaseClient {
 // Webhook handler for Stripe events
 // Stripe sends events here when subscription status changes
 export async function POST(request: NextRequest) {
+  console.log('=== STRIPE WEBHOOK RECEIVED ===');
+
   // Get raw body for signature verification - MUST be raw, not parsed JSON
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
+
+  console.log('Webhook secret configured:', !!process.env.STRIPE_WEBHOOK_SECRET);
+  console.log('Signature present:', !!signature);
 
   if (!signature) {
     console.error('Missing stripe-signature header');
@@ -46,6 +51,8 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('Webhook signature verification failed:', message);
+    console.error('This usually means STRIPE_WEBHOOK_SECRET does not match.');
+    console.error('For local testing with `stripe listen`, use the secret shown in the CLI output.');
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 400 }
@@ -119,6 +126,12 @@ export async function POST(request: NextRequest) {
 
 // Handle successful checkout session
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  console.log('=== HANDLING CHECKOUT COMPLETED ===');
+  console.log('Session ID:', session.id);
+  console.log('Session metadata:', JSON.stringify(session.metadata));
+  console.log('Customer:', session.customer);
+  console.log('Subscription:', session.subscription);
+
   const userId = session.metadata?.userId;
 
   if (!userId) {
@@ -134,30 +147,42 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   if (session.subscription) {
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
     currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+    console.log('Subscription status from Stripe:', subscription.status);
+    console.log('Current period end:', currentPeriodEnd.toISOString());
   }
 
   // Map to database status: 'free', 'premium', 'canceled', 'past_due'
   const status = 'premium'; // After checkout, user is premium (even if trialing)
 
+  const upsertData = {
+    user_id: userId,
+    stripe_customer_id: session.customer as string,
+    stripe_subscription_id: session.subscription as string,
+    status: status,
+    current_period_end: currentPeriodEnd.toISOString(),
+    cancel_at_period_end: false,
+    updated_at: new Date().toISOString(),
+  };
+
+  console.log('Upserting subscription data:', JSON.stringify(upsertData));
+
   // Upsert subscription record (using correct table name: subscriptions)
-  const { error } = await getSupabaseAdmin()
+  const { data, error } = await getSupabaseAdmin()
     .from('subscriptions')
-    .upsert({
-      user_id: userId,
-      stripe_customer_id: session.customer as string,
-      stripe_subscription_id: session.subscription as string,
-      status: status,
-      current_period_end: currentPeriodEnd.toISOString(),
-      cancel_at_period_end: false,
-      updated_at: new Date().toISOString(),
-    }, {
+    .upsert(upsertData, {
       onConflict: 'user_id',
-    });
+    })
+    .select();
 
   if (error) {
     console.error('Failed to upsert subscription:', error);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.details);
+    console.error('Error hint:', error.hint);
     throw error;
   }
+
+  console.log('Subscription upserted successfully:', JSON.stringify(data));
 }
 
 // Handle subscription updates (status changes, plan changes)

@@ -1,0 +1,10 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- White Background -->
+  <rect width="32" height="32" rx="7" fill="#ffffff"/>
+
+  <!-- Property - dark color -->
+  <text x="16" y="13" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="5" font-weight="700" fill="#0f172a">Property</text>
+
+  <!-- Check - blue color, larger and bolder to match Property length -->
+  <text x="16" y="23" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, sans-serif" font-size="8" font-weight="800" fill="#2563eb">Check</text>
+</svg>

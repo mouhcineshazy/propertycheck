@@ -25,7 +25,7 @@ import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { registerSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 
@@ -72,7 +72,7 @@ async function registerAction(
 
   // Attempt registration
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     const { error } = await supabase.auth.signUp({
       email: result.data.email,
       password: result.data.password,
@@ -129,7 +129,7 @@ export default function RegisterScreen() {
   const handleGoogleSignUp = async () => {
     try {
       setGoogleLoading(true);
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMobileSupabaseClient();
 
       const redirectUri = Linking.createURL('auth/callback');
 

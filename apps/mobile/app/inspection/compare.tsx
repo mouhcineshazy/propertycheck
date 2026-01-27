@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { format } from 'date-fns';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { APP_CONFIG } from '@propertycheck/shared';
 import { ComparisonReport, UpgradeModal } from '../../components';
 import { fetchComparisonData, getPhotoUrl } from '../../lib';
@@ -52,7 +52,7 @@ export default function ComparisonScreen() {
         }
 
         try {
-          const supabase = getSupabaseBrowserClient();
+          const supabase = getMobileSupabaseClient();
 
           // Fetch comparison data and subscription status in parallel
           const [compResult, subResult, userResult] = await Promise.all([

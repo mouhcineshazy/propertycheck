@@ -24,7 +24,7 @@ import { Link, Href } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { getSupabaseBrowserClient } from '@propertycheck/database';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { loginSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 
@@ -52,7 +52,7 @@ async function loginAction(
   }
 
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: result.data.email,
       password: result.data.password,
@@ -84,7 +84,7 @@ export default function LoginScreen() {
   const handleGoogleSignIn = async () => {
     try {
       setGoogleLoading(true);
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMobileSupabaseClient();
 
       // Create redirect URI for Expo
       const redirectUri = Linking.createURL('auth/callback');

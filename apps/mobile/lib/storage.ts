@@ -5,7 +5,8 @@
  * Uses expo-file-system/legacy for SDK 54 compatibility.
  */
 
-import { getSupabaseBrowserClient, INSPECTION_PHOTOS_BUCKET } from '@propertycheck/database';
+import { INSPECTION_PHOTOS_BUCKET } from '@propertycheck/database';
+import { getMobileSupabaseClient } from './supabase';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 
@@ -23,7 +24,7 @@ export async function uploadInspectionPhoto(
   index: number
 ): Promise<{ path: string; error: string | null }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
 
     // Read file as base64
     const base64 = await FileSystem.readAsStringAsync(uri, {
@@ -63,7 +64,7 @@ export function getPhotoUrl(storagePath: string): string {
     console.warn('getPhotoUrl called with empty storagePath');
     return '';
   }
-  const supabase = getSupabaseBrowserClient();
+  const supabase = getMobileSupabaseClient();
   const { data } = supabase.storage
     .from(INSPECTION_PHOTOS_BUCKET)
     .getPublicUrl(storagePath);
@@ -77,7 +78,7 @@ export async function deleteInspectionPhoto(
   storagePath: string
 ): Promise<{ error: string | null }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
     const { error } = await supabase.storage
       .from(INSPECTION_PHOTOS_BUCKET)
       .remove([storagePath]);
@@ -98,7 +99,7 @@ export async function deleteInspectionPhotos(
   inspectionId: string
 ): Promise<{ error: string | null }> {
   try {
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMobileSupabaseClient();
 
     // List all files in the inspection folder
     const { data: files, error: listError } = await supabase.storage
