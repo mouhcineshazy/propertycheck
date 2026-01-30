@@ -360,6 +360,45 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/* Legal Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Legal</Text>
+        <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.legalRow}
+            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/terms`)}
+          >
+            <View style={styles.legalRowContent}>
+              <Ionicons name="document-text-outline" size={20} color="#666" />
+              <Text style={styles.legalRowText}>Terms of Service</Text>
+            </View>
+            <Ionicons name="open-outline" size={18} color="#999" />
+          </TouchableOpacity>
+          <View style={styles.divider} />
+          <TouchableOpacity
+            style={styles.legalRow}
+            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/privacy`)}
+          >
+            <View style={styles.legalRowContent}>
+              <Ionicons name="shield-checkmark-outline" size={20} color="#666" />
+              <Text style={styles.legalRowText}>Privacy Policy</Text>
+            </View>
+            <Ionicons name="open-outline" size={18} color="#999" />
+          </TouchableOpacity>
+          <View style={styles.divider} />
+          <TouchableOpacity
+            style={styles.legalRow}
+            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/cookies`)}
+          >
+            <View style={styles.legalRowContent}>
+              <Ionicons name="finger-print-outline" size={20} color="#666" />
+              <Text style={styles.legalRowText}>Cookie Policy</Text>
+            </View>
+            <Ionicons name="open-outline" size={18} color="#999" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Logout Button */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={20} color="#ef4444" />
@@ -597,5 +636,20 @@ const styles = StyleSheet.create({
   pickerOptionTextSelected: {
     color: '#2563eb',
     fontWeight: '500',
+  },
+  legalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  legalRowContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  legalRowText: {
+    fontSize: 15,
+    color: '#1a1a1a',
   },
 });

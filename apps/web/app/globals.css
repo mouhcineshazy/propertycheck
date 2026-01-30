@@ -385,9 +385,111 @@
 .stagger-children > *:nth-child(7) { animation-delay: 600ms; }
 .stagger-children > *:nth-child(8) { animation-delay: 700ms; }
 
-/* Print styles */
+/* Print styles for legal documents */
 @media print {
-  .no-print {
+  /* Hide non-essential elements */
+  .no-print,
+  nav,
+  footer,
+  .print-hide {
     display: none !important;
+  }
+
+  /* Reset page styling */
+  html, body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Legal document print container */
+  .legal-print-content {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Page breaks */
+  .print-page-break {
+    page-break-before: always;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  p, li, blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Tables */
+  table {
+    page-break-inside: avoid;
+  }
+
+  /* Ensure links show URL in print */
+  .legal-print-content a[href^="http"]:after,
+  .legal-print-content a[href^="mailto"]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Don't show URL for internal links */
+  .legal-print-content a[href^="/"]:after,
+  .legal-print-content a[href^="#"]:after {
+    content: "";
+  }
+
+  /* Header styling for print */
+  .legal-print-header {
+    border-bottom: 2px solid #000;
+    padding-bottom: 16pt;
+    margin-bottom: 24pt;
+  }
+
+  /* Section styling */
+  section {
+    margin-bottom: 16pt;
+  }
+
+  /* Colored boxes become bordered in print */
+  .bg-yellow-50,
+  .bg-red-50,
+  .bg-orange-50,
+  .bg-primary-50,
+  .bg-green-50,
+  .bg-blue-50,
+  .bg-gray-50,
+  .bg-gray-100 {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    padding: 12pt !important;
+  }
+
+  /* Border colors become visible */
+  .border-l-4 {
+    border-left-width: 3pt !important;
+    border-left-color: #333 !important;
+  }
+
+  /* Remove shadows and rounded corners */
+  * {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 0.75in;
+    size: letter;
+  }
+
+  /* First page */
+  @page :first {
+    margin-top: 0.5in;
   }
 }

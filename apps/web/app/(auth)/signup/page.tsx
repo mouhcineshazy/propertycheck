@@ -128,6 +128,7 @@ function SignupContent() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [province, setProvince] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,6 +138,12 @@ function SignupContent() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    if (!agreedToTerms) {
+      setError('You must agree to the Terms of Service and Privacy Policy to create an account.');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const supabase = createClient();
@@ -422,6 +429,30 @@ function SignupContent() {
                 <p className="mt-2 text-xs text-gray-500">We tailor legal info to your province</p>
               </motion.div>
 
+              {/* Terms and Privacy Agreement Checkbox */}
+              <motion.div variants={itemVariants} className="flex items-start gap-3">
+                <input
+                  id="agreedToTerms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  required
+                  disabled={isLoading || isGoogleLoading}
+                  className="mt-1 w-4 h-4 text-primary-600 border-2 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed"
+                />
+                <label htmlFor="agreedToTerms" className="text-sm text-gray-600 cursor-pointer">
+                  I agree to the{' '}
+                  <Link href="/terms" target="_blank" className="text-primary-600 hover:text-primary-700 underline">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" target="_blank" className="text-primary-600 hover:text-primary-700 underline">
+                    Privacy Policy
+                  </Link>
+                  , and consent to the collection and use of my personal information as described.
+                </label>
+              </motion.div>
+
               <motion.button
                 variants={itemVariants}
                 type="submit"
@@ -437,17 +468,6 @@ function SignupContent() {
                 )}
               </motion.button>
             </form>
-
-            <motion.p variants={itemVariants} className="mt-6 text-center text-xs text-gray-500">
-              By signing up, you agree to our{' '}
-              <Link href="/terms" className="text-primary-600 hover:text-primary-700">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="text-primary-600 hover:text-primary-700">
-                Privacy Policy
-              </Link>
-            </motion.p>
 
             <motion.p
               variants={itemVariants}
