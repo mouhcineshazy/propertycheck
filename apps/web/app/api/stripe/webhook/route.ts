@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, getPlanByPriceId, isAnnualPrice } from '@/lib/stripe/config';
+import { stripe } from '@/lib/stripe/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
+import { sendPremiumWelcomeEmail, sendPaymentFailedEmail } from '@/lib/email';
 
 // Lazy-initialized Supabase admin client with service role to bypass RLS
 // This is required because webhooks don't have user context
@@ -183,6 +184,38 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   console.log('Subscription upserted successfully:', JSON.stringify(data));
+
+  // Send premium welcome email
+  try {
+    // Fetch user email from the users table
+    const { data: userData } = await getSupabaseAdmin()
+      .from('users')
+      .select('email, full_name')
+      .eq('id', userId)
+      .single();
+
+    if (userData?.email) {
+      // Determine if annual or monthly based on price
+      const subscription = session.subscription
+        ? await stripe.subscriptions.retrieve(session.subscription as string)
+        : null;
+
+      const priceId = subscription?.items.data[0]?.price.id;
+      const isAnnual = priceId === process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID;
+
+      await sendPremiumWelcomeEmail({
+        to: userData.email,
+        userName: userData.full_name || undefined,
+        planType: isAnnual ? 'annual' : 'monthly',
+        periodEnd: currentPeriodEnd,
+      });
+    } else {
+      console.warn('Could not send welcome email: user email not found');
+    }
+  } catch (emailErr) {
+    // Don't fail the webhook if email fails - just log it
+    console.error('Failed to send welcome email:', emailErr);
+  }
 }
 
 // Handle subscription updates (status changes, plan changes)
@@ -283,7 +316,34 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     throw error;
   }
 
-  // TODO: Send email notification about payment failure
+  // Send payment failed email notification
+  try {
+    // Get user ID from subscription
+    const { data: subData } = await getSupabaseAdmin()
+      .from('subscriptions')
+      .select('user_id')
+      .eq('stripe_subscription_id', invoice.subscription as string)
+      .single();
+
+    if (subData?.user_id) {
+      // Fetch user email
+      const { data: userData } = await getSupabaseAdmin()
+        .from('users')
+        .select('email, full_name')
+        .eq('id', subData.user_id)
+        .single();
+
+      if (userData?.email) {
+        await sendPaymentFailedEmail({
+          to: userData.email,
+          userName: userData.full_name || undefined,
+        });
+      }
+    }
+  } catch (emailErr) {
+    // Don't fail the webhook if email fails - just log it
+    console.error('Failed to send payment failed email:', emailErr);
+  }
 }
 
 // Handle trial ending soon notification

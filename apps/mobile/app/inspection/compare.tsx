@@ -118,15 +118,6 @@ export default function ComparisonScreen() {
     }
   };
 
-  const handleShare = () => {
-    if (!isPremium) {
-      setShowUpgradeModal(true);
-      return;
-    }
-    // TODO: Implement shareable link generation
-    Alert.alert('Coming Soon', 'Shareable links will be available soon!');
-  };
-
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -157,13 +148,6 @@ export default function ComparisonScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Comparison</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={handleShare}
-            disabled={isGeneratingPdf}
-          >
-            <Ionicons name="share-outline" size={22} color="#2563eb" />
-          </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={handleGeneratePdf}
