@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { getProvinceOptions } from '@propertycheck/shared';
+
+// Get province options for dropdown
+const PROVINCE_OPTIONS = getProvinceOptions();
 
 interface Subscription {
   status: string;
@@ -14,6 +18,7 @@ export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [fullName, setFullName] = useState('');
+  const [province, setProvince] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -25,6 +30,7 @@ export default function SettingsPage() {
       if (user) {
         setUser(user);
         setFullName(user.user_metadata?.full_name || '');
+        setProvince(user.user_metadata?.province || '');
 
         // Fetch subscription status
         const { data: subData } = await supabase
@@ -47,11 +53,23 @@ export default function SettingsPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({
-        data: { full_name: fullName },
+
+      // Update auth user metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { full_name: fullName, province: province },
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+
+      // Also update the users table if province changed
+      if (user && province) {
+        const { error: dbError } = await supabase
+          .from('users')
+          .update({ province: province })
+          .eq('id', user.id);
+
+        if (dbError) console.error('Failed to update users table:', dbError);
+      }
 
       setMessage({ type: 'success', text: 'Profile updated successfully' });
     } catch (err) {
@@ -115,6 +133,32 @@ export default function SettingsPage() {
                 placeholder="Enter your full name"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
+            </div>
+
+            <div>
+              <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-1">
+                Province
+              </label>
+              <select
+                id="province"
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white appearance-none cursor-pointer"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 0.75rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em',
+                }}
+              >
+                <option value="">Select your province</option>
+                {PROVINCE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">We tailor legal information to your province</p>
             </div>
 
             <button

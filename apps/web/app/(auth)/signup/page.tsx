@@ -6,6 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
+import { getProvinceOptions } from '@propertycheck/shared';
+
+// Get province options for dropdown
+const PROVINCE_OPTIONS = getProvinceOptions();
 
 // Animation variants
 const containerVariants: Variants = {
@@ -123,6 +127,7 @@ function SignupContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [province, setProvince] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +146,7 @@ function SignupContent() {
         options: {
           data: {
             full_name: fullName,
+            province: province,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback${plan ? `?plan=${plan}` : ''}`,
         },
@@ -386,6 +392,34 @@ function SignupContent() {
                   className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
                 />
                 <p className="mt-2 text-xs text-gray-500">Must be at least 8 characters</p>
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-2">
+                  Province
+                </label>
+                <select
+                  id="province"
+                  value={province}
+                  onChange={(e) => setProvince(e.target.value)}
+                  required
+                  disabled={isLoading || isGoogleLoading}
+                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 bg-white appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                  }}
+                >
+                  <option value="" disabled>Select your province</option>
+                  {PROVINCE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-xs text-gray-500">We tailor legal info to your province</p>
               </motion.div>
 
               <motion.button

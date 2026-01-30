@@ -83,11 +83,27 @@ export interface PDFOptions {
   provinceCode?: string;
   shareUrl?: string;
   isFirstInspection?: boolean;
+  isPremium?: boolean;
 }
 
 /**
  * Generate professional HTML content for the inspection report
  */
+// Brand colors - matching logo
+const BRAND_COLORS = {
+  primary: '#2563eb',      // Blue (Check)
+  primaryDark: '#1d4ed8',
+  primaryLight: '#3b82f6',
+  dark: '#0f172a',         // Dark (Property)
+  gray: '#64748b',
+  lightGray: '#94a3b8',
+  background: '#f8fafc',
+  white: '#ffffff',
+  success: '#22c55e',
+  warning: '#f59e0b',
+  error: '#ef4444',
+};
+
 function generateReportHtml(
   inspection: InspectionWithPhotos,
   propertyAddress: string,
@@ -99,6 +115,7 @@ function generateReportHtml(
     provinceCode,
     shareUrl,
     isFirstInspection = true,
+    isPremium = false,
   } = options;
 
   // Dates and times
@@ -186,6 +203,46 @@ function generateReportHtml(
     `
     : '';
 
+  // Tier badge for header
+  const tierBadge = isPremium
+    ? `<span class="tier-badge premium">Premium</span>`
+    : `<span class="tier-badge free">Free</span>`;
+
+  // Watermark for free tier
+  const watermarkStyles = !isPremium
+    ? `
+        body::before {
+          content: 'FREE VERSION';
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-35deg);
+          font-size: 100px;
+          font-weight: 900;
+          color: rgba(37, 99, 235, 0.06);
+          pointer-events: none;
+          z-index: 1000;
+          white-space: nowrap;
+        }
+      `
+    : '';
+
+  // Upgrade CTA for free tier
+  const upgradeSection = !isPremium
+    ? `
+      <div class="upgrade-banner">
+        <div class="upgrade-content">
+          <div class="upgrade-icon">⭐</div>
+          <div class="upgrade-text">
+            <p class="upgrade-title">Upgrade to Premium</p>
+            <p class="upgrade-desc">Remove watermark, get unlimited reports, and access comparison features</p>
+          </div>
+        </div>
+        <div class="upgrade-url">propertycheck.app/upgrade</div>
+      </div>
+    `
+    : '';
+
   return `
     <!DOCTYPE html>
     <html>
@@ -209,15 +266,18 @@ function generateReportHtml(
           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
           font-size: 11pt;
           line-height: 1.5;
-          color: #1a1a1a;
-          background: #fff;
+          color: ${BRAND_COLORS.dark};
+          background: ${BRAND_COLORS.white};
         }
+
+        ${watermarkStyles}
 
         /* Header Section */
         .header {
-          border-bottom: 3px solid #2563eb;
+          border-bottom: 4px solid ${BRAND_COLORS.primary};
           padding-bottom: 24px;
           margin-bottom: 28px;
+          ${isPremium ? `background: linear-gradient(135deg, ${BRAND_COLORS.background} 0%, ${BRAND_COLORS.white} 100%); margin: -20px -20px 28px -20px; padding: 20px 20px 24px 20px;` : ''}
         }
 
         .header-top {
@@ -230,14 +290,49 @@ function generateReportHtml(
         .brand {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
         }
 
         .logo {
-          font-size: 20pt;
-          font-weight: 700;
-          color: #2563eb;
+          font-size: 22pt;
+          font-weight: 800;
           letter-spacing: -0.5px;
+        }
+
+        .logo-property {
+          color: ${BRAND_COLORS.dark};
+        }
+
+        .logo-check {
+          color: ${BRAND_COLORS.primary};
+        }
+
+        .tier-badge {
+          display: inline-block;
+          padding: 4px 10px;
+          border-radius: 12px;
+          font-size: 8pt;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .tier-badge.premium {
+          background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, ${BRAND_COLORS.primaryDark} 100%);
+          color: ${BRAND_COLORS.white};
+        }
+
+        .tier-badge.free {
+          background: ${BRAND_COLORS.background};
+          color: ${BRAND_COLORS.gray};
+          border: 1px solid #e2e8f0;
+        }
+
+        .badges {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 8px;
         }
 
         .inspection-badge {
@@ -272,20 +367,20 @@ function generateReportHtml(
 
         .badge-draft {
           background: #f5f5f5;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
         }
 
         h1 {
-          font-size: 22pt;
+          font-size: 24pt;
           font-weight: 700;
-          color: #1a1a1a;
+          color: ${BRAND_COLORS.dark};
           margin-bottom: 8px;
           letter-spacing: -0.5px;
         }
 
         .subtitle {
           font-size: 11pt;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
         }
 
         /* Info Grid */
@@ -293,10 +388,11 @@ function generateReportHtml(
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 16px;
-          background: #f9fafb;
+          background: ${isPremium ? BRAND_COLORS.white : BRAND_COLORS.background};
           padding: 20px;
           border-radius: 12px;
           margin-top: 20px;
+          ${isPremium ? `border: 2px solid ${BRAND_COLORS.primary}20; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);` : ''}
         }
 
         .info-item {
@@ -307,7 +403,7 @@ function generateReportHtml(
         .info-label {
           font-size: 8pt;
           font-weight: 600;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
           text-transform: uppercase;
           letter-spacing: 0.5px;
           margin-bottom: 4px;
@@ -316,12 +412,13 @@ function generateReportHtml(
         .info-value {
           font-size: 11pt;
           font-weight: 500;
-          color: #1a1a1a;
+          color: ${BRAND_COLORS.dark};
         }
 
         .info-value.address {
           font-size: 12pt;
           font-weight: 600;
+          color: ${isPremium ? BRAND_COLORS.primary : BRAND_COLORS.dark};
         }
 
         /* Status indicator */
@@ -339,26 +436,26 @@ function generateReportHtml(
         }
 
         .status-dot.completed {
-          background: #22c55e;
+          background: ${BRAND_COLORS.success};
         }
 
         .status-dot.draft {
-          background: #f59e0b;
+          background: ${BRAND_COLORS.warning};
         }
 
         /* Notes Section */
         .notes-section {
-          background: #fffbeb;
-          border-left: 4px solid #f59e0b;
+          background: ${isPremium ? '#eff6ff' : '#fffbeb'};
+          border-left: 4px solid ${isPremium ? BRAND_COLORS.primary : BRAND_COLORS.warning};
           padding: 16px 20px;
-          border-radius: 0 8px 8px 0;
+          border-radius: 0 12px 12px 0;
           margin-bottom: 28px;
         }
 
         .notes-section h2 {
           font-size: 10pt;
           font-weight: 600;
-          color: #92400e;
+          color: ${isPremium ? BRAND_COLORS.primaryDark : '#92400e'};
           text-transform: uppercase;
           letter-spacing: 0.5px;
           margin-bottom: 8px;
@@ -366,7 +463,7 @@ function generateReportHtml(
 
         .notes-section p {
           font-size: 11pt;
-          color: #1a1a1a;
+          color: ${BRAND_COLORS.dark};
           line-height: 1.6;
         }
 
@@ -377,21 +474,22 @@ function generateReportHtml(
           align-items: center;
           margin-bottom: 20px;
           padding-bottom: 12px;
-          border-bottom: 2px solid #e5e5e5;
+          border-bottom: 3px solid ${isPremium ? BRAND_COLORS.primary : '#e5e5e5'};
         }
 
         .photos-header h2 {
           font-size: 14pt;
           font-weight: 700;
-          color: #1a1a1a;
+          color: ${BRAND_COLORS.dark};
         }
 
         .photo-summary {
           font-size: 10pt;
-          color: #666;
-          background: #f5f5f5;
-          padding: 6px 12px;
+          color: ${isPremium ? BRAND_COLORS.white : BRAND_COLORS.gray};
+          background: ${isPremium ? BRAND_COLORS.primary : '#f5f5f5'};
+          padding: 6px 14px;
           border-radius: 16px;
+          font-weight: ${isPremium ? '600' : '400'};
         }
 
         /* Room Section */
@@ -405,28 +503,30 @@ function generateReportHtml(
           align-items: center;
           gap: 10px;
           margin-bottom: 14px;
-          padding: 10px 14px;
-          background: #f0f9ff;
-          border-radius: 8px;
+          padding: 12px 16px;
+          background: ${isPremium ? `linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)` : '#f0f9ff'};
+          border-radius: 10px;
+          ${isPremium ? `border-left: 4px solid ${BRAND_COLORS.primary};` : ''}
         }
 
         .room-icon {
-          font-size: 16pt;
+          font-size: 18pt;
         }
 
         .room-header h3 {
-          font-size: 12pt;
+          font-size: 13pt;
           font-weight: 600;
-          color: #0369a1;
+          color: ${BRAND_COLORS.primaryDark};
           flex: 1;
         }
 
         .photo-count {
           font-size: 9pt;
-          color: #666;
-          background: #fff;
-          padding: 4px 10px;
+          color: ${BRAND_COLORS.gray};
+          background: ${BRAND_COLORS.white};
+          padding: 4px 12px;
           border-radius: 12px;
+          font-weight: 500;
         }
 
         /* Photo Grid */
@@ -442,9 +542,10 @@ function generateReportHtml(
 
         .photo-wrapper {
           position: relative;
-          border-radius: 8px;
+          border-radius: ${isPremium ? '12px' : '8px'};
           overflow: hidden;
-          border: 1px solid #e5e5e5;
+          border: ${isPremium ? `2px solid ${BRAND_COLORS.primary}30` : '1px solid #e5e5e5'};
+          ${isPremium ? 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);' : ''}
         }
 
         .photo-item img {
@@ -458,12 +559,12 @@ function generateReportHtml(
           position: absolute;
           top: 8px;
           left: 8px;
-          background: rgba(0, 0, 0, 0.7);
-          color: #fff;
+          background: ${isPremium ? BRAND_COLORS.primary : 'rgba(0, 0, 0, 0.7)'};
+          color: ${BRAND_COLORS.white};
           font-size: 9pt;
           font-weight: 600;
-          width: 24px;
-          height: 24px;
+          width: 26px;
+          height: 26px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -471,12 +572,12 @@ function generateReportHtml(
         }
 
         .photo-meta {
-          padding: 8px 4px;
+          padding: 10px 4px;
         }
 
         .caption {
           font-size: 9pt;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
           line-height: 1.4;
         }
 
@@ -484,9 +585,9 @@ function generateReportHtml(
         .empty-photos {
           text-align: center;
           padding: 40px;
-          background: #f9fafb;
+          background: ${BRAND_COLORS.background};
           border-radius: 12px;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
         }
 
         /* QR Code Section */
@@ -496,9 +597,9 @@ function generateReportHtml(
           gap: 16px;
           margin-top: 24px;
           padding: 16px;
-          background: #f0f9ff;
+          background: ${isPremium ? `linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)` : '#f0f9ff'};
           border-radius: 12px;
-          border: 1px solid #bae6fd;
+          border: 1px solid ${isPremium ? BRAND_COLORS.primary + '40' : '#bae6fd'};
         }
 
         .qr-code {
@@ -512,43 +613,90 @@ function generateReportHtml(
         .qr-label {
           font-size: 11pt;
           font-weight: 600;
-          color: #0369a1;
+          color: ${BRAND_COLORS.primaryDark};
           margin-bottom: 2px;
         }
 
         .qr-hint {
           font-size: 9pt;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
+        }
+
+        /* Upgrade Banner (Free tier only) */
+        .upgrade-banner {
+          margin-top: 24px;
+          padding: 20px;
+          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+          border-radius: 12px;
+          border: 2px dashed #f59e0b;
+        }
+
+        .upgrade-content {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+
+        .upgrade-icon {
+          font-size: 28pt;
+        }
+
+        .upgrade-text {
+          flex: 1;
+        }
+
+        .upgrade-title {
+          font-size: 13pt;
+          font-weight: 700;
+          color: ${BRAND_COLORS.dark};
+          margin-bottom: 4px;
+        }
+
+        .upgrade-desc {
+          font-size: 10pt;
+          color: #92400e;
+        }
+
+        .upgrade-url {
+          margin-top: 12px;
+          text-align: center;
+          font-size: 11pt;
+          font-weight: 600;
+          color: ${BRAND_COLORS.primary};
+          background: ${BRAND_COLORS.white};
+          padding: 8px 16px;
+          border-radius: 8px;
         }
 
         /* Footer */
         .footer {
           margin-top: 32px;
           padding-top: 20px;
-          border-top: 2px solid #e5e5e5;
+          border-top: 3px solid ${isPremium ? BRAND_COLORS.primary : '#e5e5e5'};
         }
 
         .legal-notice {
-          background: #f9fafb;
+          background: ${BRAND_COLORS.background};
           padding: 16px;
           border-radius: 8px;
           margin-bottom: 16px;
+          ${isPremium ? `border-left: 4px solid ${BRAND_COLORS.primary};` : ''}
         }
 
         .legal-notice p {
           font-size: 9pt;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
           line-height: 1.5;
         }
 
         .legal-notice strong {
-          color: #1a1a1a;
+          color: ${BRAND_COLORS.dark};
           font-weight: 600;
         }
 
         .share-notice {
           font-size: 9pt;
-          color: #666;
+          color: ${BRAND_COLORS.gray};
           text-align: center;
           margin-bottom: 12px;
           font-style: italic;
@@ -559,12 +707,19 @@ function generateReportHtml(
           justify-content: space-between;
           align-items: center;
           font-size: 8pt;
-          color: #999;
+          color: ${BRAND_COLORS.lightGray};
         }
 
         .footer-brand {
-          font-weight: 600;
-          color: #2563eb;
+          font-weight: 700;
+        }
+
+        .footer-brand .brand-property {
+          color: ${BRAND_COLORS.dark};
+        }
+
+        .footer-brand .brand-check {
+          color: ${BRAND_COLORS.primary};
         }
 
         /* Print optimizations */
@@ -584,11 +739,14 @@ function generateReportHtml(
       <div class="header">
         <div class="header-top">
           <div class="brand">
-            <span class="logo">${APP_CONFIG.name}</span>
+            <span class="logo"><span class="logo-property">Property</span><span class="logo-check">Check</span></span>
+            ${tierBadge}
           </div>
-          <span class="inspection-badge badge-${inspectionType}">
-            ${inspectionTypeLabel}
-          </span>
+          <div class="badges">
+            <span class="inspection-badge badge-${inspectionType}">
+              ${inspectionTypeLabel}
+            </span>
+          </div>
         </div>
 
         <h1>Property Inspection Report</h1>
@@ -652,6 +810,8 @@ function generateReportHtml(
 
       ${qrCodeSection}
 
+      ${upgradeSection}
+
       <!-- Footer -->
       <div class="footer">
         <div class="legal-notice">
@@ -664,7 +824,7 @@ function generateReportHtml(
 
         <div class="footer-meta">
           <span>Report generated on ${generatedDate} at ${generatedTime}</span>
-          <span class="footer-brand">${APP_CONFIG.name} &bull; ${APP_CONFIG.supportEmail}</span>
+          <span class="footer-brand"><span class="brand-property">Property</span><span class="brand-check">Check</span> &bull; ${APP_CONFIG.supportEmail}</span>
         </div>
       </div>
     </body>

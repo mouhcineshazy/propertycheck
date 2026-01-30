@@ -18,11 +18,15 @@ import {
   ScrollView,
   Linking,
   RefreshControl,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { User, Subscription } from '@propertycheck/database';
 import { getMobileSupabaseClient } from '../../lib/supabase';
-import { APP_CONFIG, PRICING, FREE_TIER_LIMITS, getProvince } from '@propertycheck/shared';
+import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@propertycheck/shared';
+
+// Get province options for dropdown
+const PROVINCE_OPTIONS = getProvinceOptions();
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 
@@ -37,6 +41,8 @@ export default function SettingsScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
+  const [showProvincePicker, setShowProvincePicker] = useState(false);
+  const [isSavingProvince, setIsSavingProvince] = useState(false);
 
   // Fetch user data function (reusable for refresh)
   const fetchUserData = useCallback(async (showRefreshIndicator = false) => {
@@ -93,6 +99,43 @@ export default function SettingsScreen() {
   // Handle upgrade prompt - show modal
   const handleUpgrade = () => {
     setShowUpgradeModal(true);
+  };
+
+  // Handle province change - save to database
+  const handleProvinceChange = async (provinceCode: string) => {
+    if (!authUser) return;
+
+    setIsSavingProvince(true);
+    setShowProvincePicker(false);
+
+    try {
+      const supabase = getMobileSupabaseClient();
+
+      // Update user metadata in auth
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { province: provinceCode },
+      });
+
+      if (authError) throw authError;
+
+      // Also update the users table
+      const { error: dbError } = await supabase
+        .from('users')
+        .update({ province: provinceCode })
+        .eq('id', authUser.id);
+
+      if (dbError) throw dbError;
+
+      // Update local state
+      setUser(prev => prev ? { ...prev, province: provinceCode } : null);
+
+      Alert.alert('Success', 'Province updated successfully');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update province';
+      Alert.alert('Error', message);
+    } finally {
+      setIsSavingProvince(false);
+    }
   };
 
   // Handle manage subscription - open Stripe portal
@@ -167,16 +210,75 @@ export default function SettingsScreen() {
               <Text style={styles.profileEmail}>{user?.email}</Text>
             </View>
           </View>
-          {/* Province */}
+          {/* Province - Editable */}
           <View style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Province</Text>
-            <Text style={styles.infoValue}>
-              {userProvince?.name || 'Not set'}
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={styles.editableRow}
+            onPress={() => setShowProvincePicker(true)}
+            disabled={isSavingProvince}
+          >
+            <View>
+              <Text style={styles.infoLabel}>Province</Text>
+              <Text style={styles.infoValue}>
+                {userProvince?.name || 'Not set'}
+              </Text>
+            </View>
+            {isSavingProvince ? (
+              <ActivityIndicator size="small" color="#2563eb" />
+            ) : (
+              <Ionicons name="chevron-forward" size={20} color="#999" />
+            )}
+          </TouchableOpacity>
         </View>
       </View>
+
+      {/* Province Picker Modal */}
+      <Modal
+        visible={showProvincePicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowProvincePicker(false)}
+      >
+        <TouchableOpacity
+          style={styles.pickerOverlay}
+          activeOpacity={1}
+          onPress={() => setShowProvincePicker(false)}
+        >
+          <View style={styles.pickerContainer}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Select Province</Text>
+              <TouchableOpacity onPress={() => setShowProvincePicker(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.pickerSubtitle}>
+              We tailor legal information to your province
+            </Text>
+            {PROVINCE_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.pickerOption,
+                  user?.province === option.value && styles.pickerOptionSelected,
+                ]}
+                onPress={() => handleProvinceChange(option.value)}
+              >
+                <Text
+                  style={[
+                    styles.pickerOptionText,
+                    user?.province === option.value && styles.pickerOptionTextSelected,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                {user?.province === option.value && (
+                  <Ionicons name="checkmark" size={20} color="#2563eb" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Subscription Section */}
       <View style={styles.section}>
@@ -439,5 +541,61 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40,
+  },
+  editableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '90%',
+    maxWidth: 340,
+    overflow: 'hidden',
+  },
+  pickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    paddingBottom: 8,
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  pickerSubtitle: {
+    fontSize: 13,
+    color: '#666',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  pickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  pickerOptionSelected: {
+    backgroundColor: '#eff6ff',
+  },
+  pickerOptionText: {
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  pickerOptionTextSelected: {
+    color: '#2563eb',
+    fontWeight: '500',
   },
 });

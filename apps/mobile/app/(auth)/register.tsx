@@ -20,14 +20,18 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { getMobileSupabaseClient } from '../../lib/supabase';
-import { registerSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
+import { registerSchema, formatZodError, APP_CONFIG, getProvinceOptions } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
+
+// Get province options for the dropdown
+const PROVINCE_OPTIONS = getProvinceOptions();
 
 // Required for Google OAuth
 WebBrowser.maybeCompleteAuthSession();
@@ -50,6 +54,7 @@ type RegisterPayload = {
   email: string;
   password: string;
   confirmPassword: string;
+  province: string;
   onSuccess: () => void;
 };
 
@@ -79,6 +84,7 @@ async function registerAction(
       options: {
         data: {
           full_name: result.data.full_name,
+          province: payload.province,
         },
       },
     });
@@ -110,6 +116,8 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [province, setProvince] = useState('');
+  const [showProvincePicker, setShowProvincePicker] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   // useActionState for form handling
@@ -121,9 +129,13 @@ export default function RegisterScreen() {
       email,
       password,
       confirmPassword,
+      province,
       onSuccess: () => router.back(),
     });
   };
+
+  // Get selected province label
+  const selectedProvinceLabel = PROVINCE_OPTIONS.find(p => p.value === province)?.label || 'Select your province';
 
   // Google OAuth Sign Up
   const handleGoogleSignUp = async () => {
@@ -279,6 +291,71 @@ export default function RegisterScreen() {
             )}
           </View>
 
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Province</Text>
+            <TouchableOpacity
+              style={[styles.input, styles.selectInput, state.errors.province && styles.inputError]}
+              onPress={() => setShowProvincePicker(true)}
+              disabled={isPending}
+            >
+              <Text style={[styles.selectText, !province && styles.selectPlaceholder]}>
+                {selectedProvinceLabel}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#666" />
+            </TouchableOpacity>
+            {state.errors.province && (
+              <Text style={styles.errorText}>{state.errors.province}</Text>
+            )}
+          </View>
+
+          {/* Province Picker Modal */}
+          <Modal
+            visible={showProvincePicker}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowProvincePicker(false)}
+          >
+            <TouchableOpacity
+              style={styles.pickerOverlay}
+              activeOpacity={1}
+              onPress={() => setShowProvincePicker(false)}
+            >
+              <View style={styles.pickerContainer}>
+                <View style={styles.pickerHeader}>
+                  <Text style={styles.pickerTitle}>Select Province</Text>
+                  <TouchableOpacity onPress={() => setShowProvincePicker(false)}>
+                    <Ionicons name="close" size={24} color="#666" />
+                  </TouchableOpacity>
+                </View>
+                {PROVINCE_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.value}
+                    style={[
+                      styles.pickerOption,
+                      province === option.value && styles.pickerOptionSelected,
+                    ]}
+                    onPress={() => {
+                      setProvince(option.value);
+                      setShowProvincePicker(false);
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.pickerOptionText,
+                        province === option.value && styles.pickerOptionTextSelected,
+                      ]}
+                    >
+                      {option.label}
+                    </Text>
+                    {province === option.value && (
+                      <Ionicons name="checkmark" size={20} color="#2563eb" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableOpacity>
+          </Modal>
+
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
@@ -429,6 +506,63 @@ const styles = StyleSheet.create({
   link: {
     color: '#2563eb',
     fontSize: 14,
+    fontWeight: '500',
+  },
+  selectInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selectText: {
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  selectPlaceholder: {
+    color: '#999',
+  },
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    width: '90%',
+    maxWidth: 340,
+    overflow: 'hidden',
+  },
+  pickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e5e5',
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  pickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  pickerOptionSelected: {
+    backgroundColor: '#eff6ff',
+  },
+  pickerOptionText: {
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  pickerOptionTextSelected: {
+    color: '#2563eb',
     fontWeight: '500',
   },
 });
