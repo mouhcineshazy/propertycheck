@@ -75,7 +75,7 @@ export function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
           <span className="text-white/90 text-sm font-medium">
-            Trusted by 10,000+ renters across Canada
+            Built for Canadian Renters
           </span>
         </motion.div>
 
@@ -136,22 +136,10 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-700 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
 
-          <Link
-            href="#demo"
-            className="group border-2 border-white/30 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 hover:border-white/50 transition-all flex items-center justify-center gap-2"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            Watch Demo
-          </Link>
+{/* Watch Demo button hidden for MVP - no demo video yet */}
         </motion.div>
 
-        {/* Stats */}
+        {/* Value Props */}
         <motion.div
           className="grid grid-cols-3 gap-8 max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
@@ -159,10 +147,10 @@ export function HeroSection() {
           transition={{ duration: 1, delay: 0.5 }}
         >
           {[
-            { value: '10K+', label: 'Inspections Created' },
-            { value: '$2.4M', label: 'Deposits Protected' },
-            { value: '4.9★', label: 'App Store Rating' },
-          ].map((stat, i) => (
+            { icon: '📸', label: 'Timestamped Photos' },
+            { icon: '📄', label: 'PDF Reports' },
+            { icon: '🔒', label: 'Secure & Private' },
+          ].map((item, i) => (
             <motion.div
               key={i}
               className="text-white"
@@ -170,10 +158,10 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 + i * 0.1 }}
             >
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                {stat.value}
+              <div className="text-3xl md:text-4xl mb-1">
+                {item.icon}
               </div>
-              <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
+              <div className="text-sm text-gray-300 font-medium">{item.label}</div>
             </motion.div>
           ))}
         </motion.div>

@@ -6,9 +6,17 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Logo, LogoOutline } from '@/components/ui/Logo';
 
-export function Navigation() {
+interface NavigationProps {
+  /** Use 'light' variant for pages with white/light backgrounds (FAQ, Privacy, etc.) */
+  variant?: 'default' | 'light';
+}
+
+export function Navigation({ variant = 'default' }: NavigationProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // For light variant pages, always show dark styling
+  const showDarkStyle = variant === 'light' || scrolled;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -20,7 +28,7 @@ export function Navigation() {
     <motion.nav
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        scrolled
+        showDarkStyle
           ? 'bg-white/90 backdrop-blur-lg shadow-lg'
           : 'bg-transparent'
       )}
@@ -30,64 +38,58 @@ export function Navigation() {
     >
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2.5">
-          {scrolled ? (
+          {showDarkStyle ? (
             <Logo size={36} color="#1a1a1a" />
           ) : (
             <LogoOutline size={36} color="white" />
           )}
-          <span
-            className={cn(
-              'text-xl font-semibold tracking-tight transition-colors',
-              scrolled ? 'text-gray-900' : 'text-white'
-            )}
-          >
-            PropertyCheck
-          </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link
-            href="#features"
-            className={cn(
-              'font-medium transition-colors',
-              scrolled
-                ? 'text-gray-700 hover:text-primary-600'
-                : 'text-white/90 hover:text-white'
-            )}
-          >
-            Features
-          </Link>
-          <Link
-            href="#how-it-works"
-            className={cn(
-              'font-medium transition-colors',
-              scrolled
-                ? 'text-gray-700 hover:text-primary-600'
-                : 'text-white/90 hover:text-white'
-            )}
-          >
-            How It Works
-          </Link>
-          <Link
-            href="#pricing"
-            className={cn(
-              'font-medium transition-colors',
-              scrolled
-                ? 'text-gray-700 hover:text-primary-600'
-                : 'text-white/90 hover:text-white'
-            )}
-          >
-            Pricing
-          </Link>
-        </div>
+        {/* Desktop Navigation - Only show on landing page (default variant) */}
+        {variant === 'default' && (
+          <div className="hidden md:flex items-center gap-8">
+            <Link
+              href="#features"
+              className={cn(
+                'font-medium transition-colors',
+                showDarkStyle
+                  ? 'text-gray-700 hover:text-primary-600'
+                  : 'text-white/90 hover:text-white'
+              )}
+            >
+              Features
+            </Link>
+            <Link
+              href="#how-it-works"
+              className={cn(
+                'font-medium transition-colors',
+                showDarkStyle
+                  ? 'text-gray-700 hover:text-primary-600'
+                  : 'text-white/90 hover:text-white'
+              )}
+            >
+              How It Works
+            </Link>
+            <Link
+              href="#pricing"
+              className={cn(
+                'font-medium transition-colors',
+                showDarkStyle
+                  ? 'text-gray-700 hover:text-primary-600'
+                  : 'text-white/90 hover:text-white'
+              )}
+            >
+              Pricing
+            </Link>
+          </div>
+        )}
 
         <div className="hidden md:flex items-center gap-4">
           <Link
             href="/login"
             className={cn(
               'font-medium transition-colors px-4 py-2',
-              scrolled
+              showDarkStyle
                 ? 'text-gray-700 hover:text-primary-600'
                 : 'text-white hover:text-white/80'
             )}
@@ -108,7 +110,7 @@ export function Navigation() {
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           <svg
-            className={cn('w-6 h-6', scrolled ? 'text-gray-900' : 'text-white')}
+            className={cn('w-6 h-6', showDarkStyle ? 'text-gray-900' : 'text-white')}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -140,28 +142,32 @@ export function Navigation() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="container mx-auto px-6 py-4 flex flex-col gap-4">
-            <Link
-              href="#features"
-              className="text-gray-700 font-medium py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Features
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="text-gray-700 font-medium py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              How It Works
-            </Link>
-            <Link
-              href="#pricing"
-              className="text-gray-700 font-medium py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Pricing
-            </Link>
-            <hr />
+            {variant === 'default' && (
+              <>
+                <Link
+                  href="#features"
+                  className="text-gray-700 font-medium py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Features
+                </Link>
+                <Link
+                  href="#how-it-works"
+                  className="text-gray-700 font-medium py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  How It Works
+                </Link>
+                <Link
+                  href="#pricing"
+                  className="text-gray-700 font-medium py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <hr />
+              </>
+            )}
             <Link href="/login" className="text-gray-700 font-medium py-2">
               Log in
             </Link>

@@ -137,7 +137,7 @@ export default function ForgotPasswordPage() {
       >
         <Link href="/" className="flex items-center gap-2.5 w-fit">
           <Logo size={36} color="#1a1a1a" />
-          <span className="text-xl font-bold text-gray-900">PropertyCheck</span>
+          {/* <span className="text-xl font-bold text-gray-900">PropertyCheck</span> */}
         </Link>
       </motion.header>
 

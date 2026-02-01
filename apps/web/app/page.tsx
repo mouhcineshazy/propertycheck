@@ -5,8 +5,9 @@ import {
   HeroSection,
   FeaturesSection,
   HowItWorksSection,
-  TestimonialsSection,
-  CaseStudiesSection,
+  // TestimonialsSection, // Commented out for MVP - no real testimonials yet
+  // CaseStudiesSection,  // Commented out for MVP - no real case studies yet
+  DownloadSection,
   PricingSection,
   CTASection,
   Footer,
@@ -19,8 +20,10 @@ export default function HomePage() {
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <TestimonialsSection />
-      <CaseStudiesSection />
+      {/* TestimonialsSection and CaseStudiesSection commented out for MVP */}
+      {/* <TestimonialsSection /> */}
+      {/* <CaseStudiesSection /> */}
+      <DownloadSection />
       <PricingSection />
       <CTASection />
       <Footer />

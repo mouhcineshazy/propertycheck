@@ -130,7 +130,7 @@ export default function DashboardLayout({
           {/* Logo */}
           <div className="flex items-center gap-2.5 px-6 py-5 border-b border-gray-100">
             <Logo size={32} color="#1a1a1a" />
-            <span className="text-lg font-bold text-gray-900">PropertyCheck</span>
+            {/* <span className="text-lg font-bold text-gray-900">PropertyCheck</span> */}
           </div>
 
           {/* Navigation */}

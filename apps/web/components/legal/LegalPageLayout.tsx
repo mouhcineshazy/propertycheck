@@ -34,7 +34,7 @@ export function LegalPageLayout({
 
   return (
     <main className="min-h-screen bg-white">
-      <Navigation />
+      <Navigation variant="light" />
 
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-4xl legal-print-content">
