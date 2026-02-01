@@ -26,6 +26,7 @@
   },
   "packageManager": "npm@10.2.0",
   "dependencies": {
-    "canvas-confetti": "^1.9.4"
+    "canvas-confetti": "^1.9.4",
+    "expo-dev-client": "~6.0.20"
   }
 }

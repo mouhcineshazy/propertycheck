@@ -18,12 +18,40 @@ import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 import { format } from 'date-fns';
 import { getMobileSupabaseClient } from '../../lib/supabase';
-import { APP_CONFIG } from '@propertycheck/shared';
 import { ComparisonReport, UpgradeModal } from '../../components';
 import { fetchComparisonData, getPhotoUrl } from '../../lib';
 import type { InspectionWithPhotos } from '../../lib';
+
+/**
+ * Generate PDF filename from address: {streetNumber}-{streetName}-report.pdf
+ */
+function generatePdfFilename(address: string): string {
+  // Extract street number and name from address
+  // Address format typically: "123 Main Street, City, Province"
+  const streetPart = address.split(',')[0]?.trim() || address;
+
+  // Match street number and name
+  const match = streetPart.match(/^(\d+[-\d]*)\s+(.+)$/);
+
+  if (match) {
+    const streetNumber = match[1];
+    const streetName = match[2]
+      .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special chars
+      .replace(/\s+/g, '-') // Replace spaces with dashes
+      .toLowerCase();
+    return `${streetNumber}-${streetName}-report.pdf`;
+  }
+
+  // Fallback: sanitize the whole address
+  const sanitized = streetPart
+    .replace(/[^a-zA-Z0-9\s]/g, '')
+    .replace(/\s+/g, '-')
+    .toLowerCase();
+  return `${sanitized}-report.pdf`;
+}
 
 export default function ComparisonScreen() {
   const router = useRouter();
@@ -102,8 +130,15 @@ export default function ComparisonScreen() {
       const html = generateComparisonHtml(comparisonData, false);
       const { uri } = await Print.printToFileAsync({ html, base64: false });
 
+      // Generate filename from address: {streetNumber}-{streetName}-report.pdf
+      const pdfFilename = generatePdfFilename(comparisonData.propertyAddress);
+      const newUri = `${FileSystem.cacheDirectory}${pdfFilename}`;
+
+      // Move file to new location with proper name
+      await FileSystem.moveAsync({ from: uri, to: newUri });
+
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, {
+        await Sharing.shareAsync(newUri, {
           mimeType: 'application/pdf',
           dialogTitle: 'Share Comparison Report',
         });
@@ -210,6 +245,24 @@ function generateComparisonHtml(
   showWatermark: boolean
 ): string {
   const isPremium = !showWatermark;
+
+  // Free tier uses grayscale colors for a clean B&W look
+  const FREE_COLORS = {
+    primary: '#4a5568',
+    primaryDark: '#2d3748',
+    primaryLight: '#718096',
+    dark: '#1a202c',
+    gray: '#718096',
+    lightGray: '#a0aec0',
+    background: '#f7fafc',
+    white: '#ffffff',
+    success: '#4a5568',
+    warning: '#718096',
+  };
+
+  // Select color scheme based on tier
+  const colors = isPremium ? BRAND_COLORS : FREE_COLORS;
+
   const moveInDate = format(
     new Date(data.moveInInspection.inspection_date),
     'MMMM d, yyyy'
@@ -218,7 +271,6 @@ function generateComparisonHtml(
     new Date(data.moveOutInspection.inspection_date),
     'MMMM d, yyyy'
   );
-  const generatedDate = format(new Date(), 'MMMM d, yyyy');
 
   // Group photos by room type
   const groupByRoom = (photos: typeof data.moveInInspection.photos) => {
@@ -323,44 +375,9 @@ function generateComparisonHtml(
     })
     .join('');
 
-  // Tier badge
+  // Tier badge (only show for premium)
   const tierBadge = isPremium
     ? `<span class="tier-badge premium">Premium</span>`
-    : `<span class="tier-badge free">Free</span>`;
-
-  // Watermark styles for free tier
-  const watermarkStyles = showWatermark
-    ? `
-        body::before {
-          content: 'FREE VERSION';
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-35deg);
-          font-size: 100px;
-          font-weight: 900;
-          color: rgba(37, 99, 235, 0.06);
-          pointer-events: none;
-          z-index: 1000;
-          white-space: nowrap;
-        }
-      `
-    : '';
-
-  // Upgrade banner for free tier
-  const upgradeSection = showWatermark
-    ? `
-      <div class="upgrade-banner">
-        <div class="upgrade-content">
-          <div class="upgrade-icon">⭐</div>
-          <div class="upgrade-text">
-            <p class="upgrade-title">Upgrade to Premium</p>
-            <p class="upgrade-desc">Remove watermark, get unlimited comparison reports, and download high-quality PDFs</p>
-          </div>
-        </div>
-        <div class="upgrade-url">propertycheck.app/upgrade</div>
-      </div>
-    `
     : '';
 
   return `
@@ -377,25 +394,51 @@ function generateComparisonHtml(
         }
 
         @page {
-          margin: 0.75in;
+          margin: 0.5in;
           size: letter;
         }
 
         body {
           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
           line-height: 1.6;
-          color: ${BRAND_COLORS.dark};
-          padding: 40px;
+          color: ${colors.dark};
+          margin: 0;
+          padding: 0;
         }
 
-        ${watermarkStyles}
+        /* Wrapper to contain all content */
+        .content-wrapper {
+          padding: 20px 30px 50px 30px; /* Extra bottom padding for footer */
+        }
 
-        /* Header */
+        /* Fixed footer that appears on every printed page */
+        .page-footer {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 30px;
+          text-align: center;
+          font-size: 9px;
+          color: ${colors.gray};
+          padding-top: 10px;
+          border-top: 1px solid #e5e5e5;
+          background: white;
+        }
+
+        .page-footer a {
+          color: ${colors.primary};
+          text-decoration: none;
+        }
+
+        /* No watermark - clean professional look for all tiers */
+
+        /* Header - compact to reduce first page space */
         .header {
-          border-bottom: 4px solid ${BRAND_COLORS.primary};
-          padding-bottom: 24px;
-          margin-bottom: 30px;
-          ${isPremium ? `background: linear-gradient(135deg, ${BRAND_COLORS.background} 0%, ${BRAND_COLORS.white} 100%); margin: -40px -40px 30px -40px; padding: 40px 40px 24px 40px;` : ''}
+          border-bottom: 3px solid ${colors.primary};
+          padding-bottom: 16px;
+          margin-bottom: 20px;
+          ${isPremium ? `background: linear-gradient(135deg, ${colors.background} 0%, ${colors.white} 100%); margin: -20px -30px 20px -30px; padding: 20px 30px 16px 30px;` : ''}
         }
 
         .header-top {
@@ -418,11 +461,11 @@ function generateComparisonHtml(
         }
 
         .logo-property {
-          color: ${BRAND_COLORS.dark};
+          color: ${colors.dark};
         }
 
         .logo-check {
-          color: ${BRAND_COLORS.primary};
+          color: ${colors.primary};
         }
 
         .tier-badge {
@@ -436,60 +479,60 @@ function generateComparisonHtml(
         }
 
         .tier-badge.premium {
-          background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, ${BRAND_COLORS.primaryDark} 100%);
-          color: ${BRAND_COLORS.white};
+          background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%);
+          color: ${colors.white};
         }
 
         .tier-badge.free {
-          background: ${BRAND_COLORS.background};
-          color: ${BRAND_COLORS.gray};
+          background: ${colors.background};
+          color: ${colors.gray};
           border: 1px solid #e2e8f0;
         }
 
         h1 {
           font-size: 26px;
           font-weight: 700;
-          color: ${BRAND_COLORS.dark};
+          color: ${colors.dark};
           margin-bottom: 8px;
         }
 
         .meta {
-          color: ${BRAND_COLORS.gray};
+          color: ${colors.gray};
           font-size: 14px;
         }
 
         .meta strong {
-          color: ${BRAND_COLORS.dark};
+          color: ${colors.dark};
         }
 
-        /* Summary */
+        /* Summary - compact layout */
         .summary {
           display: flex;
-          gap: 24px;
-          margin-bottom: 30px;
-          padding: 20px;
-          background: ${isPremium ? BRAND_COLORS.white : BRAND_COLORS.background};
-          border-radius: 12px;
-          ${isPremium ? `border: 2px solid ${BRAND_COLORS.primary}20; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);` : ''}
+          gap: 16px;
+          margin-bottom: 20px;
+          padding: 14px;
+          background: ${isPremium ? colors.white : colors.background};
+          border-radius: 10px;
+          ${isPremium ? `border: 2px solid ${colors.primary}20; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);` : ''}
         }
 
         .summary-item {
           flex: 1;
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 16px;
-          background: ${BRAND_COLORS.background};
-          border-radius: 10px;
-          ${isPremium ? 'border-left: 4px solid;' : ''}
+          gap: 10px;
+          padding: 12px;
+          background: ${colors.background};
+          border-radius: 8px;
+          ${isPremium ? 'border-left: 3px solid;' : ''}
         }
 
         .summary-item.move-in-item {
-          ${isPremium ? `border-left-color: ${BRAND_COLORS.success};` : ''}
+          ${isPremium ? `border-left-color: ${colors.success};` : ''}
         }
 
         .summary-item.move-out-item {
-          ${isPremium ? `border-left-color: ${BRAND_COLORS.warning};` : ''}
+          ${isPremium ? `border-left-color: ${colors.warning};` : ''}
         }
 
         .summary-dot {
@@ -500,40 +543,40 @@ function generateComparisonHtml(
         }
 
         .summary-dot.move-in {
-          background: ${BRAND_COLORS.success};
+          background: ${colors.success};
         }
 
         .summary-dot.move-out {
-          background: ${BRAND_COLORS.warning};
+          background: ${colors.warning};
         }
 
         .summary-info strong {
           display: block;
           font-size: 13px;
-          color: ${BRAND_COLORS.dark};
+          color: ${colors.dark};
           margin-bottom: 2px;
         }
 
         .summary-info span {
           font-size: 12px;
-          color: ${BRAND_COLORS.gray};
+          color: ${colors.gray};
         }
 
         /* Room Section */
         .room-section {
-          margin-bottom: 30px;
-          page-break-inside: avoid;
+          margin-bottom: 20px;
+          /* Allow page breaks inside room sections to prevent large white spaces */
         }
 
         .room-header {
           display: flex;
           align-items: center;
           gap: 10px;
-          margin-bottom: 16px;
-          padding: 12px 16px;
+          margin-bottom: 12px;
+          padding: 10px 14px;
           background: ${isPremium ? `linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)` : '#f0f9ff'};
-          border-radius: 10px;
-          ${isPremium ? `border-left: 4px solid ${BRAND_COLORS.primary};` : ''}
+          border-radius: 8px;
+          ${isPremium ? `border-left: 3px solid ${colors.primary};` : ''}
         }
 
         .room-icon {
@@ -544,7 +587,7 @@ function generateComparisonHtml(
           flex: 1;
           font-size: 15px;
           font-weight: 600;
-          color: ${BRAND_COLORS.primaryDark};
+          color: ${colors.primaryDark};
           margin: 0;
           border: none;
           padding: 0;
@@ -552,8 +595,8 @@ function generateComparisonHtml(
 
         .photo-count {
           font-size: 11px;
-          color: ${BRAND_COLORS.gray};
-          background: ${BRAND_COLORS.white};
+          color: ${colors.gray};
+          background: ${colors.white};
           padding: 4px 12px;
           border-radius: 12px;
         }
@@ -569,12 +612,12 @@ function generateComparisonHtml(
         }
 
         .comparison-table th {
-          background: ${BRAND_COLORS.background};
+          background: ${colors.background};
           padding: 14px 12px;
           text-align: left;
           font-size: 13px;
           font-weight: 600;
-          color: ${BRAND_COLORS.dark};
+          color: ${colors.dark};
           border-bottom: 2px solid #e5e5e5;
         }
 
@@ -592,11 +635,11 @@ function generateComparisonHtml(
         }
 
         .header-dot.move-in {
-          background: ${BRAND_COLORS.success};
+          background: ${colors.success};
         }
 
         .header-dot.move-out {
-          background: ${BRAND_COLORS.warning};
+          background: ${colors.warning};
         }
 
         .photo-cell {
@@ -604,7 +647,7 @@ function generateComparisonHtml(
           padding: 12px;
           vertical-align: top;
           border-bottom: 1px solid #e5e5e5;
-          background: ${BRAND_COLORS.white};
+          background: ${colors.white};
         }
 
         .photo-cell:first-child {
@@ -620,7 +663,7 @@ function generateComparisonHtml(
 
         .photo-cell img {
           width: 100%;
-          height: 200px;
+          height: 160px;
           object-fit: cover;
           display: block;
         }
@@ -630,7 +673,7 @@ function generateComparisonHtml(
           top: 8px;
           left: 8px;
           background: ${isPremium ? BRAND_COLORS.primary : 'rgba(0, 0, 0, 0.7)'};
-          color: ${BRAND_COLORS.white};
+          color: ${colors.white};
           font-size: 10px;
           font-weight: 600;
           width: 24px;
@@ -643,19 +686,19 @@ function generateComparisonHtml(
 
         .no-photo {
           width: 100%;
-          height: 200px;
-          background: ${BRAND_COLORS.background};
+          height: 160px;
+          background: ${colors.background};
           border-radius: 6px;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: ${BRAND_COLORS.lightGray};
+          color: ${colors.lightGray};
           font-size: 13px;
         }
 
         .caption {
           font-size: 11px;
-          color: ${BRAND_COLORS.gray};
+          color: ${colors.gray};
           margin-top: 8px;
           line-height: 1.4;
         }
@@ -686,7 +729,7 @@ function generateComparisonHtml(
         .upgrade-title {
           font-size: 15px;
           font-weight: 700;
-          color: ${BRAND_COLORS.dark};
+          color: ${colors.dark};
           margin-bottom: 4px;
         }
 
@@ -700,47 +743,31 @@ function generateComparisonHtml(
           text-align: center;
           font-size: 13px;
           font-weight: 600;
-          color: ${BRAND_COLORS.primary};
-          background: ${BRAND_COLORS.white};
+          color: ${colors.primary};
+          background: ${colors.white};
           padding: 10px 16px;
           border-radius: 8px;
         }
 
-        /* Footer */
-        .footer {
-          margin-top: 40px;
-          padding-top: 20px;
-          border-top: 3px solid ${isPremium ? BRAND_COLORS.primary : '#e5e5e5'};
-          text-align: center;
-        }
-
-        .footer p {
-          font-size: 11px;
-          color: ${BRAND_COLORS.gray};
-          margin-bottom: 4px;
-        }
-
-        .footer-brand {
-          font-weight: 700;
-        }
-
-        .footer-brand .brand-property {
-          color: ${BRAND_COLORS.dark};
-        }
-
-        .footer-brand .brand-check {
-          color: ${BRAND_COLORS.primary};
-        }
-
         /* Print */
         @media print {
-          .room-section {
+          /* Keep individual photo rows together, but allow room sections to split */
+          .comparison-table tr {
+            page-break-inside: avoid;
+          }
+          .photo-wrapper {
             page-break-inside: avoid;
           }
         }
       </style>
     </head>
     <body>
+      <!-- Footer first so it's rendered behind content -->
+      <div class="page-footer">
+        Generated by PropertyCheck &bull; <a href="${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}">${process.env.EXPO_PUBLIC_APP_URL || 'propertycheck.app'}</a>
+      </div>
+
+      <div class="content-wrapper">
       <div class="header">
         <div class="header-top">
           <div class="brand">
@@ -772,13 +799,7 @@ function generateComparisonHtml(
       </div>
 
       ${roomSections || '<p style="text-align: center; color: #666; padding: 40px;">No photos to compare.</p>'}
-
-      ${upgradeSection}
-
-      <div class="footer">
-        <p>Generated by <span class="footer-brand"><span class="brand-property">Property</span><span class="brand-check">Check</span></span> on ${generatedDate}</p>
-        <p>${APP_CONFIG.supportEmail}</p>
-      </div>
+      </div><!-- end content-wrapper -->
     </body>
     </html>
   `;

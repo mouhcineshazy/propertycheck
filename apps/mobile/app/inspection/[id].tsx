@@ -26,6 +26,7 @@ import * as Sharing from 'expo-sharing';
 import * as MailComposer from 'expo-mail-composer';
 import { format } from 'date-fns';
 import { APP_CONFIG } from '@propertycheck/shared';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import {
   fetchInspectionWithPhotos,
   completeInspection,
@@ -34,7 +35,7 @@ import {
   getPhotoUrl,
   canGenerateComparison,
 } from '../../lib';
-import type { InspectionWithPhotos } from '../../lib';
+import type { InspectionWithPhotos, PDFOptions } from '../../lib';
 
 // Room type labels
 const ROOM_TYPE_LABELS: Record<string, string> = {
@@ -105,6 +106,8 @@ export default function InspectionDetailScreen() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  const [isPremium, setIsPremium] = useState(false);
+  const [isFirstInspection, setIsFirstInspection] = useState(true);
 
   // Refetch data when screen gains focus (after completing/editing inspection elsewhere)
   useFocusEffect(
@@ -113,8 +116,31 @@ export default function InspectionDetailScreen() {
         if (!id) return;
 
         try {
+          const supabase = getMobileSupabaseClient();
+
+          // Fetch inspection data
           const data = await fetchInspectionWithPhotos(id);
           setInspection(data);
+
+          // Fetch subscription status and property inspections in parallel
+          const propertyId = data.property?.id || data.property_id;
+          const [subResult, inspectionsResult] = await Promise.all([
+            supabase.from('subscriptions').select('status').single(),
+            supabase
+              .from('inspections')
+              .select('id, created_at')
+              .eq('property_id', propertyId)
+              .order('created_at', { ascending: true }),
+          ]);
+
+          // Set premium status
+          setIsPremium(subResult.data?.status === 'premium');
+
+          // Determine if this is the first inspection (move-in) or not (move-out)
+          if (inspectionsResult.data && inspectionsResult.data.length > 0) {
+            const firstInspectionId = inspectionsResult.data[0].id;
+            setIsFirstInspection(id === firstInspectionId);
+          }
         } catch (err) {
           console.error('Error loading inspection:', err);
           Alert.alert('Error', 'Failed to load inspection', [
@@ -213,7 +239,11 @@ export default function InspectionDetailScreen() {
     setIsGeneratingPdf(true);
     try {
       const propertyAddress = inspection.property?.address || 'Unknown Property';
-      const pdfUri = await generateInspectionPdf(inspection, propertyAddress);
+      const pdfOptions: PDFOptions = {
+        isPremium,
+        isFirstInspection,
+      };
+      const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(pdfUri, {
@@ -245,7 +275,11 @@ export default function InspectionDetailScreen() {
 
       // Generate PDF first
       const propertyAddress = inspection.property?.address || 'Unknown Property';
-      const pdfUri = await generateInspectionPdf(inspection, propertyAddress);
+      const pdfOptions: PDFOptions = {
+        isPremium,
+        isFirstInspection,
+      };
+      const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
       const inspectionDate = format(new Date(inspection.inspection_date), 'MMMM d, yyyy');
 
       // Compose email with PDF attachment

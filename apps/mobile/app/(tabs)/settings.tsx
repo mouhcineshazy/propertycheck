@@ -124,14 +124,22 @@ export default function SettingsScreen() {
         .update({ province: provinceCode })
         .eq('id', authUser.id);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('DB update error:', dbError);
+        throw dbError;
+      }
 
       // Update local state
       setUser(prev => prev ? { ...prev, province: provinceCode } : null);
 
       Alert.alert('Success', 'Province updated successfully');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update province';
+      console.error('Province update error:', error);
+      const message = error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'message' in error
+          ? String((error as { message: unknown }).message)
+          : 'Failed to update province';
       Alert.alert('Error', message);
     } finally {
       setIsSavingProvince(false);
