@@ -1,61 +1,63 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { FREE_TIER_LIMITS, PRICING } from '@propertycheck/shared';
 
-const plans = [
-  {
-    name: 'Free',
-    description: 'Complete your move-in & move-out inspections',
-    price: { monthly: 0, annual: 0 },
-    features: [
-      `${FREE_TIER_LIMITS.maxProperties} property`,
-      `${FREE_TIER_LIMITS.maxInspectionsTotal} inspections (move-in + move-out)`,
-      'Basic PDF reports',
-      'Photo documentation',
-      `${FREE_TIER_LIMITS.pdfRetentionDays}-day cloud storage`,
-    ],
-    limitations: [
-      'No shareable links',
-      'Watermarked comparison reports',
-      'No priority support',
-    ],
-    cta: 'Start Free',
-    popular: false,
-  },
-  {
-    name: 'Premium',
-    description: 'For renters who want legally defensible evidence',
-    price: {
-      monthly: parseFloat(PRICING.monthly.displayPrice.replace('$', '')),
-      annual: parseFloat(PRICING.annual.displayPrice.replace('$', '')),
-    },
-    features: [
-      'Share secure timestamped links with landlords', // LEAD with this
-      'Legally defensible evidence for disputes',
-      'Unlimited properties',
-      'Unlimited inspections',
-      'Comparison reports without watermarks',
-      'Professional PDF reports',
-      'Unlimited cloud storage',
-      'Priority email support',
-    ],
-    limitations: [],
-    cta: 'Start 7-Day Free Trial',
-    popular: true,
-  },
-];
-
 export function PricingSection() {
+  const t = useTranslations('landing.pricing');
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
   const [isAnnual, setIsAnnual] = useState(true);
+
+  const plans = [
+    {
+      nameKey: 'free.name',
+      descriptionKey: 'free.description',
+      price: { monthly: 0, annual: 0 },
+      features: [
+        t('free.features.property', { count: FREE_TIER_LIMITS.maxProperties }),
+        t('free.features.inspections', { count: FREE_TIER_LIMITS.maxInspectionsTotal }),
+        t('free.features.basicPdf'),
+        t('free.features.photoDoc'),
+        t('free.features.storage', { days: FREE_TIER_LIMITS.pdfRetentionDays }),
+      ],
+      limitations: [
+        t('free.limitations.noLinks'),
+        t('free.limitations.watermark'),
+        t('free.limitations.noSupport'),
+      ],
+      ctaKey: 'free.cta',
+      popular: false,
+    },
+    {
+      nameKey: 'premium.name',
+      descriptionKey: 'premium.description',
+      price: {
+        monthly: parseFloat(PRICING.monthly.displayPrice.replace('$', '')),
+        annual: parseFloat(PRICING.annual.displayPrice.replace('$', '')),
+      },
+      features: [
+        t('premium.features.shareLinks'),
+        t('premium.features.legalEvidence'),
+        t('premium.features.unlimitedProperties'),
+        t('premium.features.unlimitedInspections'),
+        t('premium.features.comparisonReports'),
+        t('premium.features.professionalPdf'),
+        t('premium.features.unlimitedStorage'),
+        t('premium.features.prioritySupport'),
+      ],
+      limitations: [],
+      ctaKey: 'premium.cta',
+      popular: true,
+    },
+  ];
 
   return (
     <section id="pricing" ref={ref} className="py-24 bg-gradient-to-b from-white to-gray-50">
@@ -68,16 +70,16 @@ export function PricingSection() {
           transition={{ duration: 0.6 }}
         >
           <span className="inline-block text-primary-600 font-semibold text-sm uppercase tracking-wider mb-4">
-            Pricing
+            {t('badge')}
           </span>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Simple,{' '}
+            {t('title')}{' '}
             <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">
-              Transparent Pricing
+              {t('titleHighlight')}
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Document your move-in & move-out for free. Upgrade to share evidence landlords trust.
+            {t('subtitle')}
           </p>
         </motion.div>
 
@@ -94,7 +96,7 @@ export function PricingSection() {
               !isAnnual ? 'text-gray-900' : 'text-gray-500'
             )}
           >
-            Monthly
+            {t('monthly')}
           </span>
           <button
             onClick={() => setIsAnnual(!isAnnual)}
@@ -106,7 +108,7 @@ export function PricingSection() {
                 !isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
               )}
             >
-              Monthly
+              {t('monthly')}
             </span>
             <span
               className={cn(
@@ -114,7 +116,7 @@ export function PricingSection() {
                 isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
               )}
             >
-              Annual
+              {t('annual')}
             </span>
           </button>
           {isAnnual && (
@@ -140,16 +142,16 @@ export function PricingSection() {
               {/* Popular badge */}
               {plan.popular && (
                 <div className="absolute top-0 right-0 bg-primary-600 text-white text-xs font-semibold px-4 py-1 rounded-bl-lg">
-                  Most Popular
+                  {t('mostPopular')}
                 </div>
               )}
 
               <div className="p-8">
                 {/* Plan name & description */}
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  {plan.name}
+                  {t(plan.nameKey)}
                 </h3>
-                <p className="text-gray-500 mb-6">{plan.description}</p>
+                <p className="text-gray-500 mb-6">{t(plan.descriptionKey)}</p>
 
                 {/* Price */}
                 <div className="mb-8">
@@ -158,12 +160,12 @@ export function PricingSection() {
                       ${isAnnual ? plan.price.annual : plan.price.monthly}
                     </span>
                     {plan.price.monthly > 0 && (
-                      <span className="text-gray-500">/month</span>
+                      <span className="text-gray-500">/{t('perMonth')}</span>
                     )}
                   </div>
                   {isAnnual && plan.price.monthly > 0 && (
                     <p className="text-sm text-gray-500 mt-1">
-                      Billed annually ({PRICING.annual.annualTotal})
+                      {t('billedAnnually', { total: PRICING.annual.annualTotal })}
                     </p>
                   )}
                 </div>
@@ -178,13 +180,13 @@ export function PricingSection() {
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   )}
                 >
-                  {plan.cta}
+                  {t(plan.ctaKey)}
                 </Link>
 
                 {/* Features */}
                 <div className="mt-8 space-y-4">
                   <p className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                    What&apos;s included
+                    {t('whatsIncluded')}
                   </p>
                   <ul className="space-y-3">
                     {plan.features.map((feature, j) => (
@@ -192,7 +194,6 @@ export function PricingSection() {
                         <svg
                           className={cn(
                             'w-5 h-5 flex-shrink-0 mt-0.5',
-                            // Highlight first premium feature (shareable links)
                             plan.popular && j === 0 ? 'text-primary-600' : 'text-green-500'
                           )}
                           fill="none"
@@ -263,7 +264,7 @@ export function PricingSection() {
                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
               />
             </svg>
-            <span>30-day money-back guarantee • Cancel anytime • No questions asked</span>
+            <span>{t('guarantee')}</span>
           </div>
         </motion.div>
       </div>

@@ -1,10 +1,11 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { Logo, LogoOutline } from '@/components/ui/Logo';
+import { Logo, LogoOutline, LanguageSwitcher } from '@/components/ui';
 
 interface NavigationProps {
   /** Use 'light' variant for pages with white/light backgrounds (FAQ, Privacy, etc.) */
@@ -12,6 +13,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ variant = 'default' }: NavigationProps) {
+  const t = useTranslations('navigation');
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -48,7 +50,7 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
         {/* Desktop Navigation - Only show on landing page (default variant) */}
         {variant === 'default' && (
           <div className="hidden md:flex items-center gap-8">
-            <Link
+            <a
               href="#features"
               className={cn(
                 'font-medium transition-colors',
@@ -57,9 +59,9 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
                   : 'text-white/90 hover:text-white'
               )}
             >
-              Features
-            </Link>
-            <Link
+              {t('features')}
+            </a>
+            <a
               href="#how-it-works"
               className={cn(
                 'font-medium transition-colors',
@@ -68,9 +70,9 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
                   : 'text-white/90 hover:text-white'
               )}
             >
-              How It Works
-            </Link>
-            <Link
+              {t('howItWorks')}
+            </a>
+            <a
               href="#pricing"
               className={cn(
                 'font-medium transition-colors',
@@ -79,12 +81,13 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
                   : 'text-white/90 hover:text-white'
               )}
             >
-              Pricing
-            </Link>
+              {t('pricing')}
+            </a>
           </div>
         )}
 
         <div className="hidden md:flex items-center gap-4">
+          <LanguageSwitcher />
           <Link
             href="/login"
             className={cn(
@@ -94,13 +97,13 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
                 : 'text-white hover:text-white/80'
             )}
           >
-            Log in
+            {t('login')}
           </Link>
           <Link
             href="/signup"
             className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-all hover:shadow-lg hover:shadow-primary-600/30"
           >
-            Get Started Free
+            {t('getStarted')}
           </Link>
         </div>
 
@@ -144,38 +147,42 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
           <div className="container mx-auto px-6 py-4 flex flex-col gap-4">
             {variant === 'default' && (
               <>
-                <Link
+                <a
                   href="#features"
                   className="text-gray-700 font-medium py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Features
-                </Link>
-                <Link
+                  {t('features')}
+                </a>
+                <a
                   href="#how-it-works"
                   className="text-gray-700 font-medium py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  How It Works
-                </Link>
-                <Link
+                  {t('howItWorks')}
+                </a>
+                <a
                   href="#pricing"
                   className="text-gray-700 font-medium py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Pricing
-                </Link>
+                  {t('pricing')}
+                </a>
                 <hr />
               </>
             )}
+            <div className="py-2">
+              <LanguageSwitcher variant="inline" />
+            </div>
+            <hr />
             <Link href="/login" className="text-gray-700 font-medium py-2">
-              Log in
+              {t('login')}
             </Link>
             <Link
               href="/signup"
               className="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold text-center"
             >
-              Get Started Free
+              {t('getStarted')}
             </Link>
           </div>
         </motion.div>

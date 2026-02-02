@@ -18,3 +18,5 @@ export {
   FeatureCard,
   PricingCard,
 } from './GradientCard';
+
+export { LanguageSwitcher } from './LanguageSwitcher';

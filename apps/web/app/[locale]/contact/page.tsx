@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { Navigation, Footer } from '@/components/landing';
 
 const SUPPORT_EMAIL = 'support@propertycheck.app';
 
 export default function ContactPage() {
+  const t = useTranslations('pages.contact');
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,10 +42,10 @@ export default function ContactPage() {
       <section className="pt-32 pb-12 bg-gradient-to-br from-primary-50 via-white to-blue-50">
         <div className="container mx-auto px-6 max-w-4xl text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Contact Support
+            {t('title')}
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Have questions or need help? We&apos;re here to assist you with PropertyCheck.
+            {t('subtitle')}
           </p>
         </div>
       </section>
@@ -53,10 +56,9 @@ export default function ContactPage() {
           <div className="grid md:grid-cols-2 gap-12">
             {/* Contact Info */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('getInTouch.title')}</h2>
               <p className="text-gray-600 mb-8">
-                Whether you have a question about features, pricing, need a demo, or anything else,
-                our team is ready to help.
+                {t('getInTouch.description')}
               </p>
 
               {/* Email Card */}
@@ -68,8 +70,8 @@ export default function ContactPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Email Support</h3>
-                    <p className="text-sm text-gray-600 mb-2">Our team typically responds within 24 hours.</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">{t('getInTouch.emailSupport.title')}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{t('getInTouch.emailSupport.description')}</p>
                     <a
                       href={`mailto:${SUPPORT_EMAIL}`}
                       className="text-primary-600 font-medium hover:text-primary-700 transition-colors"
@@ -89,8 +91,8 @@ export default function ContactPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Check Our FAQ</h3>
-                    <p className="text-sm text-gray-600 mb-2">Find quick answers to common questions.</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">{t('getInTouch.checkFaq.title')}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{t('getInTouch.checkFaq.description')}</p>
                     <Link
                       href="/faq"
                       className="text-primary-600 font-medium hover:text-primary-700 transition-colors"
@@ -108,7 +110,7 @@ export default function ContactPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="text-sm text-green-800">
-                    <strong>Average response time:</strong> Within 24 hours
+                    <strong>Average response time:</strong> {t('getInTouch.responseTime')}
                   </span>
                 </div>
               </div>
@@ -117,7 +119,7 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div>
               <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Send us a message</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">{t('form.title')}</h2>
 
                 {submitted ? (
                   <div className="text-center py-8">
@@ -126,9 +128,9 @@ export default function ContactPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Client Opened!</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('form.success.title')}</h3>
                     <p className="text-gray-600 mb-4">
-                      Complete sending your message in your email application.
+                      {t('form.success.message')}
                     </p>
                     <button
                       onClick={() => setSubmitted(false)}
@@ -141,14 +143,14 @@ export default function ContactPage() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                        Your Name
+                        {t('form.nameLabel')}
                       </label>
                       <input
                         type="text"
                         id="name"
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="John Doe"
+                        placeholder={t('form.namePlaceholder')}
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
@@ -156,14 +158,14 @@ export default function ContactPage() {
 
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address
+                        {t('form.emailLabel')}
                       </label>
                       <input
                         type="email"
                         id="email"
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder="john@example.com"
+                        placeholder={t('form.emailPlaceholder')}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       />
@@ -171,7 +173,7 @@ export default function ContactPage() {
 
                     <div>
                       <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                        Subject
+                        {t('form.subjectLabel')}
                       </label>
                       <select
                         id="subject"
@@ -180,26 +182,26 @@ export default function ContactPage() {
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       >
-                        <option value="">Select a topic</option>
-                        <option value="General Question">General Question</option>
-                        <option value="Technical Support">Technical Support</option>
-                        <option value="Billing Inquiry">Billing Inquiry</option>
-                        <option value="Feature Request">Feature Request</option>
-                        <option value="Bug Report">Bug Report</option>
-                        <option value="Other">Other</option>
+                        <option value="">{t('form.subjectPlaceholder')}</option>
+                        <option value="General Question">{t('form.subjectOptions.generalQuestion')}</option>
+                        <option value="Technical Support">{t('form.subjectOptions.technicalSupport')}</option>
+                        <option value="Billing Inquiry">{t('form.subjectOptions.billingInquiry')}</option>
+                        <option value="Feature Request">{t('form.subjectOptions.featureRequest')}</option>
+                        <option value="Bug Report">{t('form.subjectOptions.bugReport')}</option>
+                        <option value="Other">{t('form.subjectOptions.other')}</option>
                       </select>
                     </div>
 
                     <div>
                       <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                        Message
+                        {t('form.messageLabel')}
                       </label>
                       <textarea
                         id="message"
                         required
                         rows={5}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
-                        placeholder="How can we help you?"
+                        placeholder={t('form.messagePlaceholder')}
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       />
@@ -223,7 +225,7 @@ export default function ContactPage() {
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                           </svg>
-                          Send Message
+                          {t('form.submitButton')}
                         </>
                       )}
                     </button>
@@ -232,7 +234,7 @@ export default function ContactPage() {
               </div>
 
               <p className="text-sm text-gray-500 mt-4 text-center">
-                By submitting this form, you agree to our{' '}
+                {t('form.privacyNote').split('Privacy Policy')[0]}
                 <Link href="/privacy" className="text-primary-600 hover:underline">
                   Privacy Policy
                 </Link>

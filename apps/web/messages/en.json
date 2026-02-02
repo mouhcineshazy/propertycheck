@@ -1,0 +1,598 @@
+{
+  "common": {
+    "appName": "PropertyCheck",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit"
+  },
+
+  "navigation": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "pricing": "Pricing",
+    "login": "Log in",
+    "getStarted": "Get Started Free",
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "inspections": "Inspections",
+    "reports": "Reports",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
+
+  "landing": {
+    "hero": {
+      "badge": "Built for Canadian Renters",
+      "title": "Protect Your",
+      "titleHighlight": "Damage Deposit",
+      "subtitle": "Document your rental property in minutes with professional inspection reports that landlords respect.",
+      "subtitleHighlight": "Never lose your deposit again.",
+      "cta": "Start Free Today",
+      "scrollToExplore": "Scroll to explore",
+      "valueProps": {
+        "timestamped": "Timestamped Photos",
+        "pdfReports": "PDF Reports",
+        "secure": "Secure & Private"
+      }
+    },
+    "features": {
+      "badge": "Features",
+      "title": "Everything You Need to",
+      "titleHighlight": "Protect Your Deposit",
+      "subtitle": "Document your rental property with timestamped photos and professional reports. Simple enough for anyone, thorough enough for disputes.",
+      "freePlan": "Free Plan",
+      "getStarted": "Get Started",
+      "premiumPlan": "Premium Plan",
+      "freeTrial": "7-Day Free Trial",
+      "free": {
+        "photoDoc": {
+          "title": "Photo Documentation",
+          "description": "Capture photos of every room with automatic timestamps. Document the condition of your rental before and after your tenancy."
+        },
+        "basicPdf": {
+          "title": "Basic PDF Reports",
+          "description": "Generate inspection reports with your photos and notes. Perfect for keeping a personal record of your move-in and move-out condition."
+        },
+        "oneProperty": {
+          "title": "1 Property",
+          "description": "Perfect for renters documenting their current home. Complete your move-in and move-out inspections for one property."
+        }
+      },
+      "premium": {
+        "shareLinks": {
+          "title": "Share Secure Links",
+          "description": "Send timestamped inspection links directly to your landlord. They can view your evidence without creating an account."
+        },
+        "comparison": {
+          "title": "Comparison Reports",
+          "description": "Side-by-side move-in vs move-out comparisons. Easily show what damage existed before your tenancy began."
+        },
+        "legal": {
+          "title": "Legally Defensible Evidence",
+          "description": "Timestamped photos and reports that can support your case in deposit disputes. Professional documentation landlords trust."
+        },
+        "unlimited": {
+          "title": "Unlimited Properties",
+          "description": "Document as many properties as you need. Perfect for frequent movers or those managing multiple rentals."
+        },
+        "cloud": {
+          "title": "Unlimited Cloud Storage",
+          "description": "All your inspection photos and reports stored securely in the cloud. Access them anytime, from any device."
+        },
+        "support": {
+          "title": "Priority Support",
+          "description": "Get help when you need it with priority email support. We're here to ensure your deposit is protected."
+        }
+      }
+    },
+    "howItWorks": {
+      "badge": "How It Works",
+      "title": "Protected in",
+      "titleHighlight": "Three Simple Steps",
+      "subtitle": "From download to protected deposit in under 10 minutes. No training required.",
+      "step1": {
+        "title": "Download the App",
+        "description": "Get PropertyCheck free on iOS or Android. Create your account in seconds with just your email."
+      },
+      "step2": {
+        "title": "Walk Through Your Property",
+        "description": "Our guided camera helps you systematically document every room. Add notes and flag any existing damage."
+      },
+      "step3": {
+        "title": "Generate & Share Report",
+        "description": "Get a professional PDF report instantly. Share it with your landlord via secure link or email."
+      },
+      "stepComplete": "Step {step} Complete",
+      "cta": "Get Started Now"
+    },
+    "pricing": {
+      "badge": "Pricing",
+      "title": "Simple,",
+      "titleHighlight": "Transparent Pricing",
+      "subtitle": "Document your move-in & move-out for free. Upgrade to share evidence landlords trust.",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "perMonth": "month",
+      "billedAnnually": "Billed annually ({total})",
+      "mostPopular": "Most Popular",
+      "whatsIncluded": "What's included",
+      "guarantee": "30-day money-back guarantee - Cancel anytime - No questions asked",
+      "free": {
+        "name": "Free",
+        "description": "Complete your move-in & move-out inspections",
+        "cta": "Start Free",
+        "features": {
+          "property": "{count} property",
+          "inspections": "{count} inspections (move-in + move-out)",
+          "basicPdf": "Basic PDF reports",
+          "photoDoc": "Photo documentation",
+          "storage": "{days}-day cloud storage"
+        },
+        "limitations": {
+          "noLinks": "No shareable links",
+          "watermark": "Watermarked comparison reports",
+          "noSupport": "No priority support"
+        }
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "For renters who want legally defensible evidence",
+        "cta": "Start 7-Day Free Trial",
+        "features": {
+          "shareLinks": "Share secure timestamped links with landlords",
+          "legalEvidence": "Legally defensible evidence for disputes",
+          "unlimitedProperties": "Unlimited properties",
+          "unlimitedInspections": "Unlimited inspections",
+          "comparisonReports": "Comparison reports without watermarks",
+          "professionalPdf": "Professional PDF reports",
+          "unlimitedStorage": "Unlimited cloud storage",
+          "prioritySupport": "Priority email support"
+        }
+      }
+    },
+    "download": {
+      "badge": "Available Now",
+      "title": "Download the",
+      "titleHighlight": "PropertyCheck App",
+      "subtitle": "Start documenting your rental property today. Take timestamped photos, generate professional reports, and protect your damage deposit.",
+      "appStore": {
+        "aria": "Download on the App Store",
+        "label": "Download on the",
+        "store": "App Store"
+      },
+      "playStore": {
+        "aria": "Get it on Google Play",
+        "label": "Get it on",
+        "store": "Google Play"
+      },
+      "features": {
+        "quickSetup": {
+          "title": "Quick Setup",
+          "description": "Get started in minutes with our easy-to-use app"
+        },
+        "photoDoc": {
+          "title": "Photo Documentation",
+          "description": "Capture and organize photos with automatic timestamps"
+        },
+        "pdfReports": {
+          "title": "PDF Reports",
+          "description": "Generate professional inspection reports instantly"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Protect Your",
+      "titleHighlight": "Damage Deposit?",
+      "subtitle": "Join thousands of Canadian renters who trust PropertyCheck to document their rentals and protect their damage deposits.",
+      "primaryCta": "Get Started Free",
+      "secondaryCta": "Contact Us",
+      "trust": {
+        "easyToUse": "Easy to use",
+        "freePlan": "Free plan for 1 property",
+        "freeTrial": "7-day free trial for Premium"
+      }
+    }
+  },
+
+  "footer": {
+    "description": "Protect your damage deposit with professional inspection reports.",
+    "sections": {
+      "product": "Product",
+      "company": "Company",
+      "legal": "Legal",
+      "support": "Support"
+    },
+    "links": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "about": "About",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy",
+      "contact": "Contact Support"
+    },
+    "copyright": "© {year} PropertyCheck. All rights reserved.",
+    "madeIn": "Made with love in Canada"
+  },
+
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account to continue",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "submitButton": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up for free",
+      "googleButton": "Continue with Google",
+      "orDivider": "or continue with email",
+      "error": {
+        "invalidCredentials": "Invalid email or password",
+        "generic": "Failed to sign in"
+      }
+    },
+    "signup": {
+      "titleFree": "Start for free",
+      "titlePremium": "Start Premium trial",
+      "subtitleFree": "Document your move-in & move-out",
+      "subtitlePremium": "7-day free trial, cancel anytime",
+      "badgePremium": "Most Popular",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "John Smith",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Create a password",
+      "passwordHint": "Must be at least 8 characters",
+      "provinceLabel": "Province",
+      "provincePlaceholder": "Select your province",
+      "provinceHint": "We tailor legal info to your province",
+      "termsCheckbox": "I agree to the {terms} and {privacy}, and consent to the collection and use of my personal information as described.",
+      "termsLink": "Terms of Service",
+      "privacyLink": "Privacy Policy",
+      "submitButton": "Create account",
+      "hasAccount": "Already have an account?",
+      "signInLink": "Sign in",
+      "googleButton": "Continue with Google",
+      "orDivider": "or continue with email",
+      "success": {
+        "title": "Check your email",
+        "message": "We've sent a confirmation link to",
+        "hint": "Click the link in the email to verify your account and get started.",
+        "backToLogin": "Back to login"
+      },
+      "freePlanIncludes": "Free plan includes:",
+      "premiumIncludes": "Premium includes:",
+      "freeFeatures": ["1 property", "Move-in & move-out inspections", "Basic PDF reports", "Photo documentation"],
+      "premiumFeatures": ["Unlimited properties & inspections", "Share secure timestamped links", "Professional PDF reports", "Priority email support"],
+      "trustIndicators": {
+        "ssl": "256-bit SSL",
+        "gdpr": "GDPR compliant"
+      },
+      "downloadApp": {
+        "title": "Download the App",
+        "subtitle": "Available on iOS and Android. Document your rental property anywhere, anytime."
+      },
+      "error": {
+        "termsRequired": "You must agree to the Terms of Service and Privacy Policy to create an account.",
+        "generic": "Failed to create account"
+      }
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "submitButton": "Send reset link",
+      "backToLogin": "Remember your password?",
+      "signInLink": "Sign in",
+      "success": {
+        "title": "Check your email",
+        "message": "We've sent a password reset link to",
+        "hint": "Click the link in the email to reset your password."
+      }
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "subtitle": "Enter your new password below",
+      "passwordLabel": "New password",
+      "passwordPlaceholder": "Enter new password",
+      "confirmLabel": "Confirm new password",
+      "confirmPlaceholder": "Confirm new password",
+      "passwordHint": "Must be at least 8 characters",
+      "submitButton": "Reset password",
+      "backToLogin": "Back to login",
+      "success": {
+        "title": "Password updated!",
+        "message": "Your password has been successfully reset.",
+        "redirecting": "Redirecting to dashboard..."
+      }
+    },
+    "tips": {
+      "title": "Deposit Protection Tips",
+      "tip1": {
+        "title": "Document Everything",
+        "description": "Take photos of every room, appliance, and existing damage before moving in."
+      },
+      "tip2": {
+        "title": "Use Timestamps",
+        "description": "Timestamped photos serve as legal evidence of the property condition."
+      },
+      "tip3": {
+        "title": "Compare Move-In & Move-Out",
+        "description": "Side-by-side comparisons make it easy to prove what was pre-existing."
+      },
+      "tip4": {
+        "title": "Share with Your Landlord",
+        "description": "Send secure links to landlords so everyone has the same records."
+      }
+    }
+  },
+
+  "pages": {
+    "about": {
+      "title": "Protecting Renters Across Canada",
+      "subtitle": "PropertyCheck helps renters document their rental property condition with timestamped photos and professional reports.",
+      "mission": {
+        "title": "Our Mission",
+        "description1": "Every year, thousands of Canadian renters lose part or all of their damage deposit due to disputes over property condition. Without proper documentation, it's often your word against your landlord's.",
+        "description2": "PropertyCheck was built to solve this problem. Our app makes it easy to create timestamped, professional inspection reports that document exactly what condition your rental was in when you moved in and when you moved out.",
+        "description3": "With PropertyCheck, you have the evidence you need to protect your deposit."
+      },
+      "benefits": {
+        "easyDocumentation": {
+          "title": "Easy Documentation",
+          "description": "Our guided inspection process walks you through documenting every room systematically."
+        },
+        "legalEvidence": {
+          "title": "Legal Evidence",
+          "description": "Timestamped photos and reports that can support your case in deposit disputes."
+        },
+        "peaceOfMind": {
+          "title": "Peace of Mind",
+          "description": "Know that you're protected with professional documentation from day one."
+        }
+      },
+      "howItWorks": {
+        "title": "How PropertyCheck Works",
+        "step1": {
+          "title": "Document Your Property",
+          "description": "Take photos of every room with our guided inspection process. Each photo is automatically timestamped."
+        },
+        "step2": {
+          "title": "Generate Reports",
+          "description": "Create professional PDF reports with your photos and notes. Share them with your landlord."
+        },
+        "step3": {
+          "title": "Protect Your Deposit",
+          "description": "When you move out, compare your move-in photos with move-out condition to prove what was pre-existing."
+        }
+      },
+      "stats": {
+        "depositAtRisk": {
+          "value": "$1,500",
+          "label": "Average deposit at risk"
+        },
+        "provincesSupported": {
+          "value": "10+",
+          "label": "Provinces supported"
+        },
+        "freeToStart": {
+          "value": "100%",
+          "label": "Free to start"
+        },
+        "accessToReports": {
+          "value": "24/7",
+          "label": "Access to reports"
+        }
+      },
+      "cta": {
+        "title": "Ready to Protect Your Deposit?",
+        "subtitle": "Join thousands of Canadian renters who trust PropertyCheck to document their rentals.",
+        "button": "Get Started Free"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Find answers to common questions about PropertyCheck and how it helps protect your rental damage deposit.",
+      "searchPlaceholder": "Search for answers...",
+      "questionsAnswered": "questions answered",
+      "resultsFound": "results found for",
+      "noResults": {
+        "title": "No results found",
+        "subtitle": "Try searching with different keywords or browse the categories below.",
+        "clearSearch": "Clear search"
+      },
+      "stillHaveQuestions": {
+        "title": "Still Have Questions?",
+        "subtitle": "Can't find the answer you're looking for? Our support team is here to help.",
+        "contactButton": "Contact Support",
+        "emailButton": "Email Us"
+      },
+      "categories": {
+        "gettingStarted": {
+          "title": "Getting Started",
+          "questions": {
+            "q1": {
+              "question": "What is PropertyCheck?",
+              "answer": "PropertyCheck is a mobile app that helps renters document their rental property condition with timestamped photos and professional reports. It's designed to help protect your damage deposit by providing evidence of the property's condition at move-in and move-out."
+            },
+            "q2": {
+              "question": "Is PropertyCheck free to use?",
+              "answer": "Yes! PropertyCheck offers a free plan that includes 1 property with move-in and move-out inspections, basic PDF reports, and photo documentation with 90-day cloud storage. Premium plans are available for renters who need unlimited properties, shareable links, and additional features."
+            },
+            "q3": {
+              "question": "What platforms is PropertyCheck available on?",
+              "answer": "PropertyCheck is available on both iOS (App Store) and Android (Google Play). You can also access your reports and account through our web dashboard."
+            },
+            "q4": {
+              "question": "How do I create an account?",
+              "answer": "You can create a free account by downloading the app from the App Store or Google Play, or by signing up on our website. You can sign up with your email or use Google sign-in for faster access."
+            }
+          }
+        },
+        "inspectionsReports": {
+          "title": "Inspections & Reports",
+          "questions": {
+            "q1": {
+              "question": "How do I conduct an inspection?",
+              "answer": "Our app guides you through a systematic inspection process. Simply select the property, start a new inspection, and follow the prompts to photograph each room. The app automatically timestamps each photo and organizes them by room."
+            },
+            "q2": {
+              "question": "What's included in the PDF reports?",
+              "answer": "Your PDF reports include all photos taken during the inspection, organized by room, with timestamps and any notes you've added. Premium reports include professional formatting without watermarks and can include comparison views of move-in vs move-out condition."
+            },
+            "q3": {
+              "question": "Can I share reports with my landlord?",
+              "answer": "Premium subscribers can generate secure, shareable links that allow landlords to view inspection reports without creating an account. This ensures both parties have access to the same documentation."
+            },
+            "q4": {
+              "question": "How long are my reports stored?",
+              "answer": "Free accounts include 90-day cloud storage. Premium accounts include unlimited storage, so your reports are available for as long as you need them."
+            }
+          }
+        },
+        "legalEvidence": {
+          "title": "Legal & Evidence",
+          "questions": {
+            "q1": {
+              "question": "Are PropertyCheck reports legally valid?",
+              "answer": "While PropertyCheck reports are designed to provide strong documentation, their admissibility in legal proceedings depends on your jurisdiction. Our timestamped photos and detailed reports are accepted by many landlord-tenant boards as supporting evidence in deposit disputes."
+            },
+            "q2": {
+              "question": "What makes the timestamps reliable?",
+              "answer": "Photos taken through PropertyCheck are automatically timestamped using your device's date/time and can include GPS location data. This metadata is embedded in the photo files and included in reports to help verify when and where photos were taken."
+            },
+            "q3": {
+              "question": "Can PropertyCheck help me get my deposit back?",
+              "answer": "PropertyCheck provides the documentation you need to support your case in deposit disputes. By having clear evidence of the property's condition at move-in and move-out, you can demonstrate what damage (if any) was pre-existing vs. caused during your tenancy."
+            }
+          }
+        },
+        "accountSubscription": {
+          "title": "Account & Subscription",
+          "questions": {
+            "q1": {
+              "question": "What's the difference between Free and Premium?",
+              "answer": "The Free plan includes 1 property, basic reports, and 90-day storage. Premium adds unlimited properties, shareable links, comparison reports, unlimited storage, and priority support. Premium is available with a 7-day free trial."
+            },
+            "q2": {
+              "question": "How do I cancel my subscription?",
+              "answer": "You can cancel your Premium subscription at any time through your account settings. Your subscription will remain active until the end of your current billing period, and you won't be charged again."
+            },
+            "q3": {
+              "question": "Is there a money-back guarantee?",
+              "answer": "Yes! Premium subscriptions come with a 30-day money-back guarantee. If you're not satisfied, contact support within 30 days of your purchase for a full refund."
+            },
+            "q4": {
+              "question": "Can I change my plan?",
+              "answer": "Yes, you can upgrade from Free to Premium at any time. If you're on a monthly Premium plan, you can switch to annual billing to save money. Changes take effect immediately."
+            }
+          }
+        },
+        "troubleshooting": {
+          "title": "Troubleshooting",
+          "questions": {
+            "q1": {
+              "question": "Why aren't my photos uploading?",
+              "answer": "Photo uploads require an internet connection. If you're having trouble, check your connection and try again. Photos taken offline are stored locally and will upload automatically when you're back online."
+            },
+            "q2": {
+              "question": "I forgot my password. How do I reset it?",
+              "answer": "Click 'Forgot password?' on the login screen and enter your email address. We'll send you a link to reset your password. If you don't see the email, check your spam folder."
+            },
+            "q3": {
+              "question": "How do I contact support?",
+              "answer": "You can reach our support team by email at support@propertycheck.app. Premium subscribers receive priority support with faster response times."
+            }
+          }
+        }
+      }
+    },
+    "contact": {
+      "title": "Contact Support",
+      "subtitle": "Have questions or need help? We're here to assist you.",
+      "getInTouch": {
+        "title": "Get in Touch",
+        "description": "Our support team is available to help you with any questions about PropertyCheck, your account, or technical issues.",
+        "emailSupport": {
+          "title": "Email Support",
+          "description": "Our team typically responds within 24 hours."
+        },
+        "checkFaq": {
+          "title": "Check Our FAQ",
+          "description": "Find quick answers to common questions."
+        },
+        "responseTime": "Within 24 hours"
+      },
+      "form": {
+        "title": "Send us a message",
+        "nameLabel": "Your Name",
+        "namePlaceholder": "John Smith",
+        "emailLabel": "Email Address",
+        "emailPlaceholder": "you@example.com",
+        "subjectLabel": "Subject",
+        "subjectPlaceholder": "Select a subject",
+        "subjectOptions": {
+          "generalQuestion": "General Question",
+          "technicalSupport": "Technical Support",
+          "billingInquiry": "Billing Inquiry",
+          "featureRequest": "Feature Request",
+          "bugReport": "Bug Report",
+          "other": "Other"
+        },
+        "messageLabel": "Message",
+        "messagePlaceholder": "How can we help you?",
+        "submitButton": "Send Message",
+        "privacyNote": "By submitting this form, you agree to our Privacy Policy.",
+        "success": {
+          "title": "Email Client Opened!",
+          "message": "Complete your message in your email app and send it to reach our support team."
+        }
+      }
+    }
+  },
+
+  "legal": {
+    "terms": {
+      "title": "Terms of Service",
+      "metaDescription": "PropertyCheck Terms of Service - Read our terms and conditions for using our rental property inspection documentation service."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "metaDescription": "PropertyCheck Privacy Policy - Learn how we collect, use, and protect your personal information."
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "metaDescription": "PropertyCheck Cookie Policy - Understand how we use cookies and similar technologies."
+    },
+    "effectiveDate": "Effective Date",
+    "lastUpdated": "Last Updated",
+    "tableOfContents": "Table of Contents"
+  },
+
+  "languageSwitcher": {
+    "label": "Language",
+    "english": "English",
+    "french": "Francais"
+  },
+
+  "metadata": {
+    "home": {
+      "title": "PropertyCheck - Protect Your Damage Deposit",
+      "description": "Document your rental property in minutes with professional inspection reports. Protect your damage deposit with timestamped photos and court-admissible documentation."
+    }
+  }
+}

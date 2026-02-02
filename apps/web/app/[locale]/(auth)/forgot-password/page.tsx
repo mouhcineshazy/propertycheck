@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
 
@@ -49,61 +49,31 @@ const successVariants: Variants = {
   },
 };
 
-export default function ResetPasswordPage() {
-  const router = useRouter();
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+export default function ForgotPasswordPage() {
+  const t = useTranslations('auth.forgotPassword');
+  const tCommon = useTranslations('common');
+
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // Check if user has a valid session (came from email link)
-  useEffect(() => {
-    const checkSession = async () => {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (!session) {
-        // No session, redirect to forgot password
-        router.push('/forgot-password');
-      }
-    };
-
-    checkSession();
-  }, [router]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
     setIsLoading(true);
+    setError(null);
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.updateUser({
-        password: password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
       });
 
       if (error) throw error;
 
       setSuccess(true);
-
-      // Redirect to dashboard after 2 seconds
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset password');
+      setError(err instanceof Error ? err.message : 'Failed to send reset email');
     } finally {
       setIsLoading(false);
     }
@@ -122,10 +92,10 @@ export default function ResetPasswordPage() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+            className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6"
           >
             <svg
-              className="w-10 h-10 text-green-600"
+              className="w-10 h-10 text-blue-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -134,20 +104,27 @@ export default function ResetPasswordPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M5 13l4 4L19 7"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
               />
             </svg>
           </motion.div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Password updated!</h1>
-          <p className="text-gray-600 mb-4">
-            Your password has been successfully reset.
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('success.title')}</h1>
+          <p className="text-gray-600 mb-6">
+            {t('success.message')}{' '}
+            <strong className="text-gray-900">{email}</strong>
           </p>
-          <p className="text-gray-500 text-sm">
-            Redirecting to dashboard...
+          <p className="text-gray-500 text-sm mb-8">
+            {t('success.hint')}
           </p>
-          <div className="mt-6">
-            <div className="w-8 h-8 border-2 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto" />
-          </div>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 text-primary-600 font-medium hover:text-primary-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            {t('signInLink')}
+          </Link>
         </motion.div>
       </div>
     );
@@ -164,7 +141,6 @@ export default function ResetPasswordPage() {
       >
         <Link href="/" className="flex items-center gap-2.5 w-fit">
           <Logo size={36} color="#1a1a1a" />
-          {/* <span className="text-xl font-bold text-gray-900">PropertyCheck</span> */}
         </Link>
       </motion.header>
 
@@ -192,13 +168,13 @@ export default function ResetPasswordPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
                   />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Set new password</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('title')}</h1>
               <p className="text-gray-600">
-                Enter your new password below
+                {t('subtitle')}
               </p>
             </div>
 
@@ -232,35 +208,16 @@ export default function ResetPasswordPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <motion.div variants={itemVariants}>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  New password
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('emailLabel')}
                 </label>
                 <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter new password"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('emailPlaceholder')}
                   required
-                  minLength={8}
-                  disabled={isLoading}
-                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
-                />
-                <p className="mt-2 text-xs text-gray-500">Must be at least 8 characters</p>
-              </motion.div>
-
-              <motion.div variants={itemVariants}>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm new password
-                </label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  required
-                  minLength={8}
                   disabled={isLoading}
                   className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
                 />
@@ -277,7 +234,7 @@ export default function ResetPasswordPage() {
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  'Reset password'
+                  t('submitButton')
                 )}
               </motion.button>
             </form>
@@ -286,14 +243,12 @@ export default function ResetPasswordPage() {
               variants={itemVariants}
               className="mt-8 text-center text-gray-600"
             >
+              {t('backToLogin')}{' '}
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors"
+                className="text-primary-600 font-semibold hover:text-primary-700 transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to login
+                {t('signInLink')}
               </Link>
             </motion.p>
           </motion.div>
@@ -307,7 +262,7 @@ export default function ResetPasswordPage() {
         transition={{ delay: 0.5 }}
         className="p-6 text-center text-sm text-gray-500"
       >
-        <p>&copy; {new Date().getFullYear()} PropertyCheck. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} {tCommon('appName')}. All rights reserved.</p>
       </motion.footer>
     </div>
   );

@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
+import { getProvinceOptions } from '@propertycheck/shared';
+
+// Get province options for dropdown
+const PROVINCE_OPTIONS = getProvinceOptions();
 
 // Animation variants
 const containerVariants: Variants = {
@@ -38,6 +43,15 @@ const errorVariants: Variants = {
     y: -10,
     height: 0,
     transition: { duration: 0.2 },
+  },
+};
+
+const successVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
   },
 };
 
@@ -79,69 +93,87 @@ const floatVariants3: Variants = {
   },
 };
 
-// Deposit protection tips for right side
-const depositTips = [
-  {
-    title: 'Document Everything',
-    description: 'Take photos of every room, appliance, and existing damage before moving in.',
-  },
-  {
-    title: 'Use Timestamps',
-    description: 'Timestamped photos serve as legal evidence of the property condition.',
-  },
-  {
-    title: 'Compare Move-In & Move-Out',
-    description: 'Side-by-side comparisons make it easy to prove what was pre-existing.',
-  },
-  {
-    title: 'Share with Your Landlord',
-    description: 'Send secure links to landlords so everyone has the same records.',
-  },
-];
-
-function LoginContent() {
+function SignupContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/dashboard';
+  const plan = (searchParams.get('plan') as 'free' | 'premium') || 'free';
+  const t = useTranslations('auth.signup');
+  const tCommon = useTranslations('common');
+
+  // Plan-specific content using translations
+  const planContent = {
+    free: {
+      title: t('titleFree'),
+      subtitle: t('subtitleFree'),
+      features: [
+        t('freeFeatures.0'),
+        t('freeFeatures.1'),
+        t('freeFeatures.2'),
+        t('freeFeatures.3'),
+      ],
+      badge: null,
+    },
+    premium: {
+      title: t('titlePremium'),
+      subtitle: t('subtitlePremium'),
+      features: [
+        t('premiumFeatures.0'),
+        t('premiumFeatures.1'),
+        t('premiumFeatures.2'),
+        t('premiumFeatures.3'),
+      ],
+      badge: t('badgePremium'),
+    },
+  };
+
+  const content = planContent[plan] || planContent.free;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [province, setProvince] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
+    if (!agreedToTerms) {
+      setError(t('error.termsRequired'));
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+            province: province,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback${plan ? `?plan=${plan}` : ''}`,
+        },
       });
 
       if (error) throw error;
 
-      // Verify we actually got a session
-      if (!data.session) {
-        throw new Error('No session returned from login');
-      }
-
-      // Small delay to ensure cookies are set before redirect
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Use window.location for a full page reload to ensure cookies are sent
-      // router.push doesn't always trigger middleware re-evaluation with new cookies
-      window.location.href = redirect;
+      setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in');
+      setError(err instanceof Error ? err.message : t('error.generic'));
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignup = async () => {
     setIsGoogleLoading(true);
     setError(null);
 
@@ -150,20 +182,72 @@ function LoginContent() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}`,
+          redirectTo: `${window.location.origin}/auth/callback${plan ? `?plan=${plan}` : ''}`,
         },
       });
 
       if (error) throw error;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in with Google');
+      setError(err instanceof Error ? err.message : t('error.generic'));
       setIsGoogleLoading(false);
     }
   };
 
+  // Success state
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-blue-50 p-6">
+        <motion.div
+          variants={successVariants}
+          initial="hidden"
+          animate="visible"
+          className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center max-w-md w-full"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+            className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+          >
+            <svg
+              className="w-10 h-10 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </motion.div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('success.title')}</h1>
+          <p className="text-gray-600 mb-6">
+            {t('success.message')}{' '}
+            <strong className="text-gray-900">{email}</strong>
+          </p>
+          <p className="text-gray-500 text-sm mb-8">
+            {t('success.hint')}
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 text-primary-600 font-medium hover:text-primary-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            {t('success.backToLogin')}
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex">
-      {/* Left Side - Login Form */}
+      {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 flex flex-col p-6 lg:p-12 bg-white">
         {/* Logo */}
         <motion.div
@@ -173,12 +257,11 @@ function LoginContent() {
         >
           <Link href="/" className="flex items-center gap-2.5 w-fit">
             <Logo size={36} color="#1a1a1a" />
-            {/* <span className="text-xl font-bold text-gray-900">PropertyCheck</span> */}
           </Link>
         </motion.div>
 
         {/* Form Container */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center py-8">
           <motion.div
             className="w-full max-w-md"
             variants={containerVariants}
@@ -186,8 +269,15 @@ function LoginContent() {
             animate="visible"
           >
             <motion.div variants={itemVariants} className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-              <p className="text-gray-600">Sign in to your account to continue</p>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold text-gray-900">{content.title}</h1>
+                {content.badge && (
+                  <span className="bg-primary-100 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">
+                    {content.badge}
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-600">{content.subtitle}</p>
             </motion.div>
 
             {/* Error Message */}
@@ -218,11 +308,11 @@ function LoginContent() {
               )}
             </AnimatePresence>
 
-            {/* Google Sign In */}
+            {/* Google Sign Up */}
             <motion.button
               variants={itemVariants}
               type="button"
-              onClick={handleGoogleLogin}
+              onClick={handleGoogleSignup}
               disabled={isGoogleLoading || isLoading}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
@@ -250,7 +340,7 @@ function LoginContent() {
                   />
                 </svg>
               )}
-              Continue with Google
+              {t('googleButton')}
             </motion.button>
 
             <motion.div variants={itemVariants} className="relative my-8">
@@ -258,22 +348,22 @@ function LoginContent() {
                 <div className="w-full border-t border-gray-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">or continue with email</span>
+                <span className="px-4 bg-white text-gray-500">{t('orDivider')}</span>
               </div>
             </motion.div>
 
-            {/* Email Sign In Form */}
-            <form onSubmit={handleEmailLogin} className="space-y-5">
+            {/* Email Sign Up Form */}
+            <form onSubmit={handleEmailSignup} className="space-y-4">
               <motion.div variants={itemVariants}>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email address
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('fullNameLabel')}
                 </label>
                 <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  id="fullName"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder={t('fullNamePlaceholder')}
                   required
                   disabled={isLoading || isGoogleLoading}
                   className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
@@ -281,27 +371,89 @@ function LoginContent() {
               </motion.div>
 
               <motion.div variants={itemVariants}>
-                <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    Password
-                  </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('emailLabel')}
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('emailPlaceholder')}
+                  required
+                  disabled={isLoading || isGoogleLoading}
+                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
+                />
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('passwordLabel')}
+                </label>
                 <input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder={t('passwordPlaceholder')}
                   required
+                  minLength={8}
                   disabled={isLoading || isGoogleLoading}
                   className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 placeholder:text-gray-400"
                 />
+                <p className="mt-2 text-xs text-gray-500">{t('passwordHint')}</p>
+              </motion.div>
+
+              <motion.div variants={itemVariants}>
+                <label htmlFor="province" className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('provinceLabel')}
+                </label>
+                <select
+                  id="province"
+                  value={province}
+                  onChange={(e) => setProvince(e.target.value)}
+                  required
+                  disabled={isLoading || isGoogleLoading}
+                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed text-gray-900 bg-white appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                  }}
+                >
+                  <option value="" disabled>{t('provincePlaceholder')}</option>
+                  {PROVINCE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-xs text-gray-500">{t('provinceHint')}</p>
+              </motion.div>
+
+              {/* Terms and Privacy Agreement Checkbox */}
+              <motion.div variants={itemVariants} className="flex items-start gap-3">
+                <input
+                  id="agreedToTerms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  required
+                  disabled={isLoading || isGoogleLoading}
+                  className="mt-1 w-4 h-4 text-primary-600 border-2 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed"
+                />
+                <label htmlFor="agreedToTerms" className="text-sm text-gray-600 cursor-pointer">
+                  I agree to the{' '}
+                  <Link href="/terms" target="_blank" className="text-primary-600 hover:text-primary-700 underline">
+                    {t('termsLink')}
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" target="_blank" className="text-primary-600 hover:text-primary-700 underline">
+                    {t('privacyLink')}
+                  </Link>
+                  , and consent to the collection and use of my personal information as described.
+                </label>
               </motion.div>
 
               <motion.button
@@ -315,21 +467,21 @@ function LoginContent() {
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  'Sign in'
+                  t('submitButton')
                 )}
               </motion.button>
             </form>
 
             <motion.p
               variants={itemVariants}
-              className="mt-8 text-center text-gray-600"
+              className="mt-6 text-center text-gray-600"
             >
-              Don&apos;t have an account?{' '}
+              {t('hasAccount')}{' '}
               <Link
-                href="/signup"
+                href="/login"
                 className="text-primary-600 font-semibold hover:text-primary-700 transition-colors"
               >
-                Sign up for free
+                {t('signInLink')}
               </Link>
             </motion.p>
           </motion.div>
@@ -342,12 +494,12 @@ function LoginContent() {
           transition={{ delay: 0.5 }}
           className="text-center text-sm text-gray-500"
         >
-          <p>&copy; {new Date().getFullYear()} PropertyCheck. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {tCommon('appName')}. All rights reserved.</p>
         </motion.footer>
       </div>
 
-      {/* Right Side - Social Proof / Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 via-primary-700 to-blue-800 relative overflow-hidden">
+      {/* Right Side - Social Proof / Features */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 relative overflow-hidden">
         {/* Floating shapes */}
         <motion.div
           variants={floatVariants}
@@ -368,7 +520,6 @@ function LoginContent() {
           variants={floatVariants}
           animate="animate"
           className="absolute bottom-20 right-40 w-20 h-20 bg-white/5 rounded-full backdrop-blur-sm"
-          style={{ animationDelay: '3s' }}
         />
         <motion.div
           variants={floatVariants2}
@@ -383,32 +534,26 @@ function LoginContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
           >
-            {/* Deposit Protection Tips */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-8 border border-white/20">
-              <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                Deposit Protection Tips
+            {/* Plan features */}
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-10 border border-white/20">
+              <h2 className="text-2xl font-bold text-white mb-6">
+                {plan === 'premium' ? t('premiumIncludes') : t('freePlanIncludes')}
               </h2>
               <div className="space-y-4">
-                {depositTips.map((tip, index) => (
+                {content.features.map((feature, index) => (
                   <motion.div
-                    key={tip.title}
+                    key={feature}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 + index * 0.1 }}
-                    className="flex items-start gap-3"
+                    className="flex items-center gap-3 text-white"
                   >
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <div>
-                      <p className="text-white font-medium">{tip.title}</p>
-                      <p className="text-white/70 text-sm">{tip.description}</p>
-                    </div>
+                    <span className="text-lg">{feature}</span>
                   </motion.div>
                 ))}
               </div>
@@ -418,12 +563,12 @@ function LoginContent() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
+              transition={{ delay: 0.8 }}
               className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
             >
-              <h3 className="text-white font-semibold mb-3">Download the App</h3>
+              <h3 className="text-white font-semibold mb-3">{t('downloadApp.title')}</h3>
               <p className="text-white/80 text-sm mb-4">
-                Available on iOS and Android. Document your rental property anywhere, anytime.
+                {t('downloadApp.subtitle')}
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 {/* Apple App Store */}
@@ -457,6 +602,27 @@ function LoginContent() {
                 </a>
               </div>
             </motion.div>
+
+            {/* Trust indicators */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="mt-10 flex items-center gap-6"
+            >
+              <div className="flex items-center gap-2 text-white/80">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="text-sm">{t('trustIndicators.ssl')}</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/80">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span className="text-sm">{t('trustIndicators.gdpr')}</span>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -464,18 +630,18 @@ function LoginContent() {
   );
 }
 
-function LoginFallback() {
+function SignupFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-blue-50">
       <div className="w-8 h-8 border-2 border-primary-600/30 border-t-primary-600 rounded-full animate-spin" />
     </div>
   );
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
-    <Suspense fallback={<LoginFallback />}>
-      <LoginContent />
+    <Suspense fallback={<SignupFallback />}>
+      <SignupContent />
     </Suspense>
   );
 }

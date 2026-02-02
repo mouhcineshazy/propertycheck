@@ -1,10 +1,35 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { locales } from '@/i18n/config';
 
 interface CookieToSet {
   name: string;
   value: string;
   options?: CookieOptions;
+}
+
+/**
+ * Strips locale prefix from pathname for route matching
+ * e.g., '/en/dashboard' -> '/dashboard', '/fr/login' -> '/login'
+ */
+function getPathWithoutLocale(pathname: string): string {
+  const segments = pathname.split('/');
+  if (segments[1] && locales.includes(segments[1] as any)) {
+    return '/' + segments.slice(2).join('/') || '/';
+  }
+  return pathname;
+}
+
+/**
+ * Gets the current locale from pathname
+ * e.g., '/en/dashboard' -> 'en', '/fr/login' -> 'fr'
+ */
+function getLocaleFromPath(pathname: string): string {
+  const segments = pathname.split('/');
+  if (segments[1] && locales.includes(segments[1] as any)) {
+    return segments[1];
+  }
+  return 'en'; // default
 }
 
 /**
@@ -67,6 +92,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   const pathname = request.nextUrl.pathname;
+  const pathWithoutLocale = getPathWithoutLocale(pathname);
+  const locale = getLocaleFromPath(pathname);
 
   // ─────────────────────────────────────────────────────────────────────────
   // PROTECTED ROUTES
@@ -81,12 +108,12 @@ export async function updateSession(request: NextRequest) {
   ];
 
   const isProtectedRoute = protectedPaths.some((path) =>
-    pathname.startsWith(path)
+    pathWithoutLocale.startsWith(path)
   );
 
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = `/${locale}/login`;
 
     // Preserve the full URL including query params for redirect after login
     // This ensures ?plan=premium is preserved when redirecting from checkout
@@ -103,7 +130,7 @@ export async function updateSession(request: NextRequest) {
   const authPaths = ['/login', '/signup', '/forgot-password'];
 
   const isAuthRoute = authPaths.some((path) =>
-    pathname.startsWith(path)
+    pathWithoutLocale.startsWith(path)
   );
 
   if (isAuthRoute && user) {
@@ -121,8 +148,8 @@ export async function updateSession(request: NextRequest) {
         url.searchParams.set(key, value);
       });
     } else {
-      // Default to dashboard
-      url.pathname = '/dashboard';
+      // Default to dashboard with current locale
+      url.pathname = `/${locale}/dashboard`;
     }
 
     return NextResponse.redirect(url);

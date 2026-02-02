@@ -3,36 +3,27 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
-const steps = [
-  {
-    number: '01',
-    title: 'Download the App',
-    description:
-      'Get PropertyCheck free on iOS or Android. Create your account in seconds with just your email.',
-    image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=2070',
-  },
-  {
-    number: '02',
-    title: 'Walk Through Your Property',
-    description:
-      'Our guided camera helps you systematically document every room. Add notes and flag any existing damage.',
-    image: 'https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?q=80&w=2070',
-  },
-  {
-    number: '03',
-    title: 'Generate & Share Report',
-    description:
-      'Get a professional PDF report instantly. Share it with your landlord via secure link or email.',
-    image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070',
-  },
+const stepImages = [
+  'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=2070',
+  'https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?q=80&w=2070',
+  'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070',
 ];
 
 export function HowItWorksSection() {
+  const t = useTranslations('landing.howItWorks');
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
   });
+
+  const steps = [
+    { number: '01', titleKey: 'step1.title', descKey: 'step1.description', time: '30 sec' },
+    { number: '02', titleKey: 'step2.title', descKey: 'step2.description', time: '5 min' },
+    { number: '03', titleKey: 'step3.title', descKey: 'step3.description', time: '10 sec' },
+  ];
 
   return (
     <section id="how-it-works" ref={ref} className="py-24 bg-white overflow-hidden">
@@ -45,17 +36,16 @@ export function HowItWorksSection() {
           transition={{ duration: 0.6 }}
         >
           <span className="inline-block text-primary-600 font-semibold text-sm uppercase tracking-wider mb-4">
-            How It Works
+            {t('badge')}
           </span>
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Protected in{' '}
+            {t('title')}{' '}
             <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">
-              Three Simple Steps
+              {t('titleHighlight')}
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            From download to protected deposit in under 10 minutes.
-            No training required.
+            {t('subtitle')}
           </p>
         </motion.div>
 
@@ -82,10 +72,10 @@ export function HowItWorksSection() {
                   </span>
                 </motion.div>
                 <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-6">
-                  {step.title}
+                  {t(step.titleKey)}
                 </h3>
                 <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                  {step.description}
+                  {t(step.descKey)}
                 </p>
 
                 {/* Progress indicator */}
@@ -111,8 +101,8 @@ export function HowItWorksSection() {
                   transition={{ duration: 0.3 }}
                 >
                   <Image
-                    src={step.image}
-                    alt={step.title}
+                    src={stepImages[i]}
+                    alt={t(step.titleKey)}
                     fill
                     className="object-cover"
                   />
@@ -144,10 +134,10 @@ export function HowItWorksSection() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-gray-900">
-                          Step {i + 1} Complete
+                          {t('stepComplete', { step: i + 1 })}
                         </div>
                         <div className="text-xs text-gray-500">
-                          ~{i === 0 ? '30 sec' : i === 1 ? '5 min' : '10 sec'}
+                          ~{step.time}
                         </div>
                       </div>
                     </div>
@@ -165,11 +155,11 @@ export function HowItWorksSection() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          <a
+          <Link
             href="/signup"
             className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-700 transition-all hover:shadow-xl hover:shadow-primary-600/30 hover:scale-105"
           >
-            Get Started Now
+            {t('cta')}
             <svg
               className="w-5 h-5"
               fill="none"
@@ -183,7 +173,7 @@ export function HowItWorksSection() {
                 d="M13 7l5 5m0 0l-5 5m5-5H6"
               />
             </svg>
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>

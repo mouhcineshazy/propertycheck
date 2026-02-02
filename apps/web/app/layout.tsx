@@ -47,14 +47,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
+// Export the font variable for use in locale layout
+export { inter };
+
+type Props = {
   children: React.ReactNode;
-}) {
-  return (
-    <html lang="en" className={inter.variable}>
-      <body className="font-sans antialiased">{children}</body>
-    </html>
-  );
+};
+
+// Root layout - minimal wrapper for locale-based routing
+// The actual html/body tags are in [locale]/layout.tsx
+export default function RootLayout({ children }: Props) {
+  return children;
 }

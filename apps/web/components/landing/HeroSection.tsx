@@ -1,14 +1,22 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 export function HeroSection() {
+  const t = useTranslations('landing.hero');
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 0.95]);
   const textY = useTransform(scrollY, [0, 300], [0, 50]);
+
+  const valueProps = [
+    { icon: '📸', labelKey: 'valueProps.timestamped' },
+    { icon: '📄', labelKey: 'valueProps.pdfReports' },
+    { icon: '🔒', labelKey: 'valueProps.secure' },
+  ];
 
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -75,7 +83,7 @@ export function HeroSection() {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
           <span className="text-white/90 text-sm font-medium">
-            Built for Canadian Renters
+            {t('badge')}
           </span>
         </motion.div>
 
@@ -86,9 +94,9 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1 }}
         >
-          Protect Your
+          {t('title')}
           <span className="block mt-2 bg-gradient-to-r from-blue-400 via-primary-400 to-blue-500 bg-clip-text text-transparent">
-            Damage Deposit
+            {t('titleHighlight')}
           </span>
         </motion.h1>
 
@@ -99,10 +107,9 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Document your rental property in minutes with professional inspection
-          reports that landlords respect.{' '}
+          {t('subtitle')}{' '}
           <span className="text-white font-medium">
-            Never lose your deposit again.
+            {t('subtitleHighlight')}
           </span>
         </motion.p>
 
@@ -118,7 +125,7 @@ export function HeroSection() {
             className="group relative bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg overflow-hidden transition-all hover:shadow-2xl hover:shadow-primary-500/40 hover:scale-105"
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
-              Start Free Today
+              {t('cta')}
               <svg
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                 fill="none"
@@ -136,7 +143,7 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-700 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
 
-{/* Watch Demo button hidden for MVP - no demo video yet */}
+          {/* Watch Demo button hidden for MVP - no demo video yet */}
         </motion.div>
 
         {/* Value Props */}
@@ -146,11 +153,7 @@ export function HeroSection() {
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
         >
-          {[
-            { icon: '📸', label: 'Timestamped Photos' },
-            { icon: '📄', label: 'PDF Reports' },
-            { icon: '🔒', label: 'Secure & Private' },
-          ].map((item, i) => (
+          {valueProps.map((item, i) => (
             <motion.div
               key={i}
               className="text-white"
@@ -161,7 +164,7 @@ export function HeroSection() {
               <div className="text-3xl md:text-4xl mb-1">
                 {item.icon}
               </div>
-              <div className="text-sm text-gray-300 font-medium">{item.label}</div>
+              <div className="text-sm text-gray-300 font-medium">{t(item.labelKey)}</div>
             </motion.div>
           ))}
         </motion.div>
@@ -174,7 +177,7 @@ export function HeroSection() {
         transition={{ duration: 1.5, repeat: Infinity }}
       >
         <div className="flex flex-col items-center gap-2">
-          <span className="text-white/60 text-sm">Scroll to explore</span>
+          <span className="text-white/60 text-sm">{t('scrollToExplore')}</span>
           <svg
             className="w-6 h-6 text-white/60"
             fill="none"

@@ -1,0 +1,598 @@
+{
+  "common": {
+    "appName": "PropertyCheck",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre"
+  },
+
+  "navigation": {
+    "features": "Fonctionnalités",
+    "howItWorks": "Comment ça marche",
+    "pricing": "Tarifs",
+    "login": "Connexion",
+    "getStarted": "Commencer gratuitement",
+    "dashboard": "Tableau de bord",
+    "properties": "Propriétés",
+    "inspections": "Inspections",
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "signOut": "Déconnexion"
+  },
+
+  "landing": {
+    "hero": {
+      "badge": "Conçu pour les locataires canadiens",
+      "title": "Protégez votre",
+      "titleHighlight": "dépôt de garantie",
+      "subtitle": "Documentez votre logement en quelques minutes avec des rapports d'inspection professionnels que les propriétaires respectent.",
+      "subtitleHighlight": "Ne perdez plus jamais votre dépôt.",
+      "cta": "Commencer gratuitement",
+      "scrollToExplore": "Défiler pour explorer",
+      "valueProps": {
+        "timestamped": "Photos horodatées",
+        "pdfReports": "Rapports PDF",
+        "secure": "Sécurisé et privé"
+      }
+    },
+    "features": {
+      "badge": "Fonctionnalités",
+      "title": "Tout ce dont vous avez besoin pour",
+      "titleHighlight": "protéger votre dépôt",
+      "subtitle": "Documentez votre logement locatif avec des photos horodatées et des rapports professionnels. Assez simple pour tout le monde, assez complet pour les litiges.",
+      "freePlan": "Plan Gratuit",
+      "getStarted": "Commencer",
+      "premiumPlan": "Plan Premium",
+      "freeTrial": "Essai gratuit de 7 jours",
+      "free": {
+        "photoDoc": {
+          "title": "Documentation photo",
+          "description": "Capturez des photos de chaque pièce avec des horodatages automatiques. Documentez l'état de votre logement avant et après votre bail."
+        },
+        "basicPdf": {
+          "title": "Rapports PDF de base",
+          "description": "Générez des rapports d'inspection avec vos photos et notes. Parfait pour garder un dossier personnel de l'état à l'emménagement et au déménagement."
+        },
+        "oneProperty": {
+          "title": "1 propriété",
+          "description": "Parfait pour les locataires documentant leur logement actuel. Complétez vos inspections d'emménagement et de déménagement pour une propriété."
+        }
+      },
+      "premium": {
+        "shareLinks": {
+          "title": "Partager des liens sécurisés",
+          "description": "Envoyez des liens d'inspection horodatés directement à votre propriétaire. Ils peuvent voir vos preuves sans créer de compte."
+        },
+        "comparison": {
+          "title": "Rapports de comparaison",
+          "description": "Comparaisons côte à côte entre l'emménagement et le déménagement. Montrez facilement quels dommages existaient avant votre bail."
+        },
+        "legal": {
+          "title": "Preuves juridiquement défendables",
+          "description": "Photos et rapports horodatés qui peuvent soutenir votre cas en cas de litige de dépôt. Documentation professionnelle à laquelle les propriétaires font confiance."
+        },
+        "unlimited": {
+          "title": "Propriétés illimitées",
+          "description": "Documentez autant de propriétés que nécessaire. Parfait pour les déménageurs fréquents ou ceux qui gèrent plusieurs locations."
+        },
+        "cloud": {
+          "title": "Stockage infonuagique illimité",
+          "description": "Toutes vos photos et rapports d'inspection stockés en sécurité dans le nuage. Accédez-y à tout moment, depuis n'importe quel appareil."
+        },
+        "support": {
+          "title": "Soutien prioritaire",
+          "description": "Obtenez de l'aide quand vous en avez besoin avec un soutien par courriel prioritaire. Nous sommes là pour protéger votre dépôt."
+        }
+      }
+    },
+    "howItWorks": {
+      "badge": "Comment ça marche",
+      "title": "Protégé en",
+      "titleHighlight": "trois étapes simples",
+      "subtitle": "Du téléchargement à la protection de votre dépôt en moins de 10 minutes. Aucune formation requise.",
+      "step1": {
+        "title": "Télécharger l'application",
+        "description": "Obtenez PropertyCheck gratuitement sur iOS ou Android. Créez votre compte en quelques secondes avec votre courriel."
+      },
+      "step2": {
+        "title": "Parcourez votre propriété",
+        "description": "Notre caméra guidée vous aide à documenter systématiquement chaque pièce. Ajoutez des notes et signalez les dommages existants."
+      },
+      "step3": {
+        "title": "Générez et partagez le rapport",
+        "description": "Obtenez un rapport PDF professionnel instantanément. Partagez-le avec votre propriétaire via un lien sécurisé ou par courriel."
+      },
+      "stepComplete": "Étape {step} terminée",
+      "cta": "Commencer maintenant"
+    },
+    "pricing": {
+      "badge": "Tarifs",
+      "title": "Des prix simples et",
+      "titleHighlight": "transparents",
+      "subtitle": "Documentez votre emménagement et déménagement gratuitement. Passez à Premium pour partager des preuves que les propriétaires respectent.",
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "perMonth": "mois",
+      "billedAnnually": "Facturé annuellement ({total})",
+      "mostPopular": "Le plus populaire",
+      "whatsIncluded": "Ce qui est inclus",
+      "guarantee": "Garantie de remboursement de 30 jours – Annulez à tout moment – Sans questions",
+      "free": {
+        "name": "Gratuit",
+        "description": "Complétez vos inspections d'emménagement et de déménagement",
+        "cta": "Commencer gratuitement",
+        "features": {
+          "property": "{count} propriété",
+          "inspections": "{count} inspections (emménagement + déménagement)",
+          "basicPdf": "Rapports PDF de base",
+          "photoDoc": "Documentation photo",
+          "storage": "Stockage infonuagique de {days} jours"
+        },
+        "limitations": {
+          "noLinks": "Pas de liens partageables",
+          "watermark": "Rapports de comparaison avec filigrane",
+          "noSupport": "Pas de soutien prioritaire"
+        }
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "Pour les locataires qui veulent des preuves juridiquement défendables",
+        "cta": "Commencer l'essai gratuit de 7 jours",
+        "features": {
+          "shareLinks": "Partagez des liens sécurisés horodatés avec les propriétaires",
+          "legalEvidence": "Preuves juridiquement défendables pour les litiges",
+          "unlimitedProperties": "Propriétés illimitées",
+          "unlimitedInspections": "Inspections illimitées",
+          "comparisonReports": "Rapports de comparaison sans filigrane",
+          "professionalPdf": "Rapports PDF professionnels",
+          "unlimitedStorage": "Stockage infonuagique illimité",
+          "prioritySupport": "Soutien par courriel prioritaire"
+        }
+      }
+    },
+    "download": {
+      "badge": "Disponible maintenant",
+      "title": "Télécharger l'application",
+      "titleHighlight": "PropertyCheck",
+      "subtitle": "Commencez à documenter votre logement locatif aujourd'hui. Prenez des photos horodatées, générez des rapports professionnels et protégez votre dépôt de garantie.",
+      "appStore": {
+        "aria": "Télécharger sur l'App Store",
+        "label": "Télécharger sur",
+        "store": "App Store"
+      },
+      "playStore": {
+        "aria": "Obtenir sur Google Play",
+        "label": "Obtenir sur",
+        "store": "Google Play"
+      },
+      "features": {
+        "quickSetup": {
+          "title": "Configuration rapide",
+          "description": "Commencez en quelques minutes avec notre application facile à utiliser"
+        },
+        "photoDoc": {
+          "title": "Documentation photo",
+          "description": "Capturez et organisez des photos avec des horodatages automatiques"
+        },
+        "pdfReports": {
+          "title": "Rapports PDF",
+          "description": "Générez des rapports d'inspection professionnels instantanément"
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à protéger votre",
+      "titleHighlight": "dépôt de garantie?",
+      "subtitle": "Rejoignez des milliers de locataires canadiens qui font confiance à PropertyCheck pour documenter leurs locations et protéger leurs dépôts de garantie.",
+      "primaryCta": "Commencer gratuitement",
+      "secondaryCta": "Contactez-nous",
+      "trust": {
+        "easyToUse": "Facile à utiliser",
+        "freePlan": "Plan gratuit pour 1 propriété",
+        "freeTrial": "Essai gratuit de 7 jours pour Premium"
+      }
+    }
+  },
+
+  "footer": {
+    "description": "Protégez votre dépôt de garantie avec des rapports d'inspection professionnels.",
+    "sections": {
+      "product": "Produit",
+      "company": "Entreprise",
+      "legal": "Juridique",
+      "support": "Soutien"
+    },
+    "links": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "faq": "FAQ",
+      "about": "À propos",
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation",
+      "cookies": "Politique des témoins",
+      "contact": "Contacter le soutien"
+    },
+    "copyright": "© {year} PropertyCheck. Tous droits réservés.",
+    "madeIn": "Fait avec amour au Canada"
+  },
+
+  "auth": {
+    "login": {
+      "title": "Bon retour",
+      "subtitle": "Connectez-vous à votre compte pour continuer",
+      "emailLabel": "Adresse courriel",
+      "emailPlaceholder": "vous@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Entrez votre mot de passe",
+      "forgotPassword": "Mot de passe oublié?",
+      "submitButton": "Se connecter",
+      "noAccount": "Vous n'avez pas de compte?",
+      "signUpLink": "Inscrivez-vous gratuitement",
+      "googleButton": "Continuer avec Google",
+      "orDivider": "ou continuer avec le courriel",
+      "error": {
+        "invalidCredentials": "Courriel ou mot de passe invalide",
+        "generic": "Échec de la connexion"
+      }
+    },
+    "signup": {
+      "titleFree": "Commencez gratuitement",
+      "titlePremium": "Commencer l'essai Premium",
+      "subtitleFree": "Documentez votre emménagement et déménagement",
+      "subtitlePremium": "Essai gratuit de 7 jours, annulez à tout moment",
+      "badgePremium": "Le plus populaire",
+      "fullNameLabel": "Nom complet",
+      "fullNamePlaceholder": "Jean Tremblay",
+      "emailLabel": "Adresse courriel",
+      "emailPlaceholder": "vous@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Créez un mot de passe",
+      "passwordHint": "Doit contenir au moins 8 caractères",
+      "provinceLabel": "Province",
+      "provincePlaceholder": "Sélectionnez votre province",
+      "provinceHint": "Nous adaptons les informations juridiques à votre province",
+      "termsCheckbox": "J'accepte les {terms} et la {privacy}, et je consens à la collecte et à l'utilisation de mes informations personnelles telles que décrites.",
+      "termsLink": "Conditions d'utilisation",
+      "privacyLink": "Politique de confidentialité",
+      "submitButton": "Créer un compte",
+      "hasAccount": "Vous avez déjà un compte?",
+      "signInLink": "Connectez-vous",
+      "googleButton": "Continuer avec Google",
+      "orDivider": "ou continuer avec le courriel",
+      "success": {
+        "title": "Vérifiez votre courriel",
+        "message": "Nous avons envoyé un lien de confirmation à",
+        "hint": "Cliquez sur le lien dans le courriel pour vérifier votre compte et commencer.",
+        "backToLogin": "Retour à la connexion"
+      },
+      "freePlanIncludes": "Le plan gratuit inclut :",
+      "premiumIncludes": "Premium inclut :",
+      "freeFeatures": ["1 propriété", "Inspections d'emménagement et de déménagement", "Rapports PDF de base", "Documentation photo"],
+      "premiumFeatures": ["Propriétés et inspections illimitées", "Partagez des liens sécurisés horodatés", "Rapports PDF professionnels", "Soutien par courriel prioritaire"],
+      "trustIndicators": {
+        "ssl": "SSL 256 bits",
+        "gdpr": "Conforme au RGPD"
+      },
+      "downloadApp": {
+        "title": "Télécharger l'application",
+        "subtitle": "Disponible sur iOS et Android. Documentez votre logement locatif n'importe où, n'importe quand."
+      },
+      "error": {
+        "termsRequired": "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour créer un compte.",
+        "generic": "Échec de la création du compte"
+      }
+    },
+    "forgotPassword": {
+      "title": "Réinitialiser votre mot de passe",
+      "subtitle": "Entrez votre courriel et nous vous enverrons un lien de réinitialisation",
+      "emailLabel": "Adresse courriel",
+      "emailPlaceholder": "vous@exemple.com",
+      "submitButton": "Envoyer le lien de réinitialisation",
+      "backToLogin": "Vous vous souvenez de votre mot de passe?",
+      "signInLink": "Connexion",
+      "success": {
+        "title": "Vérifiez votre courriel",
+        "message": "Nous avons envoyé un lien de réinitialisation de mot de passe à",
+        "hint": "Cliquez sur le lien dans le courriel pour réinitialiser votre mot de passe."
+      }
+    },
+    "resetPassword": {
+      "title": "Créer un nouveau mot de passe",
+      "subtitle": "Entrez votre nouveau mot de passe ci-dessous",
+      "passwordLabel": "Nouveau mot de passe",
+      "passwordPlaceholder": "Entrez le nouveau mot de passe",
+      "confirmLabel": "Confirmer le nouveau mot de passe",
+      "confirmPlaceholder": "Confirmez le nouveau mot de passe",
+      "passwordHint": "Doit contenir au moins 8 caractères",
+      "submitButton": "Réinitialiser le mot de passe",
+      "backToLogin": "Retour à la connexion",
+      "success": {
+        "title": "Mot de passe mis à jour!",
+        "message": "Votre mot de passe a été réinitialisé avec succès.",
+        "redirecting": "Redirection vers le tableau de bord..."
+      }
+    },
+    "tips": {
+      "title": "Conseils pour protéger votre dépôt",
+      "tip1": {
+        "title": "Documentez tout",
+        "description": "Prenez des photos de chaque pièce, appareil et dommage existant avant d'emménager."
+      },
+      "tip2": {
+        "title": "Utilisez les horodatages",
+        "description": "Les photos horodatées servent de preuve légale de l'état de la propriété."
+      },
+      "tip3": {
+        "title": "Comparez emménagement et déménagement",
+        "description": "Les comparaisons côte à côte facilitent la preuve de ce qui était préexistant."
+      },
+      "tip4": {
+        "title": "Partagez avec votre propriétaire",
+        "description": "Envoyez des liens sécurisés aux propriétaires pour que tout le monde ait les mêmes dossiers."
+      }
+    }
+  },
+
+  "pages": {
+    "about": {
+      "title": "Protéger les locataires à travers le Canada",
+      "subtitle": "PropertyCheck aide les locataires à documenter l'état de leur logement locatif avec des photos horodatées et des rapports professionnels.",
+      "mission": {
+        "title": "Notre mission",
+        "description1": "Chaque année, des milliers de locataires canadiens perdent une partie ou la totalité de leur dépôt de garantie en raison de litiges sur l'état de la propriété. Sans documentation appropriée, c'est souvent votre parole contre celle de votre propriétaire.",
+        "description2": "PropertyCheck a été conçu pour résoudre ce problème. Notre application facilite la création de rapports d'inspection horodatés et professionnels qui documentent exactement dans quel état était votre logement à l'emménagement et au déménagement.",
+        "description3": "Avec PropertyCheck, vous avez les preuves dont vous avez besoin pour protéger votre dépôt."
+      },
+      "benefits": {
+        "easyDocumentation": {
+          "title": "Documentation facile",
+          "description": "Notre processus d'inspection guidé vous accompagne dans la documentation systématique de chaque pièce."
+        },
+        "legalEvidence": {
+          "title": "Preuves légales",
+          "description": "Photos et rapports horodatés qui peuvent soutenir votre cas en cas de litige de dépôt."
+        },
+        "peaceOfMind": {
+          "title": "Tranquillité d'esprit",
+          "description": "Sachez que vous êtes protégé avec une documentation professionnelle dès le premier jour."
+        }
+      },
+      "howItWorks": {
+        "title": "Comment PropertyCheck fonctionne",
+        "step1": {
+          "title": "Documentez votre propriété",
+          "description": "Prenez des photos de chaque pièce avec notre processus d'inspection guidé. Chaque photo est automatiquement horodatée."
+        },
+        "step2": {
+          "title": "Générez des rapports",
+          "description": "Créez des rapports PDF professionnels avec vos photos et notes. Partagez-les avec votre propriétaire."
+        },
+        "step3": {
+          "title": "Protégez votre dépôt",
+          "description": "Lorsque vous déménagez, comparez vos photos d'emménagement avec l'état au déménagement pour prouver ce qui était préexistant."
+        }
+      },
+      "stats": {
+        "depositAtRisk": {
+          "value": "1 500 $",
+          "label": "Dépôt moyen à risque"
+        },
+        "provincesSupported": {
+          "value": "10+",
+          "label": "Provinces prises en charge"
+        },
+        "freeToStart": {
+          "value": "100 %",
+          "label": "Gratuit pour commencer"
+        },
+        "accessToReports": {
+          "value": "24/7",
+          "label": "Accès aux rapports"
+        }
+      },
+      "cta": {
+        "title": "Prêt à protéger votre dépôt?",
+        "subtitle": "Rejoignez des milliers de locataires canadiens qui font confiance à PropertyCheck pour documenter leurs locations.",
+        "button": "Commencer gratuitement"
+      }
+    },
+    "faq": {
+      "title": "Foire aux questions",
+      "subtitle": "Trouvez des réponses aux questions courantes sur PropertyCheck et comment il aide à protéger votre dépôt de garantie.",
+      "searchPlaceholder": "Rechercher des réponses...",
+      "questionsAnswered": "questions répondues",
+      "resultsFound": "résultats trouvés pour",
+      "noResults": {
+        "title": "Aucun résultat trouvé",
+        "subtitle": "Essayez de rechercher avec des mots-clés différents ou parcourez les catégories ci-dessous.",
+        "clearSearch": "Effacer la recherche"
+      },
+      "stillHaveQuestions": {
+        "title": "Vous avez encore des questions?",
+        "subtitle": "Vous ne trouvez pas la réponse que vous cherchez? Notre équipe de soutien est là pour vous aider.",
+        "contactButton": "Contacter le soutien",
+        "emailButton": "Envoyez-nous un courriel"
+      },
+      "categories": {
+        "gettingStarted": {
+          "title": "Pour commencer",
+          "questions": {
+            "q1": {
+              "question": "Qu'est-ce que PropertyCheck?",
+              "answer": "PropertyCheck est une application mobile qui aide les locataires à documenter l'état de leur logement locatif avec des photos horodatées et des rapports professionnels. Elle est conçue pour aider à protéger votre dépôt de garantie en fournissant des preuves de l'état de la propriété à l'emménagement et au déménagement."
+            },
+            "q2": {
+              "question": "PropertyCheck est-il gratuit?",
+              "answer": "Oui! PropertyCheck offre un plan gratuit qui inclut 1 propriété avec des inspections d'emménagement et de déménagement, des rapports PDF de base et une documentation photo avec stockage infonuagique de 90 jours. Des plans Premium sont disponibles pour les locataires qui ont besoin de propriétés illimitées, de liens partageables et de fonctionnalités supplémentaires."
+            },
+            "q3": {
+              "question": "Sur quelles plateformes PropertyCheck est-il disponible?",
+              "answer": "PropertyCheck est disponible sur iOS (App Store) et Android (Google Play). Vous pouvez également accéder à vos rapports et à votre compte via notre tableau de bord web."
+            },
+            "q4": {
+              "question": "Comment créer un compte?",
+              "answer": "Vous pouvez créer un compte gratuit en téléchargeant l'application depuis l'App Store ou Google Play, ou en vous inscrivant sur notre site web. Vous pouvez vous inscrire avec votre courriel ou utiliser la connexion Google pour un accès plus rapide."
+            }
+          }
+        },
+        "inspectionsReports": {
+          "title": "Inspections et rapports",
+          "questions": {
+            "q1": {
+              "question": "Comment effectuer une inspection?",
+              "answer": "Notre application vous guide à travers un processus d'inspection systématique. Sélectionnez simplement la propriété, commencez une nouvelle inspection et suivez les invites pour photographier chaque pièce. L'application horodate automatiquement chaque photo et les organise par pièce."
+            },
+            "q2": {
+              "question": "Que contiennent les rapports PDF?",
+              "answer": "Vos rapports PDF incluent toutes les photos prises pendant l'inspection, organisées par pièce, avec des horodatages et les notes que vous avez ajoutées. Les rapports Premium incluent un formatage professionnel sans filigrane et peuvent inclure des vues de comparaison entre l'état à l'emménagement et au déménagement."
+            },
+            "q3": {
+              "question": "Puis-je partager des rapports avec mon propriétaire?",
+              "answer": "Les abonnés Premium peuvent générer des liens sécurisés et partageables qui permettent aux propriétaires de consulter les rapports d'inspection sans créer de compte. Cela garantit que les deux parties ont accès à la même documentation."
+            },
+            "q4": {
+              "question": "Combien de temps mes rapports sont-ils stockés?",
+              "answer": "Les comptes gratuits incluent un stockage infonuagique de 90 jours. Les comptes Premium incluent un stockage illimité, donc vos rapports sont disponibles aussi longtemps que vous en avez besoin."
+            }
+          }
+        },
+        "legalEvidence": {
+          "title": "Juridique et preuves",
+          "questions": {
+            "q1": {
+              "question": "Les rapports PropertyCheck sont-ils juridiquement valides?",
+              "answer": "Bien que les rapports PropertyCheck soient conçus pour fournir une documentation solide, leur admissibilité dans les procédures judiciaires dépend de votre juridiction. Nos photos horodatées et rapports détaillés sont acceptés par de nombreuses régies du logement comme preuves à l'appui dans les litiges de dépôt."
+            },
+            "q2": {
+              "question": "Qu'est-ce qui rend les horodatages fiables?",
+              "answer": "Les photos prises via PropertyCheck sont automatiquement horodatées en utilisant la date et l'heure de votre appareil et peuvent inclure des données de localisation GPS. Ces métadonnées sont intégrées dans les fichiers photo et incluses dans les rapports pour aider à vérifier quand et où les photos ont été prises."
+            },
+            "q3": {
+              "question": "PropertyCheck peut-il m'aider à récupérer mon dépôt?",
+              "answer": "PropertyCheck fournit la documentation dont vous avez besoin pour soutenir votre cas dans les litiges de dépôt. En ayant des preuves claires de l'état de la propriété à l'emménagement et au déménagement, vous pouvez démontrer quels dommages (le cas échéant) étaient préexistants par rapport à ceux causés pendant votre bail."
+            }
+          }
+        },
+        "accountSubscription": {
+          "title": "Compte et abonnement",
+          "questions": {
+            "q1": {
+              "question": "Quelle est la différence entre Gratuit et Premium?",
+              "answer": "Le plan Gratuit inclut 1 propriété, des rapports de base et un stockage de 90 jours. Premium ajoute des propriétés illimitées, des liens partageables, des rapports de comparaison, un stockage illimité et un soutien prioritaire. Premium est disponible avec un essai gratuit de 7 jours."
+            },
+            "q2": {
+              "question": "Comment annuler mon abonnement?",
+              "answer": "Vous pouvez annuler votre abonnement Premium à tout moment via les paramètres de votre compte. Votre abonnement restera actif jusqu'à la fin de votre période de facturation en cours, et vous ne serez plus facturé."
+            },
+            "q3": {
+              "question": "Y a-t-il une garantie de remboursement?",
+              "answer": "Oui! Les abonnements Premium sont accompagnés d'une garantie de remboursement de 30 jours. Si vous n'êtes pas satisfait, contactez le soutien dans les 30 jours suivant votre achat pour un remboursement complet."
+            },
+            "q4": {
+              "question": "Puis-je changer de plan?",
+              "answer": "Oui, vous pouvez passer de Gratuit à Premium à tout moment. Si vous êtes sur un plan Premium mensuel, vous pouvez passer à la facturation annuelle pour économiser de l'argent. Les changements prennent effet immédiatement."
+            }
+          }
+        },
+        "troubleshooting": {
+          "title": "Dépannage",
+          "questions": {
+            "q1": {
+              "question": "Pourquoi mes photos ne se téléversent-elles pas?",
+              "answer": "Le téléversement de photos nécessite une connexion Internet. Si vous rencontrez des problèmes, vérifiez votre connexion et réessayez. Les photos prises hors ligne sont stockées localement et se téléverseront automatiquement lorsque vous serez de nouveau en ligne."
+            },
+            "q2": {
+              "question": "J'ai oublié mon mot de passe. Comment le réinitialiser?",
+              "answer": "Cliquez sur « Mot de passe oublié? » sur l'écran de connexion et entrez votre adresse courriel. Nous vous enverrons un lien pour réinitialiser votre mot de passe. Si vous ne voyez pas le courriel, vérifiez votre dossier de courrier indésirable."
+            },
+            "q3": {
+              "question": "Comment contacter le soutien?",
+              "answer": "Vous pouvez joindre notre équipe de soutien par courriel à support@propertycheck.app. Les abonnés Premium bénéficient d'un soutien prioritaire avec des temps de réponse plus rapides."
+            }
+          }
+        }
+      }
+    },
+    "contact": {
+      "title": "Contacter le soutien",
+      "subtitle": "Vous avez des questions ou besoin d'aide? Nous sommes là pour vous aider.",
+      "getInTouch": {
+        "title": "Nous contacter",
+        "description": "Notre équipe de soutien est disponible pour vous aider avec toutes vos questions sur PropertyCheck, votre compte ou les problèmes techniques.",
+        "emailSupport": {
+          "title": "Soutien par courriel",
+          "description": "Notre équipe répond généralement dans les 24 heures."
+        },
+        "checkFaq": {
+          "title": "Consultez notre FAQ",
+          "description": "Trouvez des réponses rapides aux questions courantes."
+        },
+        "responseTime": "Dans les 24 heures"
+      },
+      "form": {
+        "title": "Envoyez-nous un message",
+        "nameLabel": "Votre nom",
+        "namePlaceholder": "Jean Tremblay",
+        "emailLabel": "Adresse courriel",
+        "emailPlaceholder": "vous@exemple.com",
+        "subjectLabel": "Sujet",
+        "subjectPlaceholder": "Sélectionnez un sujet",
+        "subjectOptions": {
+          "generalQuestion": "Question générale",
+          "technicalSupport": "Soutien technique",
+          "billingInquiry": "Question de facturation",
+          "featureRequest": "Demande de fonctionnalité",
+          "bugReport": "Signaler un bogue",
+          "other": "Autre"
+        },
+        "messageLabel": "Message",
+        "messagePlaceholder": "Comment pouvons-nous vous aider?",
+        "submitButton": "Envoyer le message",
+        "privacyNote": "En soumettant ce formulaire, vous acceptez notre Politique de confidentialité.",
+        "success": {
+          "title": "Client de messagerie ouvert!",
+          "message": "Complétez votre message dans votre application de messagerie et envoyez-le pour contacter notre équipe de soutien."
+        }
+      }
+    }
+  },
+
+  "legal": {
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "metaDescription": "Conditions d'utilisation de PropertyCheck – Lisez nos termes et conditions pour utiliser notre service de documentation d'inspection de propriétés locatives."
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "metaDescription": "Politique de confidentialité de PropertyCheck – Découvrez comment nous collectons, utilisons et protégeons vos informations personnelles."
+    },
+    "cookies": {
+      "title": "Politique des témoins",
+      "metaDescription": "Politique des témoins de PropertyCheck – Comprenez comment nous utilisons les témoins et technologies similaires."
+    },
+    "effectiveDate": "Date d'entrée en vigueur",
+    "lastUpdated": "Dernière mise à jour",
+    "tableOfContents": "Table des matières"
+  },
+
+  "languageSwitcher": {
+    "label": "Langue",
+    "english": "English",
+    "french": "Français"
+  },
+
+  "metadata": {
+    "home": {
+      "title": "PropertyCheck – Protégez votre dépôt de garantie",
+      "description": "Documentez votre logement locatif en quelques minutes avec des rapports d'inspection professionnels. Protégez votre dépôt de garantie avec des photos horodatées et une documentation admissible en cour."
+    }
+  }
+}

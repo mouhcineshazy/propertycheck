@@ -1,10 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 export function CTASection() {
+  const t = useTranslations('landing.cta');
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -26,14 +28,13 @@ export function CTASection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Protect Your{' '}
+            {t('title')}{' '}
             <span className="bg-gradient-to-r from-primary-400 to-blue-400 bg-clip-text text-transparent">
-              Damage Deposit?
+              {t('titleHighlight')}
             </span>
           </h2>
           <p className="text-xl text-gray-300 mb-10">
-            Join thousands of Canadian renters who trust PropertyCheck to document their rentals
-            and protect their damage deposits.
+            {t('subtitle')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -42,7 +43,7 @@ export function CTASection() {
               className="group relative bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg overflow-hidden transition-all hover:shadow-2xl hover:shadow-white/20 hover:scale-105"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                Get Started Free
+                {t('primaryCta')}
                 <svg
                   className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                   fill="none"
@@ -76,7 +77,7 @@ export function CTASection() {
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              Contact Us
+              {t('secondaryCta')}
             </Link>
           </div>
 
@@ -101,7 +102,7 @@ export function CTASection() {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>Easy to use</span>
+              <span>{t('trust.easyToUse')}</span>
             </div>
             <div className="flex items-center gap-2">
               <svg
@@ -117,7 +118,7 @@ export function CTASection() {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>Free plan for 1 property</span>
+              <span>{t('trust.freePlan')}</span>
             </div>
             <div className="flex items-center gap-2">
               <svg
@@ -133,7 +134,7 @@ export function CTASection() {
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              <span>7-day free trial for Premium</span>
+              <span>{t('trust.freeTrial')}</span>
             </div>
           </motion.div>
         </motion.div>

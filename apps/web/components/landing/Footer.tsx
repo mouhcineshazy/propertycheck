@@ -1,28 +1,31 @@
-import Link from 'next/link';
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { Logo } from '@/components/ui/Logo';
 
-const footerLinks = {
-  product: [
-    { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'FAQ', href: '/faq' },
-  ],
-  company: [
-    { label: 'About', href: '/about' },
-  ],
-  legal: [
-    { label: 'Privacy Policy', href: '/privacy' },
-    { label: 'Terms of Service', href: '/terms' },
-    { label: 'Cookie Policy', href: '/cookies' },
-  ],
-  support: [
-    { label: 'Contact Support', href: '/contact' },
-  ],
-};
-
-const SUPPORT_EMAIL = 'support@propertycheck.app';
-
 export function Footer() {
+  const t = useTranslations('footer');
+
+  const footerLinks = {
+    product: [
+      { labelKey: 'links.features', href: '#features' },
+      { labelKey: 'links.pricing', href: '#pricing' },
+      { labelKey: 'links.faq', href: '/faq' },
+    ],
+    company: [
+      { labelKey: 'links.about', href: '/about' },
+    ],
+    legal: [
+      { labelKey: 'links.privacy', href: '/privacy' },
+      { labelKey: 'links.terms', href: '/terms' },
+      { labelKey: 'links.cookies', href: '/cookies' },
+    ],
+    support: [
+      { labelKey: 'links.contact', href: '/contact' },
+    ],
+  };
+
   return (
     <footer className="bg-gray-900 text-gray-400 pt-16 pb-8">
       <div className="container mx-auto px-6">
@@ -33,22 +36,31 @@ export function Footer() {
               <Logo size="sm" variant="light" />
             </Link>
             <p className="text-sm text-gray-500 mb-4">
-              Protect your damage deposit with professional inspection reports.
+              {t('description')}
             </p>
           </div>
 
           {/* Product Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Product</h4>
+            <h4 className="text-white font-semibold mb-4">{t('sections.product')}</h4>
             <ul className="space-y-2">
               {footerLinks.product.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
+                  {link.href.startsWith('#') ? (
+                    <a
+                      href={link.href}
+                      className="text-sm hover:text-white transition-colors"
+                    >
+                      {t(link.labelKey)}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm hover:text-white transition-colors"
+                    >
+                      {t(link.labelKey)}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -56,7 +68,7 @@ export function Footer() {
 
           {/* Company Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <h4 className="text-white font-semibold mb-4">{t('sections.company')}</h4>
             <ul className="space-y-2">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
@@ -64,7 +76,7 @@ export function Footer() {
                     href={link.href}
                     className="text-sm hover:text-white transition-colors"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -73,7 +85,7 @@ export function Footer() {
 
           {/* Legal Links */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Legal</h4>
+            <h4 className="text-white font-semibold mb-4">{t('sections.legal')}</h4>
             <ul className="space-y-2">
               {footerLinks.legal.map((link) => (
                 <li key={link.href}>
@@ -81,7 +93,7 @@ export function Footer() {
                     href={link.href}
                     className="text-sm hover:text-white transition-colors"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -90,7 +102,7 @@ export function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="text-white font-semibold mb-4">Support</h4>
+            <h4 className="text-white font-semibold mb-4">{t('sections.support')}</h4>
             <ul className="space-y-2">
               {footerLinks.support.map((link) => (
                 <li key={link.href}>
@@ -98,7 +110,7 @@ export function Footer() {
                     href={link.href}
                     className="text-sm hover:text-white transition-colors"
                   >
-                    {link.label}
+                    {t(link.labelKey)}
                   </Link>
                 </li>
               ))}
@@ -109,10 +121,10 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm">
-            © {new Date().getFullYear()} PropertyCheck. All rights reserved.
+            {t('copyright', { year: new Date().getFullYear() })}
           </p>
           <div className="flex items-center gap-4">
-            <span className="text-sm">Made with ❤️ in Canada</span>
+            <span className="text-sm">{t('madeIn')}</span>
           </div>
         </div>
       </div>
