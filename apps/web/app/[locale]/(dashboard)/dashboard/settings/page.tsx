@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { getProvinceOptions } from '@propertycheck/shared';
@@ -195,6 +196,7 @@ export default function SettingsPage() {
                   Active
                 </span>
               </div>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- API route requires full page navigation */}
               <a
                 href="/api/stripe/create-portal-session"
                 className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
@@ -223,12 +225,12 @@ export default function SettingsPage() {
                   <p className="font-medium text-gray-900">Premium Plan</p>
                   <p className="text-sm text-gray-600">Unlimited inspections, priority support, and more</p>
                 </div>
-                <a
+                <Link
                   href="/checkout?plan=premium"
                   className="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
                 >
                   Upgrade
-                </a>
+                </Link>
               </div>
             </>
           )}
