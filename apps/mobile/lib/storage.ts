@@ -50,7 +50,7 @@ export async function uploadInspectionPhoto(
     }
 
     return { path: data.path, error: null };
-  } catch {
+  } catch (err) {
     console.error('Upload exception:', err);
     return { path: '', error: 'Failed to upload photo' };
   }
