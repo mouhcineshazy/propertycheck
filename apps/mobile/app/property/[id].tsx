@@ -93,7 +93,7 @@ export default function PropertyDetailScreen() {
       }
 
       loadProperty();
-    }, [id, router])
+    }, [id, router, t])
   );
 
   const handleDelete = () => {

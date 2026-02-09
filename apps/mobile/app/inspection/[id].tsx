@@ -162,7 +162,7 @@ export default function InspectionDetailScreen() {
       }
 
       loadInspection();
-    }, [id, router])
+    }, [id, router, t])
   );
 
   const handleComplete = async () => {

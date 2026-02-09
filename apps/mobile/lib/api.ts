@@ -6,7 +6,7 @@
  */
 
 import { getMobileSupabaseClient } from './supabase';
-import type { Property, Inspection, InspectionPhoto } from '@propertycheck/database';
+import type { Property, Inspection } from '@propertycheck/database';
 import type {
   PropertyFormData,
   InspectionWithPhotos,
@@ -37,7 +37,7 @@ export async function fetchProperties(): Promise<{
       return { data: null, error: error.message };
     }
     return { data, error: null };
-  } catch (err) {
+  } catch {
     return { data: null, error: 'Failed to fetch properties' };
   }
 }
@@ -336,7 +336,7 @@ export async function getShareableLink(
     const url = `${baseUrl}/share/${data.share_token}`;
 
     return { url, error: null };
-  } catch (err) {
+  } catch {
     return { url: null, error: 'Failed to generate link' };
   }
 }
@@ -377,7 +377,7 @@ export async function checkFreeTierLimits(): Promise<{
       },
       error: null,
     };
-  } catch (err) {
+  } catch {
     return { data: null, error: 'Failed to check limits' };
   }
 }
@@ -465,7 +465,7 @@ export async function fetchComparisonData(propertyId: string): Promise<{
       },
       error: null,
     };
-  } catch (err) {
+  } catch {
     return { data: null, error: 'Failed to fetch comparison data' };
   }
 }

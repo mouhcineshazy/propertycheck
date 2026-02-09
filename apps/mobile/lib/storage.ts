@@ -50,7 +50,7 @@ export async function uploadInspectionPhoto(
     }
 
     return { path: data.path, error: null };
-  } catch (err) {
+  } catch {
     console.error('Upload exception:', err);
     return { path: '', error: 'Failed to upload photo' };
   }
@@ -87,7 +87,7 @@ export async function deleteInspectionPhoto(
       return { error: error.message };
     }
     return { error: null };
-  } catch (err) {
+  } catch {
     return { error: 'Failed to delete photo' };
   }
 }
@@ -125,7 +125,7 @@ export async function deleteInspectionPhotos(
     }
 
     return { error: null };
-  } catch (err) {
+  } catch {
     return { error: 'Failed to delete photos' };
   }
 }

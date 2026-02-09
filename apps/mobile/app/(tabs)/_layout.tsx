@@ -7,7 +7,7 @@
 
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useI18n } from '@/contexts';
+import { useI18n } from '../../contexts';
 
 export default function TabsLayout() {
   const { t } = useI18n();

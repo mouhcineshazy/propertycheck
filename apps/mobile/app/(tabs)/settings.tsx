@@ -24,12 +24,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { User, Subscription } from '@propertycheck/database';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@propertycheck/shared';
-
-// Get province options for dropdown
-const PROVINCE_OPTIONS = getProvinceOptions();
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 import { useI18n, type Locale } from '../../contexts';
+
+// Get province options for dropdown
+const PROVINCE_OPTIONS = getProvinceOptions();
 
 export default function SettingsScreen() {
   // Use auth hook for signOut (React 19 pattern)

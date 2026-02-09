@@ -61,6 +61,7 @@ export default function PropertiesScreen() {
   );
 
   // Optimistic updates - UI updates instantly, rollback on server error
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [optimisticProperties, addOptimistic] = useOptimistic(
     properties,
     (currentProperties, deletedId: string) =>

@@ -16,10 +16,8 @@ import React, {
   ReactNode,
 } from 'react';
 import {
-  i18n,
   initializeI18n,
   setLocale as setI18nLocale,
-  getCurrentLocale,
   t as translate,
   locales,
   localeNames,

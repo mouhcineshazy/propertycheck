@@ -116,7 +116,7 @@ export default function ComparisonScreen() {
       }
 
       loadData();
-    }, [propertyId, router])
+    }, [propertyId, router, t])
   );
 
   const handleGeneratePdf = async () => {

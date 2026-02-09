@@ -28,7 +28,7 @@ function emitChange() {
 
 // Initialize auth listener (runs once)
 let initialized = false;
-let authInitPromise: Promise<void> | null = null;
+let _authInitPromise: Promise<void> | null = null;
 
 function initializeAuth() {
   if (initialized) return;
@@ -37,7 +37,7 @@ function initializeAuth() {
   const supabase = getMobileSupabaseClient();
 
   // Get initial session - this restores the persisted session
-  authInitPromise = supabase.auth.getSession().then(({ data: { session } }) => {
+  _authInitPromise = supabase.auth.getSession().then(({ data: { session } }) => {
     console.log('[useAuth] Session restored:', session ? 'authenticated' : 'not authenticated');
     authState = { session, isLoading: false };
     emitChange();
