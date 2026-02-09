@@ -1,0 +1,320 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "ok": "OK",
+    "yes": "Oui",
+    "no": "Non",
+    "or": "ou",
+    "noNameSet": "Nom non défini",
+    "notSet": "Non défini"
+  },
+
+  "auth": {
+    "login": {
+      "title": "Bon retour",
+      "continueWithGoogle": "Continuer avec Google",
+      "orContinueWith": "ou",
+      "emailLabel": "Courriel",
+      "emailPlaceholder": "vous@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "forgotPassword": "Mot de passe oublié?",
+      "signInButton": "Se connecter",
+      "noAccount": "Vous n'avez pas de compte? ",
+      "signUpLink": "S'inscrire",
+      "errors": {
+        "loginFailed": "Échec de la connexion",
+        "unexpectedError": "Une erreur inattendue s'est produite",
+        "googleSignInFailed": "Échec de la connexion avec Google"
+      }
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez {{appName}} aujourd'hui",
+      "continueWithGoogle": "Continuer avec Google",
+      "fullNameLabel": "Nom complet",
+      "fullNamePlaceholder": "Jean Tremblay",
+      "emailLabel": "Courriel",
+      "emailPlaceholder": "vous@exemple.com",
+      "passwordLabel": "Mot de passe",
+      "passwordPlaceholder": "Au moins 6 caractères",
+      "confirmPasswordLabel": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Répétez votre mot de passe",
+      "provinceLabel": "Province",
+      "provincePlaceholder": "Sélectionnez votre province",
+      "selectProvince": "Sélectionner la province",
+      "createAccountButton": "Créer un compte",
+      "terms": "En créant un compte, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité.",
+      "hasAccount": "Vous avez déjà un compte? ",
+      "signInLink": "Se connecter",
+      "errors": {
+        "registrationFailed": "Échec de l'inscription",
+        "unexpectedError": "Une erreur inattendue s'est produite",
+        "googleSignUpFailed": "Échec de l'inscription avec Google"
+      },
+      "success": {
+        "title": "Vérifiez votre courriel",
+        "message": "Nous vous avons envoyé un lien de confirmation. Veuillez vérifier votre courriel pour activer votre compte."
+      }
+    },
+    "forgotPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Entrez votre courriel pour recevoir un lien de réinitialisation",
+      "emailLabel": "Courriel",
+      "emailPlaceholder": "vous@exemple.com",
+      "sendResetLink": "Envoyer le lien de réinitialisation",
+      "backToLogin": "Retour à la connexion",
+      "success": {
+        "title": "Vérifiez votre courriel",
+        "message": "Nous vous avons envoyé un lien de réinitialisation de mot de passe."
+      },
+      "errors": {
+        "resetFailed": "Échec de la réinitialisation"
+      }
+    }
+  },
+
+  "tabs": {
+    "properties": "Propriétés",
+    "settings": "Paramètres"
+  },
+
+  "properties": {
+    "title": "Propriétés",
+    "empty": {
+      "title": "Aucune propriété",
+      "subtitle": "Ajoutez votre première propriété pour commencer à documenter son état.",
+      "addButton": "Ajouter une propriété"
+    },
+    "addProperty": "Ajouter une propriété",
+    "limitBanner": {
+      "text": "{{current}} / {{max}} propriétés (Plan gratuit)",
+      "tapToUpgrade": " - Appuyez pour passer à Premium"
+    },
+    "limitReached": {
+      "title": "Limite de propriétés atteinte",
+      "message": "Le plan gratuit permet {{limit}} propriété. Passez à Premium pour des propriétés illimitées.",
+      "upgradeButton": "Passer à Premium"
+    },
+    "card": {
+      "inspections": "{{count}} inspections",
+      "noInspections": "Aucune inspection",
+      "lastInspection": "Dernière: {{date}}"
+    }
+  },
+
+  "property": {
+    "new": {
+      "title": "Nouvelle propriété",
+      "nameLabel": "Nom de la propriété",
+      "namePlaceholder": "ex: Mon appartement",
+      "addressLabel": "Adresse",
+      "addressPlaceholder": "123 rue Principale, Ville",
+      "unitLabel": "Numéro d'unité/apt (optionnel)",
+      "unitPlaceholder": "ex: Apt 4B",
+      "typeLabel": "Type de propriété",
+      "types": {
+        "apartment": "Appartement",
+        "house": "Maison",
+        "condo": "Condo"
+      },
+      "notesLabel": "Notes (Optionnel)",
+      "notesPlaceholder": "Ajoutez des notes supplémentaires sur cette propriété...",
+      "createButton": "Créer la propriété",
+      "success": "Propriété créée avec succès",
+      "errors": {
+        "createFailed": "Échec de la création de la propriété"
+      }
+    },
+    "detail": {
+      "title": "Détails de la propriété",
+      "inspections": "Inspections",
+      "noInspections": "Aucune inspection",
+      "noInspectionsHint": "Commencez votre première inspection pour documenter l'état de la propriété.",
+      "startInspection": "Commencer une inspection",
+      "compareInspections": "Comparer",
+      "deleteProperty": "Supprimer la propriété",
+      "notes": "Notes",
+      "added": "Ajoutée le",
+      "loadError": "Échec du chargement de la propriété",
+      "total": "total",
+      "limitReached": "limite atteinte",
+      "deleteConfirm": {
+        "title": "Supprimer la propriété",
+        "message": "Êtes-vous sûr de vouloir supprimer cette propriété? Cela supprimera également toutes les inspections et photos.",
+        "confirmButton": "Supprimer"
+      }
+    }
+  },
+
+  "inspection": {
+    "status": {
+      "completed": "Terminée",
+      "inProgress": "En cours"
+    },
+    "new": {
+      "title": "Nouvelle inspection",
+      "typeLabel": "Type d'inspection",
+      "types": {
+        "moveIn": "Emménagement",
+        "moveOut": "Déménagement",
+        "routine": "Routine"
+      },
+      "roomsTitle": "Pièces à inspecter",
+      "rooms": {
+        "livingRoom": "Salon",
+        "bedroom": "Chambre",
+        "bathroom": "Salle de bain",
+        "kitchen": "Cuisine",
+        "other": "Autre"
+      },
+      "addRoom": "Ajouter une pièce",
+      "startButton": "Commencer l'inspection",
+      "errors": {
+        "createFailed": "Échec de la création de l'inspection"
+      }
+    },
+    "detail": {
+      "title": "Détails de l'inspection",
+      "photos": "Photos ({{count}})",
+      "noPhotos": "Aucune photo",
+      "addPhoto": "Ajouter une photo",
+      "addNote": "Ajouter une note",
+      "notes": "Notes",
+      "notePlaceholder": "Entrez des notes sur cette pièce...",
+      "generateReport": "Générer le rapport",
+      "shareReport": "Partager le rapport",
+      "deleteInspection": "Supprimer l'inspection",
+      "completeTitle": "Terminer l'inspection",
+      "completeMessage": "Marquer cette inspection comme terminée? Cela finalisera l'inspection.",
+      "completeButton": "Terminer",
+      "completedSuccess": "Inspection marquée comme terminée",
+      "deletedSuccess": "Inspection supprimée",
+      "comparisonReadyTitle": "Rapport de comparaison prêt!",
+      "comparisonReadyMessage": "Vous avez maintenant 2 inspections terminées. Souhaitez-vous voir une comparaison côte à côte de l'emménagement vs le déménagement?",
+      "viewComparison": "Voir la comparaison",
+      "pdfGenerated": "Le rapport PDF a été généré",
+      "emailNotAvailable": "Le courriel n'est pas disponible sur cet appareil",
+      "photoLoadError": "Échec du chargement",
+      "loadError": "Échec du chargement de l'inspection",
+      "completeError": "Échec de la finalisation de l'inspection",
+      "emailError": "Échec de la composition du courriel",
+      "unknownProperty": "Propriété inconnue",
+      "deleteConfirm": {
+        "title": "Supprimer l'inspection",
+        "message": "Êtes-vous sûr de vouloir supprimer cette inspection? Cela supprimera également toutes les photos.",
+        "confirmButton": "Supprimer"
+      }
+    },
+    "compare": {
+      "title": "Comparer les inspections",
+      "selectMoveIn": "Sélectionner l'inspection d'emménagement",
+      "selectMoveOut": "Sélectionner l'inspection de déménagement",
+      "generateComparison": "Générer le rapport de comparaison",
+      "shareComparison": "Partager le rapport de comparaison",
+      "pdfGenerated": "PDF généré avec succès",
+      "pdfError": "Échec de la génération du PDF",
+      "loadError": "Échec du chargement de la comparaison",
+      "noInspections": "Vous avez besoin d'au moins deux inspections pour comparer."
+    }
+  },
+
+  "settings": {
+    "title": "Paramètres",
+    "sections": {
+      "account": "Compte",
+      "subscription": "Abonnement",
+      "about": "À propos",
+      "legal": "Légal",
+      "language": "Langue"
+    },
+    "account": {
+      "province": "Province",
+      "provinceHint": "Nous adaptons les informations juridiques à votre province",
+      "selectProvince": "Sélectionner la province"
+    },
+    "subscription": {
+      "premiumPlan": "Plan Premium",
+      "freePlan": "Plan gratuit",
+      "premiumDescription": "Propriétés et inspections illimitées",
+      "freeDescription": "Jusqu'à {{maxProperties}} propriété, {{maxInspections}} inspection",
+      "statusActive": "Actif",
+      "statusFree": "Gratuit",
+      "upgradeButton": "Passer à Premium",
+      "manageButton": "Gérer l'abonnement",
+      "renewsOn": "Renouvellement: {{date}}",
+      "expiresOn": "Expiration: {{date}}",
+      "provinceUpdated": "Province mise à jour avec succès"
+    },
+    "about": {
+      "version": "Version",
+      "support": "Soutien"
+    },
+    "legal": {
+      "termsOfService": "Conditions d'utilisation",
+      "privacyPolicy": "Politique de confidentialité",
+      "cookiePolicy": "Politique des témoins"
+    },
+    "language": {
+      "title": "Langue",
+      "selectLanguage": "Sélectionner la langue",
+      "current": "Actuelle: {{language}}"
+    },
+    "signOut": {
+      "button": "Se déconnecter",
+      "confirmTitle": "Se déconnecter",
+      "confirmMessage": "Êtes-vous sûr de vouloir vous déconnecter?"
+    }
+  },
+
+  "upgrade": {
+    "title": "Passer à Premium",
+    "subtitle": "Débloquez des propriétés illimitées et des fonctionnalités avancées",
+    "reasons": {
+      "propertyLimit": "Vous avez atteint la limite de propriétés",
+      "inspectionLimit": "Vous avez atteint la limite d'inspections",
+      "shareLinks": "Partagez des liens sécurisés avec les propriétaires",
+      "general": "Obtenez plus de PropertyCheck"
+    },
+    "features": {
+      "unlimitedProperties": "Propriétés illimitées",
+      "unlimitedInspections": "Inspections illimitées",
+      "shareLinks": "Liens horodatés sécurisés",
+      "comparisonReports": "Rapports de comparaison",
+      "prioritySupport": "Soutien prioritaire par courriel",
+      "unlimitedStorage": "Stockage infonuagique illimité"
+    },
+    "pricing": {
+      "monthly": "{{price}}/mois",
+      "annual": "{{price}}/an",
+      "savePercent": "Économisez {{percent}}%"
+    },
+    "trialInfo": "Commencez avec un essai gratuit de 7 jours",
+    "startTrial": "Commencer l'essai gratuit",
+    "maybeLater": "Peut-être plus tard"
+  },
+
+  "errors": {
+    "generic": "Une erreur s'est produite",
+    "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
+    "unauthorized": "Veuillez vous connecter pour continuer",
+    "notFound": "Non trouvé",
+    "tryAgain": "Réessayer"
+  },
+
+  "alerts": {
+    "success": "Succès",
+    "error": "Erreur",
+    "confirm": "Confirmer"
+  }
+}

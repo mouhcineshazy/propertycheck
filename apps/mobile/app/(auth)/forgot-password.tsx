@@ -25,6 +25,7 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import { z } from 'zod';
 import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
+import { useTranslation } from '../../contexts';
 
 // Validation schema
 const forgotPasswordSchema = z.object({
@@ -45,7 +46,7 @@ const initialState: ForgotPasswordState = {
 // Forgot password action
 async function forgotPasswordAction(
   _prevState: ForgotPasswordState,
-  payload: { email: string; onSuccess: () => void }
+  payload: { email: string; onSuccess: () => void; t: (key: string) => string }
 ): Promise<ForgotPasswordState> {
   const result = forgotPasswordSchema.safeParse({ email: payload.email });
 
@@ -60,25 +61,26 @@ async function forgotPasswordAction(
     });
 
     if (error) {
-      Alert.alert('Error', error.message);
+      Alert.alert(payload.t('alerts.error'), error.message);
       return { errors: {}, success: false };
     }
 
     Alert.alert(
-      'Check Your Email',
-      'We sent you a password reset link. Please check your email.',
-      [{ text: 'OK', onPress: payload.onSuccess }]
+      payload.t('auth.forgotPassword.success.title'),
+      payload.t('auth.forgotPassword.success.message'),
+      [{ text: payload.t('common.ok'), onPress: payload.onSuccess }]
     );
 
     return { errors: {}, success: true };
   } catch {
-    Alert.alert('Error', 'An unexpected error occurred');
+    Alert.alert(payload.t('alerts.error'), payload.t('auth.login.errors.unexpectedError'));
     return { errors: {}, success: false };
   }
 }
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [state, dispatch, isPending] = useActionState(forgotPasswordAction, initialState);
 
@@ -86,6 +88,7 @@ export default function ForgotPasswordScreen() {
     dispatch({
       email,
       onSuccess: () => router.back(),
+      t,
     });
   };
 
@@ -106,19 +109,19 @@ export default function ForgotPasswordScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Ionicons name="lock-closed-outline" size={48} color="#2563eb" />
-          <Text style={styles.title}>Reset Password</Text>
+          <Text style={styles.title}>{t('auth.forgotPassword.title')}</Text>
           <Text style={styles.subtitle}>
-            Enter your email address and we'll send you a link to reset your password.
+            {t('auth.forgotPassword.subtitle')}
           </Text>
         </View>
 
         {/* Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.forgotPassword.emailLabel')}</Text>
             <TextInput
               style={[styles.input, state.errors.email && styles.inputError]}
-              placeholder="you@example.com"
+              placeholder={t('auth.forgotPassword.emailPlaceholder')}
               placeholderTextColor="#999"
               value={email}
               onChangeText={setEmail}
@@ -140,17 +143,17 @@ export default function ForgotPasswordScreen() {
             {isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Send Reset Link</Text>
+              <Text style={styles.buttonText}>{t('auth.forgotPassword.sendResetLink')}</Text>
             )}
           </TouchableOpacity>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Remember your password? </Text>
+          <Text style={styles.footerText}>{t('auth.forgotPassword.backToLogin')} </Text>
           <Link href="/(auth)/login" asChild>
             <TouchableOpacity>
-              <Text style={styles.link}>Sign In</Text>
+              <Text style={styles.link}>{t('auth.login.signInButton')}</Text>
             </TouchableOpacity>
           </Link>
         </View>

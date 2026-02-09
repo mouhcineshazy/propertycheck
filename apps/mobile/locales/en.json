@@ -1,0 +1,320 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "noNameSet": "No name set",
+    "notSet": "Not set"
+  },
+
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "continueWithGoogle": "Continue with Google",
+      "orContinueWith": "or",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Your password",
+      "forgotPassword": "Forgot password?",
+      "signInButton": "Sign In",
+      "noAccount": "Don't have an account? ",
+      "signUpLink": "Sign Up",
+      "errors": {
+        "loginFailed": "Login Failed",
+        "unexpectedError": "An unexpected error occurred",
+        "googleSignInFailed": "Failed to sign in with Google"
+      }
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join {{appName}} today",
+      "continueWithGoogle": "Continue with Google",
+      "fullNameLabel": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "provinceLabel": "Province",
+      "provincePlaceholder": "Select your province",
+      "selectProvince": "Select Province",
+      "createAccountButton": "Create Account",
+      "terms": "By creating an account, you agree to our Terms of Service and Privacy Policy.",
+      "hasAccount": "Already have an account? ",
+      "signInLink": "Sign In",
+      "errors": {
+        "registrationFailed": "Registration Failed",
+        "unexpectedError": "An unexpected error occurred",
+        "googleSignUpFailed": "Failed to sign up with Google"
+      },
+      "success": {
+        "title": "Check Your Email",
+        "message": "We sent you a confirmation link. Please check your email to verify your account."
+      }
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a reset link",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "sendResetLink": "Send Reset Link",
+      "backToLogin": "Back to Login",
+      "success": {
+        "title": "Check Your Email",
+        "message": "We sent you a password reset link."
+      },
+      "errors": {
+        "resetFailed": "Reset Failed"
+      }
+    }
+  },
+
+  "tabs": {
+    "properties": "Properties",
+    "settings": "Settings"
+  },
+
+  "properties": {
+    "title": "Properties",
+    "empty": {
+      "title": "No Properties Yet",
+      "subtitle": "Add your first property to start documenting its condition.",
+      "addButton": "Add Property"
+    },
+    "addProperty": "Add Property",
+    "limitBanner": {
+      "text": "{{current}} / {{max}} properties (Free tier)",
+      "tapToUpgrade": " - Tap to upgrade"
+    },
+    "limitReached": {
+      "title": "Property Limit Reached",
+      "message": "Free plan allows {{limit}} property. Upgrade to Premium for unlimited properties.",
+      "upgradeButton": "Upgrade to Premium"
+    },
+    "card": {
+      "inspections": "{{count}} inspections",
+      "noInspections": "No inspections yet",
+      "lastInspection": "Last: {{date}}"
+    }
+  },
+
+  "property": {
+    "new": {
+      "title": "New Property",
+      "nameLabel": "Property Name",
+      "namePlaceholder": "e.g., My Apartment",
+      "addressLabel": "Address",
+      "addressPlaceholder": "123 Main Street, City",
+      "unitLabel": "Unit/Apt Number (optional)",
+      "unitPlaceholder": "e.g., Apt 4B",
+      "typeLabel": "Property Type",
+      "types": {
+        "apartment": "Apartment",
+        "house": "House",
+        "condo": "Condo"
+      },
+      "notesLabel": "Notes (Optional)",
+      "notesPlaceholder": "Add any additional notes about this property...",
+      "createButton": "Create Property",
+      "success": "Property created successfully",
+      "errors": {
+        "createFailed": "Failed to create property"
+      }
+    },
+    "detail": {
+      "title": "Property Details",
+      "inspections": "Inspections",
+      "noInspections": "No inspections yet",
+      "noInspectionsHint": "Start your first inspection to document the property condition.",
+      "startInspection": "Start Inspection",
+      "compareInspections": "Compare",
+      "deleteProperty": "Delete Property",
+      "notes": "Notes",
+      "added": "Added",
+      "loadError": "Failed to load property",
+      "total": "total",
+      "limitReached": "limit reached",
+      "deleteConfirm": {
+        "title": "Delete Property",
+        "message": "Are you sure you want to delete this property? This will also delete all inspections and photos.",
+        "confirmButton": "Delete"
+      }
+    }
+  },
+
+  "inspection": {
+    "status": {
+      "completed": "Completed",
+      "inProgress": "In Progress"
+    },
+    "new": {
+      "title": "New Inspection",
+      "typeLabel": "Inspection Type",
+      "types": {
+        "moveIn": "Move-In",
+        "moveOut": "Move-Out",
+        "routine": "Routine"
+      },
+      "roomsTitle": "Rooms to Inspect",
+      "rooms": {
+        "livingRoom": "Living Room",
+        "bedroom": "Bedroom",
+        "bathroom": "Bathroom",
+        "kitchen": "Kitchen",
+        "other": "Other"
+      },
+      "addRoom": "Add Room",
+      "startButton": "Start Inspection",
+      "errors": {
+        "createFailed": "Failed to create inspection"
+      }
+    },
+    "detail": {
+      "title": "Inspection Details",
+      "photos": "Photos ({{count}})",
+      "noPhotos": "No photos",
+      "addPhoto": "Add Photo",
+      "addNote": "Add Note",
+      "notes": "Notes",
+      "notePlaceholder": "Enter notes about this room...",
+      "generateReport": "Generate Report",
+      "shareReport": "Share Report",
+      "deleteInspection": "Delete Inspection",
+      "completeTitle": "Complete Inspection",
+      "completeMessage": "Mark this inspection as complete? This will finalize the inspection.",
+      "completeButton": "Complete",
+      "completedSuccess": "Inspection marked as complete",
+      "deletedSuccess": "Inspection deleted",
+      "comparisonReadyTitle": "Comparison Report Ready!",
+      "comparisonReadyMessage": "You now have 2 completed inspections. Would you like to view a side-by-side comparison of move-in vs move-out?",
+      "viewComparison": "View Comparison",
+      "pdfGenerated": "PDF report has been generated",
+      "emailNotAvailable": "Email is not available on this device",
+      "photoLoadError": "Failed to load",
+      "loadError": "Failed to load inspection",
+      "completeError": "Failed to complete inspection",
+      "emailError": "Failed to compose email",
+      "unknownProperty": "Unknown Property",
+      "deleteConfirm": {
+        "title": "Delete Inspection",
+        "message": "Are you sure you want to delete this inspection? This will also delete all photos.",
+        "confirmButton": "Delete"
+      }
+    },
+    "compare": {
+      "title": "Compare Inspections",
+      "selectMoveIn": "Select Move-In Inspection",
+      "selectMoveOut": "Select Move-Out Inspection",
+      "generateComparison": "Generate Comparison Report",
+      "shareComparison": "Share Comparison Report",
+      "pdfGenerated": "PDF generated successfully",
+      "pdfError": "Failed to generate PDF",
+      "loadError": "Failed to load comparison",
+      "noInspections": "You need at least two inspections to compare."
+    }
+  },
+
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "account": "Account",
+      "subscription": "Subscription",
+      "about": "About",
+      "legal": "Legal",
+      "language": "Language"
+    },
+    "account": {
+      "province": "Province",
+      "provinceHint": "We tailor legal information to your province",
+      "selectProvince": "Select Province"
+    },
+    "subscription": {
+      "premiumPlan": "Premium Plan",
+      "freePlan": "Free Plan",
+      "premiumDescription": "Unlimited properties and inspections",
+      "freeDescription": "Up to {{maxProperties}} property, {{maxInspections}} inspection",
+      "statusActive": "Active",
+      "statusFree": "Free",
+      "upgradeButton": "Upgrade to Premium",
+      "manageButton": "Manage Subscription",
+      "renewsOn": "Renews: {{date}}",
+      "expiresOn": "Expires: {{date}}",
+      "provinceUpdated": "Province updated successfully"
+    },
+    "about": {
+      "version": "Version",
+      "support": "Support"
+    },
+    "legal": {
+      "termsOfService": "Terms of Service",
+      "privacyPolicy": "Privacy Policy",
+      "cookiePolicy": "Cookie Policy"
+    },
+    "language": {
+      "title": "Language",
+      "selectLanguage": "Select Language",
+      "current": "Current: {{language}}"
+    },
+    "signOut": {
+      "button": "Sign Out",
+      "confirmTitle": "Sign Out",
+      "confirmMessage": "Are you sure you want to sign out?"
+    }
+  },
+
+  "upgrade": {
+    "title": "Upgrade to Premium",
+    "subtitle": "Unlock unlimited properties and advanced features",
+    "reasons": {
+      "propertyLimit": "You've reached the property limit",
+      "inspectionLimit": "You've reached the inspection limit",
+      "shareLinks": "Share secure links with landlords",
+      "general": "Get more from PropertyCheck"
+    },
+    "features": {
+      "unlimitedProperties": "Unlimited properties",
+      "unlimitedInspections": "Unlimited inspections",
+      "shareLinks": "Share secure timestamped links",
+      "comparisonReports": "Comparison reports",
+      "prioritySupport": "Priority email support",
+      "unlimitedStorage": "Unlimited cloud storage"
+    },
+    "pricing": {
+      "monthly": "{{price}}/month",
+      "annual": "{{price}}/year",
+      "savePercent": "Save {{percent}}%"
+    },
+    "trialInfo": "Start with a 7-day free trial",
+    "startTrial": "Start Free Trial",
+    "maybeLater": "Maybe Later"
+  },
+
+  "errors": {
+    "generic": "Something went wrong",
+    "networkError": "Network error. Please check your connection.",
+    "unauthorized": "Please sign in to continue",
+    "notFound": "Not found",
+    "tryAgain": "Try Again"
+  },
+
+  "alerts": {
+    "success": "Success",
+    "error": "Error",
+    "confirm": "Confirm"
+  }
+}

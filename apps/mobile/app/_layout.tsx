@@ -3,6 +3,7 @@
  *
  * Uses useSyncExternalStore via useAuth hook for optimal auth state management.
  * Features animated splash screen during initialization.
+ * Includes I18nProvider for internationalization support.
  */
 
 import { useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-rout
 import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../hooks';
 import { SplashScreen } from '../components/SplashScreen';
+import { I18nProvider } from '../contexts';
 
 export default function RootLayout() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -72,7 +74,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <I18nProvider>
       <StatusBar style="auto" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -81,6 +83,6 @@ export default function RootLayout() {
         <Stack.Screen name="property/new" options={{ headerShown: false }} />
         <Stack.Screen name="inspection/[id]" options={{ headerShown: false }} />
       </Stack>
-    </>
+    </I18nProvider>
   );
 }

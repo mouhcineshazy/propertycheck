@@ -26,6 +26,7 @@ import { z } from 'zod';
 import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { createProperty } from '../../lib';
+import { useTranslation } from '../../contexts';
 
 // Property types (must match database PropertyType)
 const PROPERTY_TYPES = [
@@ -58,6 +59,7 @@ async function createPropertyAction(
     property_type: string;
     notes: string;
     onSuccess: () => void;
+    t: (key: string) => string;
   }
 ): Promise<NewPropertyState> {
   const result = newPropertySchema.safeParse({
@@ -80,14 +82,15 @@ async function createPropertyAction(
     payload.onSuccess();
     return { errors: {} };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to create property';
-    Alert.alert('Error', message);
+    const message = err instanceof Error ? err.message : payload.t('property.new.errors.createFailed');
+    Alert.alert(payload.t('alerts.error'), message);
     return { errors: {} };
   }
 }
 
 export default function NewPropertyScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [propertyType, setPropertyType] = useState<string>('apartment');
   const [notes, setNotes] = useState('');
@@ -99,9 +102,10 @@ export default function NewPropertyScreen() {
       address,
       property_type: propertyType,
       notes,
+      t,
       onSuccess: () => {
-        Alert.alert('Success', 'Property created successfully', [
-          { text: 'OK', onPress: () => router.back() },
+        Alert.alert(t('common.success'), t('property.new.success'), [
+          { text: t('common.ok'), onPress: () => router.back() },
         ]);
       },
     });
@@ -117,7 +121,7 @@ export default function NewPropertyScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="close" size={24} color="#1a1a1a" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>New Property</Text>
+        <Text style={styles.headerTitle}>{t('property.new.title')}</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -127,10 +131,10 @@ export default function NewPropertyScreen() {
       >
         {/* Address Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Property Address *</Text>
+          <Text style={styles.label}>{t('property.new.addressLabel')} *</Text>
           <TextInput
             style={[styles.input, state.errors.address && styles.inputError]}
-            placeholder="123 Main St, City, State"
+            placeholder={t('property.new.addressPlaceholder')}
             placeholderTextColor="#999"
             value={address}
             onChangeText={setAddress}
@@ -144,7 +148,7 @@ export default function NewPropertyScreen() {
 
         {/* Property Type Selection */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Property Type *</Text>
+          <Text style={styles.label}>{t('property.new.typeLabel')} *</Text>
           <View style={styles.typeGrid}>
             {PROPERTY_TYPES.map((type) => (
               <TouchableOpacity
@@ -162,7 +166,7 @@ export default function NewPropertyScreen() {
                     propertyType === type.value && styles.typeButtonTextActive,
                   ]}
                 >
-                  {type.label}
+                  {t(`property.new.types.${type.value}`)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -174,10 +178,10 @@ export default function NewPropertyScreen() {
 
         {/* Notes Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Notes (Optional)</Text>
+          <Text style={styles.label}>{t('property.new.notesLabel')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            placeholder="Add any additional notes about this property..."
+            placeholder={t('property.new.notesPlaceholder')}
             placeholderTextColor="#999"
             value={notes}
             onChangeText={setNotes}
@@ -199,7 +203,7 @@ export default function NewPropertyScreen() {
           ) : (
             <>
               <Ionicons name="add-circle-outline" size={20} color="#fff" />
-              <Text style={styles.submitButtonText}>Create Property</Text>
+              <Text style={styles.submitButtonText}>{t('property.new.createButton')}</Text>
             </>
           )}
         </TouchableOpacity>

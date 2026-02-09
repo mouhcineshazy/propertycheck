@@ -25,10 +25,12 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { useProperties, useOptimistic, useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
+import { useTranslation } from '../../contexts';
 
 export default function PropertiesScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useTranslation();
   // Fetch properties using React 19 pattern (useSyncExternalStore internally)
   // No useEffect needed - data is fetched on mount via the hook
   const { properties, isLoading, error, refetch } = useProperties();
@@ -83,7 +85,7 @@ export default function PropertiesScreen() {
         <Text style={styles.propertyAddress}>{item.address}</Text>
         <View style={styles.propertyMeta}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{item.property_type}</Text>
+            <Text style={styles.badgeText}>{t(`property.new.types.${item.property_type}`)}</Text>
           </View>
         </View>
       </View>
@@ -95,16 +97,16 @@ export default function PropertiesScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Ionicons name="home-outline" size={64} color="#ccc" />
-      <Text style={styles.emptyTitle}>No Properties Yet</Text>
+      <Text style={styles.emptyTitle}>{t('properties.empty.title')}</Text>
       <Text style={styles.emptyText}>
-        Add your first property to start tracking inspections.
+        {t('properties.empty.subtitle')}
       </Text>
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => router.push('/property/new' as Href)}
       >
         <Ionicons name="add" size={20} color="#fff" />
-        <Text style={styles.addButtonText}>Add Property</Text>
+        <Text style={styles.addButtonText}>{t('properties.empty.addButton')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -125,7 +127,7 @@ export default function PropertiesScreen() {
         <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-          <Text style={styles.retryText}>Try Again</Text>
+          <Text style={styles.retryText}>{t('errors.tryAgain')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -156,9 +158,8 @@ export default function PropertiesScreen() {
               onPress={isAtLimit ? () => setShowUpgradeModal(true) : undefined}
             >
               <Text style={[styles.limitText, isAtLimit && styles.limitTextWarning]}>
-                {optimisticProperties.length} / {FREE_TIER_LIMITS.maxProperties}{' '}
-                properties (Free tier)
-                {isAtLimit && ' - Tap to upgrade'}
+                {t('properties.limitBanner.text', { current: optimisticProperties.length, max: FREE_TIER_LIMITS.maxProperties })}
+                {isAtLimit && t('properties.limitBanner.tapToUpgrade')}
               </Text>
               {isAtLimit && (
                 <Ionicons name="star" size={14} color="#f59e0b" style={{ marginLeft: 4 }} />

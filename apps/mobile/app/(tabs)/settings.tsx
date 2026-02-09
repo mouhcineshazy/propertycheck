@@ -29,10 +29,13 @@ import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@
 const PROVINCE_OPTIONS = getProvinceOptions();
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
+import { useI18n, type Locale } from '../../contexts';
 
 export default function SettingsScreen() {
   // Use auth hook for signOut (React 19 pattern)
   const { user: authUser, signOut } = useAuth();
+  // i18n hook for translations and language switching
+  const { t, locale, setLocale, locales, localeNames } = useI18n();
 
   // User profile and subscription state
   const [user, setUser] = useState<User | null>(null);
@@ -43,6 +46,7 @@ export default function SettingsScreen() {
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
   const [showProvincePicker, setShowProvincePicker] = useState(false);
   const [isSavingProvince, setIsSavingProvince] = useState(false);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
 
   // Fetch user data function (reusable for refresh)
   const fetchUserData = useCallback(async (showRefreshIndicator = false) => {
@@ -86,14 +90,20 @@ export default function SettingsScreen() {
 
   // Handle logout with confirmation
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('settings.signOut.confirmTitle'), t('settings.signOut.confirmMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Sign Out',
+        text: t('settings.signOut.button'),
         style: 'destructive',
         onPress: signOut,
       },
     ]);
+  };
+
+  // Handle language change
+  const handleLanguageChange = async (newLocale: Locale) => {
+    await setLocale(newLocale);
+    setShowLanguagePicker(false);
   };
 
   // Handle upgrade prompt - show modal
@@ -132,15 +142,15 @@ export default function SettingsScreen() {
       // Update local state
       setUser(prev => prev ? { ...prev, province: provinceCode } : null);
 
-      Alert.alert('Success', 'Province updated successfully');
+      Alert.alert(t('alerts.success'), t('settings.subscription.provinceUpdated'));
     } catch (error) {
       console.error('Province update error:', error);
       const message = error instanceof Error
         ? error.message
         : typeof error === 'object' && error !== null && 'message' in error
           ? String((error as { message: unknown }).message)
-          : 'Failed to update province';
-      Alert.alert('Error', message);
+          : t('errors.generic');
+      Alert.alert(t('alerts.error'), message);
     } finally {
       setIsSavingProvince(false);
     }
@@ -174,8 +184,8 @@ export default function SettingsScreen() {
         }
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'An error occurred';
-      Alert.alert('Error', message);
+      const message = error instanceof Error ? error.message : t('errors.generic');
+      Alert.alert(t('alerts.error'), message);
     } finally {
       setIsManagingSubscription(false);
     }
@@ -201,7 +211,7 @@ export default function SettingsScreen() {
     >
       {/* Profile Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account</Text>
+        <Text style={styles.sectionTitle}>{t('settings.sections.account')}</Text>
         <View style={styles.card}>
           <View style={styles.profileRow}>
             <View style={styles.avatar}>
@@ -213,7 +223,7 @@ export default function SettingsScreen() {
             </View>
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>
-                {user?.full_name || 'No name set'}
+                {user?.full_name || t('common.noNameSet')}
               </Text>
               <Text style={styles.profileEmail}>{user?.email}</Text>
             </View>
@@ -226,9 +236,9 @@ export default function SettingsScreen() {
             disabled={isSavingProvince}
           >
             <View>
-              <Text style={styles.infoLabel}>Province</Text>
+              <Text style={styles.infoLabel}>{t('settings.account.province')}</Text>
               <Text style={styles.infoValue}>
-                {userProvince?.name || 'Not set'}
+                {userProvince?.name || t('common.notSet')}
               </Text>
             </View>
             {isSavingProvince ? (
@@ -254,13 +264,13 @@ export default function SettingsScreen() {
         >
           <View style={styles.pickerContainer}>
             <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>Select Province</Text>
+              <Text style={styles.pickerTitle}>{t('settings.account.selectProvince')}</Text>
               <TouchableOpacity onPress={() => setShowProvincePicker(false)}>
                 <Ionicons name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
             <Text style={styles.pickerSubtitle}>
-              We tailor legal information to your province
+              {t('settings.account.provinceHint')}
             </Text>
             {PROVINCE_OPTIONS.map((option) => (
               <TouchableOpacity
@@ -290,17 +300,17 @@ export default function SettingsScreen() {
 
       {/* Subscription Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Subscription</Text>
+        <Text style={styles.sectionTitle}>{t('settings.sections.subscription')}</Text>
         <View style={styles.card}>
           <View style={styles.subscriptionRow}>
             <View>
               <Text style={styles.planName}>
-                {isPremium ? 'Premium Plan' : 'Free Plan'}
+                {isPremium ? t('settings.subscription.premiumPlan') : t('settings.subscription.freePlan')}
               </Text>
               <Text style={styles.planDescription}>
                 {isPremium
-                  ? 'Unlimited properties and inspections'
-                  : `Up to ${FREE_TIER_LIMITS.maxProperties} property, ${FREE_TIER_LIMITS.maxInspectionsTotal} inspection`}
+                  ? t('settings.subscription.premiumDescription')
+                  : t('settings.subscription.freeDescription', { maxProperties: FREE_TIER_LIMITS.maxProperties, maxInspections: FREE_TIER_LIMITS.maxInspectionsTotal })}
               </Text>
             </View>
             <View
@@ -312,7 +322,7 @@ export default function SettingsScreen() {
                   isPremium && styles.statusBadgeTextPremium,
                 ]}
               >
-                {isPremium ? 'Active' : 'Free'}
+                {isPremium ? t('settings.subscription.statusActive') : t('settings.subscription.statusFree')}
               </Text>
             </View>
           </View>
@@ -321,7 +331,7 @@ export default function SettingsScreen() {
             <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade}>
               <Ionicons name="star" size={18} color="#fff" />
               <Text style={styles.upgradeButtonText}>
-                Upgrade to Premium
+                {t('settings.subscription.upgradeButton')}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -335,7 +345,7 @@ export default function SettingsScreen() {
               ) : (
                 <>
                   <Ionicons name="settings-outline" size={18} color="#2563eb" />
-                  <Text style={styles.manageButtonText}>Manage Subscription</Text>
+                  <Text style={styles.manageButtonText}>{t('settings.subscription.manageButton')}</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -345,8 +355,8 @@ export default function SettingsScreen() {
           {isPremium && subscription?.current_period_end && (
             <Text style={styles.renewalInfo}>
               {subscription.cancel_at_period_end
-                ? `Expires: ${new Date(subscription.current_period_end).toLocaleDateString()}`
-                : `Renews: ${new Date(subscription.current_period_end).toLocaleDateString()}`}
+                ? t('settings.subscription.expiresOn', { date: new Date(subscription.current_period_end).toLocaleDateString() })
+                : t('settings.subscription.renewsOn', { date: new Date(subscription.current_period_end).toLocaleDateString() })}
             </Text>
           )}
         </View>
@@ -354,15 +364,15 @@ export default function SettingsScreen() {
 
       {/* App Info Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About</Text>
+        <Text style={styles.sectionTitle}>{t('settings.sections.about')}</Text>
         <View style={styles.card}>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Version</Text>
+            <Text style={styles.infoLabel}>{t('settings.about.version')}</Text>
             <Text style={styles.infoValue}>{APP_CONFIG.version}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Support</Text>
+            <Text style={styles.infoLabel}>{t('settings.about.support')}</Text>
             <Text style={styles.infoValue}>{APP_CONFIG.supportEmail}</Text>
           </View>
         </View>
@@ -370,47 +380,117 @@ export default function SettingsScreen() {
 
       {/* Legal Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Legal</Text>
+        <Text style={styles.sectionTitle}>{t('settings.sections.legal')}</Text>
         <View style={styles.card}>
           <TouchableOpacity
             style={styles.legalRow}
-            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/terms`)}
+            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/terms`)}
           >
             <View style={styles.legalRowContent}>
               <Ionicons name="document-text-outline" size={20} color="#666" />
-              <Text style={styles.legalRowText}>Terms of Service</Text>
+              <Text style={styles.legalRowText}>{t('settings.legal.termsOfService')}</Text>
             </View>
             <Ionicons name="open-outline" size={18} color="#999" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity
             style={styles.legalRow}
-            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/privacy`)}
+            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/privacy`)}
           >
             <View style={styles.legalRowContent}>
               <Ionicons name="shield-checkmark-outline" size={20} color="#666" />
-              <Text style={styles.legalRowText}>Privacy Policy</Text>
+              <Text style={styles.legalRowText}>{t('settings.legal.privacyPolicy')}</Text>
             </View>
             <Ionicons name="open-outline" size={18} color="#999" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity
             style={styles.legalRow}
-            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/cookies`)}
+            onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/cookies`)}
           >
             <View style={styles.legalRowContent}>
               <Ionicons name="finger-print-outline" size={20} color="#666" />
-              <Text style={styles.legalRowText}>Cookie Policy</Text>
+              <Text style={styles.legalRowText}>{t('settings.legal.cookiePolicy')}</Text>
             </View>
             <Ionicons name="open-outline" size={18} color="#999" />
           </TouchableOpacity>
         </View>
       </View>
 
+      {/* Language Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.sections.language')}</Text>
+        <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.editableRow}
+            onPress={() => setShowLanguagePicker(true)}
+          >
+            <View style={styles.legalRowContent}>
+              <Ionicons name="language-outline" size={20} color="#666" />
+              <View>
+                <Text style={styles.legalRowText}>{t('settings.language.title')}</Text>
+                <Text style={styles.infoLabel}>{localeNames[locale]}</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#999" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Language Picker Modal */}
+      <Modal
+        visible={showLanguagePicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLanguagePicker(false)}
+      >
+        <TouchableOpacity
+          style={styles.pickerOverlay}
+          activeOpacity={1}
+          onPress={() => setShowLanguagePicker(false)}
+        >
+          <View style={styles.pickerContainer}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>{t('settings.language.selectLanguage')}</Text>
+              <TouchableOpacity onPress={() => setShowLanguagePicker(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+            {locales.map((loc) => (
+              <TouchableOpacity
+                key={loc}
+                style={[
+                  styles.pickerOption,
+                  locale === loc && styles.pickerOptionSelected,
+                ]}
+                onPress={() => handleLanguageChange(loc)}
+              >
+                <View style={styles.languageOption}>
+                  <Text style={styles.languageFlag}>
+                    {loc === 'en' ? '🇨🇦' : '🇫🇷'}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.pickerOptionText,
+                      locale === loc && styles.pickerOptionTextSelected,
+                    ]}
+                  >
+                    {localeNames[loc]}
+                  </Text>
+                </View>
+                {locale === loc && (
+                  <Ionicons name="checkmark" size={20} color="#2563eb" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       {/* Logout Button */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-        <Text style={styles.logoutText}>Sign Out</Text>
+        <Text style={styles.logoutText}>{t('settings.signOut.button')}</Text>
       </TouchableOpacity>
 
       <View style={styles.bottomPadding} />
@@ -659,5 +739,13 @@ const styles = StyleSheet.create({
   legalRowText: {
     fontSize: 15,
     color: '#1a1a1a',
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  languageFlag: {
+    fontSize: 24,
   },
 });

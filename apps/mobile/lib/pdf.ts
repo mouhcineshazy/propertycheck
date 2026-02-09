@@ -13,27 +13,89 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { InspectionWithPhotos } from './types';
 import { getPhotoUrl } from './storage';
 import { APP_CONFIG, getProvince, type ProvinceConfig } from '@propertycheck/shared';
 
-// Room type configuration for grouping and display
+// Room type configuration for grouping and display - with translations
 const ROOM_CONFIG = {
-  living_room: { label: 'Living Areas', order: 1, icon: '🏠' },
-  kitchen: { label: 'Kitchen', order: 2, icon: '🍳' },
-  bedroom: { label: 'Bedrooms', order: 3, icon: '🛏️' },
-  bathroom: { label: 'Bathrooms', order: 4, icon: '🚿' },
-  other: { label: 'Other Areas', order: 5, icon: '📷' },
+  living_room: { label: { en: 'Living Areas', fr: 'Salon' }, order: 1, icon: '🏠' },
+  kitchen: { label: { en: 'Kitchen', fr: 'Cuisine' }, order: 2, icon: '🍳' },
+  bedroom: { label: { en: 'Bedrooms', fr: 'Chambres' }, order: 3, icon: '🛏️' },
+  bathroom: { label: { en: 'Bathrooms', fr: 'Salles de bain' }, order: 4, icon: '🚿' },
+  other: { label: { en: 'Other Areas', fr: 'Autres espaces' }, order: 5, icon: '📷' },
 } as const;
 
-// Inspection type labels
+// Inspection type labels with translations
 const INSPECTION_TYPE_LABELS = {
-  'move-in': 'Move-In Inspection',
-  'move-out': 'Move-Out Inspection',
-  'routine': 'Routine Inspection',
-  'draft': 'Inspection Report',
-  'completed': 'Inspection Report',
+  en: {
+    'move-in': 'Move-In Inspection',
+    'move-out': 'Move-Out Inspection',
+    'routine': 'Routine Inspection',
+    'draft': 'Inspection Report',
+    'completed': 'Inspection Report',
+  },
+  fr: {
+    'move-in': 'Inspection d\'emménagement',
+    'move-out': 'Inspection de déménagement',
+    'routine': 'Inspection de routine',
+    'draft': 'Rapport d\'inspection',
+    'completed': 'Rapport d\'inspection',
+  },
 } as const;
+
+// PDF text translations
+const PDF_TRANSLATIONS = {
+  en: {
+    propertyInspectionReport: 'Property Inspection Report',
+    officialDocumentation: 'Official documentation of property condition',
+    propertyAddress: 'Property Address',
+    inspectionDateTime: 'Inspection Date & Time',
+    renterName: 'Renter Name',
+    inspectionStatus: 'Inspection Status',
+    completed: 'Completed',
+    inProgress: 'In Progress',
+    inspectorNotes: 'Inspector Notes',
+    photoDocumentation: 'Photo Documentation',
+    timestampedPhotos: 'timestamped photo',
+    timestampedPhotosPlural: 'timestamped photos',
+    photo: 'Photo',
+    photos: 'photos',
+    noPhotosAttached: 'No photos attached to this inspection.',
+    shareThisInspection: 'Share this inspection',
+    scanToView: 'Scan to view online report or share with landlord',
+    legalNotice: 'Legal Notice',
+    shareNotice: 'Share this report with your landlord, property manager, or rental tribunal as proof of property condition.',
+    reportGeneratedOn: 'Report generated on',
+    at: 'at',
+  },
+  fr: {
+    propertyInspectionReport: 'Rapport d\'inspection de propriété',
+    officialDocumentation: 'Documentation officielle de l\'état de la propriété',
+    propertyAddress: 'Adresse de la propriété',
+    inspectionDateTime: 'Date et heure de l\'inspection',
+    renterName: 'Nom du locataire',
+    inspectionStatus: 'Statut de l\'inspection',
+    completed: 'Terminée',
+    inProgress: 'En cours',
+    inspectorNotes: 'Notes de l\'inspecteur',
+    photoDocumentation: 'Documentation photographique',
+    timestampedPhotos: 'photo horodatée',
+    timestampedPhotosPlural: 'photos horodatées',
+    photo: 'Photo',
+    photos: 'photos',
+    noPhotosAttached: 'Aucune photo jointe à cette inspection.',
+    shareThisInspection: 'Partager cette inspection',
+    scanToView: 'Scannez pour voir le rapport en ligne ou partager avec le propriétaire',
+    legalNotice: 'Avis juridique',
+    shareNotice: 'Partagez ce rapport avec votre propriétaire, gestionnaire immobilier ou tribunal des loyers comme preuve de l\'état de la propriété.',
+    reportGeneratedOn: 'Rapport généré le',
+    at: 'à',
+  },
+} as const;
+
+type Locale = 'en' | 'fr';
 
 /**
  * Generate a QR code as SVG for embedding in HTML
@@ -49,19 +111,33 @@ function generateQRCodeSVG(url: string, size: number = 100): string {
 /**
  * Get province-specific legal disclaimer text
  */
-function getLegalDisclaimer(province: ProvinceConfig | undefined): string {
+function getLegalDisclaimer(province: ProvinceConfig | undefined, locale: Locale = 'en'): string {
   if (!province) {
-    return 'This timestamped inspection report documents the property condition at the time of inspection. It may be used as evidence in rental disputes.';
+    return locale === 'fr'
+      ? 'Ce rapport d\'inspection horodaté documente l\'état de la propriété au moment de l\'inspection. Il peut être utilisé comme preuve dans les litiges locatifs.'
+      : 'This timestamped inspection report documents the property condition at the time of inspection. It may be used as evidence in rental disputes.';
   }
 
-  const disclaimers: Record<string, string> = {
-    ON: `This timestamped inspection is legally defensible evidence under the ${province.tenancyAct}. It may be submitted to the ${province.disputeBody} as proof of property condition.`,
-    BC: `This inspection documentation complies with ${province.tenancyAct} requirements. BC law requires condition inspections for security deposit claims. Submit to ${province.disputeBody} if needed.`,
-    AB: `This inspection report meets ${province.tenancyAct} requirements for security deposit documentation. May be submitted to ${province.disputeBody} for dispute resolution.`,
-    QC: `Cette inspection documentée peut être présentée au ${province.disputeBody} comme preuve de l'état du logement. / This documented inspection may be presented to ${province.disputeBody} as proof of dwelling condition.`,
+  const disclaimers: Record<string, Record<Locale, string>> = {
+    ON: {
+      en: `This timestamped inspection is legally defensible evidence under the ${province.tenancyAct}. It may be submitted to the ${province.disputeBody} as proof of property condition.`,
+      fr: `Cette inspection horodatée constitue une preuve juridiquement recevable en vertu de la ${province.tenancyAct}. Elle peut être soumise au ${province.disputeBody} comme preuve de l'état de la propriété.`,
+    },
+    BC: {
+      en: `This inspection documentation complies with ${province.tenancyAct} requirements. BC law requires condition inspections for security deposit claims. Submit to ${province.disputeBody} if needed.`,
+      fr: `Cette documentation d'inspection est conforme aux exigences de la ${province.tenancyAct}. La loi de la C.-B. exige des inspections d'état pour les réclamations de dépôt de garantie. Soumettez au ${province.disputeBody} si nécessaire.`,
+    },
+    AB: {
+      en: `This inspection report meets ${province.tenancyAct} requirements for security deposit documentation. May be submitted to ${province.disputeBody} for dispute resolution.`,
+      fr: `Ce rapport d'inspection répond aux exigences de la ${province.tenancyAct} pour la documentation du dépôt de garantie. Peut être soumis au ${province.disputeBody} pour la résolution des litiges.`,
+    },
+    QC: {
+      en: `This documented inspection may be presented to ${province.disputeBody} as proof of dwelling condition.`,
+      fr: `Cette inspection documentée peut être présentée au ${province.disputeBody} comme preuve de l'état du logement.`,
+    },
   };
 
-  return disclaimers[province.code] || disclaimers.ON;
+  return disclaimers[province.code]?.[locale] || disclaimers.ON[locale];
 }
 
 /**
@@ -98,6 +174,7 @@ export interface PDFOptions {
   shareUrl?: string;
   isFirstInspection?: boolean;
   isPremium?: boolean;
+  locale?: 'en' | 'fr';
 }
 
 /**
@@ -130,22 +207,29 @@ function generateReportHtml(
     shareUrl,
     isFirstInspection = true,
     isPremium = false,
+    locale = 'en',
   } = options;
 
-  // Dates and times
-  const inspectionDate = format(new Date(inspection.inspection_date), 'MMMM d, yyyy');
-  const inspectionTime = format(new Date(inspection.inspection_date), 'h:mm a');
-  const generatedDate = format(new Date(), 'MMMM d, yyyy');
-  const generatedTime = format(new Date(), 'h:mm a');
+  // Get translations for current locale
+  const t = PDF_TRANSLATIONS[locale];
+
+  // Dates and times - use French Canadian format and locale if locale is fr
+  const dateFormat = locale === 'fr' ? 'd MMMM yyyy' : 'MMMM d, yyyy';
+  const dateLocale = locale === 'fr' ? { locale: fr } : undefined;
+  const inspectionDate = format(new Date(inspection.inspection_date), dateFormat, dateLocale);
+  const inspectionTime = format(new Date(inspection.inspection_date), 'HH:mm');
+  const generatedDate = format(new Date(), dateFormat, dateLocale);
+  const generatedTime = format(new Date(), 'HH:mm');
 
   // Determine inspection type - pass explicit type to function for validation
   const inspectionType = getInspectionType(inspection, isFirstInspection, explicitType);
+  const inspectionTypeLabels = INSPECTION_TYPE_LABELS[locale];
   const inspectionTypeLabel =
-    INSPECTION_TYPE_LABELS[inspectionType as keyof typeof INSPECTION_TYPE_LABELS] || 'Inspection Report';
+    inspectionTypeLabels[inspectionType as keyof typeof inspectionTypeLabels] || (locale === 'fr' ? 'Rapport d\'inspection' : 'Inspection Report');
 
   // Province legal info
   const province = provinceCode ? getProvince(provinceCode) : undefined;
-  const legalDisclaimer = getLegalDisclaimer(province);
+  const legalDisclaimer = getLegalDisclaimer(province, locale);
 
   // Group photos by room type
   const photosByRoom = inspection.photos.reduce(
@@ -169,18 +253,20 @@ function generateReportHtml(
   const photoSections = sortedRooms
     .map((room) => {
       const photos = photosByRoom[room];
-      const roomConfig = ROOM_CONFIG[room as keyof typeof ROOM_CONFIG] || { label: room, icon: '📷' };
+      const roomConfigItem = ROOM_CONFIG[room as keyof typeof ROOM_CONFIG];
+      const roomLabel = roomConfigItem ? roomConfigItem.label[locale] : room;
+      const roomIcon = roomConfigItem?.icon || '📷';
 
       const photoHtml = photos
         .map(
           (photo, index) => `
           <div class="photo-item">
             <div class="photo-wrapper">
-              <img src="${getPhotoUrl(photo.storage_path)}" alt="${photo.caption || roomConfig.label}" />
+              <img src="${getPhotoUrl(photo.storage_path)}" alt="${photo.caption || roomLabel}" />
               <div class="photo-number">${index + 1}</div>
             </div>
             <div class="photo-meta">
-              ${photo.caption ? `<p class="caption">${photo.caption}</p>` : `<p class="caption">${roomConfig.label} - Photo ${index + 1}</p>`}
+              ${photo.caption ? `<p class="caption">${photo.caption}</p>` : `<p class="caption">${roomLabel} - ${t.photo} ${index + 1}</p>`}
             </div>
           </div>
         `
@@ -190,9 +276,9 @@ function generateReportHtml(
       return `
         <div class="room-section">
           <div class="room-header">
-            <span class="room-icon">${roomConfig.icon}</span>
-            <h3>${roomConfig.label}</h3>
-            <span class="photo-count">${photos.length} photo${photos.length !== 1 ? 's' : ''}</span>
+            <span class="room-icon">${roomIcon}</span>
+            <h3>${roomLabel}</h3>
+            <span class="photo-count">${photos.length} ${photos.length !== 1 ? t.photos : t.photo.toLowerCase()}</span>
           </div>
           <div class="photo-grid">
             ${photoHtml}
@@ -210,8 +296,8 @@ function generateReportHtml(
           ${generateQRCodeSVG(shareUrl, 80)}
         </div>
         <div class="qr-text">
-          <p class="qr-label">Share this inspection</p>
-          <p class="qr-hint">Scan to view online report or share with landlord</p>
+          <p class="qr-label">${t.shareThisInspection}</p>
+          <p class="qr-hint">${t.scanToView}</p>
         </div>
       </div>
     `
@@ -272,6 +358,14 @@ function generateReportHtml(
         /* Wrapper to contain all content with space for footer */
         .content-wrapper {
           padding: 30px 40px 50px 40px; /* Extra bottom padding for footer */
+          min-height: calc(100vh - 30px); /* Account for page-footer */
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Main content area that grows to fill space */
+        .main-content {
+          flex: 1;
         }
 
         /* Fixed footer that appears on every printed page */
@@ -424,6 +518,21 @@ function generateReportHtml(
           flex-direction: column;
         }
 
+        .info-item.info-notes {
+          grid-column: 1 / -1;
+          margin-top: 4px;
+        }
+
+        .info-item.info-notes .notes-text {
+          background: transparent;
+          padding: 0;
+          border-radius: 0;
+          border-left: none;
+          line-height: 1.5;
+          font-style: italic;
+          color: ${colors.gray};
+        }
+
         .info-label {
           font-size: 8pt;
           font-weight: 600;
@@ -468,29 +577,6 @@ function generateReportHtml(
         }
 
         /* Notes Section */
-        .notes-section {
-          background: ${isPremium ? '#eff6ff' : '#fffbeb'};
-          border-left: 4px solid ${isPremium ? BRAND_COLORS.primary : BRAND_COLORS.warning};
-          padding: 16px 20px;
-          border-radius: 0 12px 12px 0;
-          margin-bottom: 28px;
-        }
-
-        .notes-section h2 {
-          font-size: 10pt;
-          font-weight: 600;
-          color: ${isPremium ? BRAND_COLORS.primaryDark : '#92400e'};
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 8px;
-        }
-
-        .notes-section p {
-          font-size: 11pt;
-          color: ${colors.dark};
-          line-height: 1.6;
-        }
-
         /* Photo Documentation */
         .photos-header {
           display: flex;
@@ -694,9 +780,10 @@ function generateReportHtml(
 
         /* Footer */
         .footer {
-          margin-top: 32px;
+          margin-top: auto; /* Push to bottom using flexbox */
           padding-top: 20px;
           border-top: 3px solid ${isPremium ? BRAND_COLORS.primary : '#e5e5e5'};
+          flex-shrink: 0;
         }
 
         .legal-notice {
@@ -765,6 +852,7 @@ function generateReportHtml(
       </div>
 
       <div class="content-wrapper">
+      <div class="main-content">
       <!-- Header -->
       <div class="header">
         <div class="header-top">
@@ -779,79 +867,78 @@ function generateReportHtml(
           </div>
         </div>
 
-        <h1>Property Inspection Report</h1>
-        <p class="subtitle">Official documentation of property condition</p>
+        <h1>${t.propertyInspectionReport}</h1>
+        <p class="subtitle">${t.officialDocumentation}</p>
 
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Property Address</span>
+            <span class="info-label">${t.propertyAddress}</span>
             <span class="info-value address">${propertyAddress}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Inspection Date & Time</span>
-            <span class="info-value">${inspectionDate} at ${inspectionTime}</span>
+            <span class="info-label">${t.inspectionDateTime}</span>
+            <span class="info-value">${inspectionDate} ${t.at} ${inspectionTime}</span>
           </div>
           ${
             renterName
               ? `
           <div class="info-item">
-            <span class="info-label">Renter Name</span>
+            <span class="info-label">${t.renterName}</span>
             <span class="info-value">${renterName}</span>
           </div>
           `
               : ''
           }
           <div class="info-item">
-            <span class="info-label">Inspection Status</span>
+            <span class="info-label">${t.inspectionStatus}</span>
             <div class="status-row">
               <span class="status-dot ${inspection.status}"></span>
-              <span class="info-value">${inspection.status === 'completed' ? 'Completed' : 'In Progress'}</span>
+              <span class="info-value">${inspection.status === 'completed' ? t.completed : t.inProgress}</span>
             </div>
           </div>
+          ${
+            inspection.notes
+              ? `
+          <div class="info-item info-notes">
+            <span class="info-label">${t.inspectorNotes}</span>
+            <span class="info-value notes-text">${inspection.notes}</span>
+          </div>
+          `
+              : ''
+          }
         </div>
       </div>
 
-      <!-- Notes Section -->
-      ${
-        inspection.notes
-          ? `
-        <div class="notes-section">
-          <h2>Inspector Notes</h2>
-          <p>${inspection.notes}</p>
-        </div>
-      `
-          : ''
-      }
-
       <!-- Photo Documentation -->
       <div class="photos-header">
-        <h2>Photo Documentation</h2>
-        <span class="photo-summary">${inspection.photos.length} timestamped photo${inspection.photos.length !== 1 ? 's' : ''}</span>
+        <h2>${t.photoDocumentation}</h2>
+        <span class="photo-summary">${inspection.photos.length} ${inspection.photos.length !== 1 ? t.timestampedPhotosPlural : t.timestampedPhotos}</span>
       </div>
 
       ${
         photoSections ||
         `
         <div class="empty-photos">
-          <p>No photos attached to this inspection.</p>
+          <p>${t.noPhotosAttached}</p>
         </div>
       `
       }
 
       ${qrCodeSection}
+      </div><!-- end main-content -->
 
-      <!-- Footer -->
+      <!-- Footer - pushed to bottom by flexbox -->
       <div class="footer">
         <div class="legal-notice">
-          <p><strong>Legal Notice:</strong> ${legalDisclaimer}</p>
+          <p><strong>${t.legalNotice}:</strong> ${legalDisclaimer}</p>
         </div>
 
         <p class="share-notice">
-          Share this report with your landlord, property manager, or rental tribunal as proof of property condition.
+          ${t.shareNotice}
         </p>
 
         <div class="footer-meta">
-          <span>Report generated on ${generatedDate} at ${generatedTime}</span>
+          <span>${t.reportGeneratedOn} ${generatedDate} ${t.at} ${generatedTime}</span>
           <span class="footer-brand"><span class="brand-property">Property</span><span class="brand-check">Check</span> &bull; ${APP_CONFIG.supportEmail}</span>
         </div>
       </div>

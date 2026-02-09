@@ -27,6 +27,7 @@ import * as Linking from 'expo-linking';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { loginSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
+import { useTranslation } from '../../contexts';
 
 // Required for Google OAuth
 WebBrowser.maybeCompleteAuthSession();
@@ -43,7 +44,7 @@ const initialState: LoginState = {
 // Email/password login action
 async function loginAction(
   _prevState: LoginState,
-  payload: { email: string; password: string }
+  payload: { email: string; password: string; t: (key: string) => string }
 ): Promise<LoginState> {
   const result = loginSchema.safeParse(payload);
 
@@ -59,25 +60,26 @@ async function loginAction(
     });
 
     if (error) {
-      Alert.alert('Login Failed', error.message);
+      Alert.alert(payload.t('auth.login.errors.loginFailed'), error.message);
       return { errors: {} };
     }
 
     return { errors: {} };
   } catch {
-    Alert.alert('Error', 'An unexpected error occurred');
+    Alert.alert(payload.t('alerts.error'), payload.t('auth.login.errors.unexpectedError'));
     return { errors: {} };
   }
 }
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
   const [state, dispatch, isPending] = useActionState(loginAction, initialState);
 
   const handleSubmit = () => {
-    dispatch({ email, password });
+    dispatch({ email, password, t });
   };
 
   // Google OAuth Sign In
@@ -98,7 +100,7 @@ export default function LoginScreen() {
       });
 
       if (error) {
-        Alert.alert('Error', error.message);
+        Alert.alert(t('alerts.error'), error.message);
         return;
       }
 
@@ -125,7 +127,7 @@ export default function LoginScreen() {
       }
     } catch (err) {
       console.error('Google sign in error:', err);
-      Alert.alert('Error', 'Failed to sign in with Google');
+      Alert.alert(t('alerts.error'), t('auth.login.errors.googleSignInFailed'));
     } finally {
       setGoogleLoading(false);
     }
@@ -156,7 +158,7 @@ export default function LoginScreen() {
           ) : (
             <>
               <Ionicons name="logo-google" size={20} color="#1a1a1a" />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
+              <Text style={styles.googleButtonText}>{t('auth.login.continueWithGoogle')}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -164,17 +166,17 @@ export default function LoginScreen() {
         {/* Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
+          <Text style={styles.dividerText}>{t('common.or')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
         {/* Email/Password Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.login.emailLabel')}</Text>
             <TextInput
               style={[styles.input, state.errors.email && styles.inputError]}
-              placeholder="you@example.com"
+              placeholder={t('auth.login.emailPlaceholder')}
               placeholderTextColor="#999"
               value={email}
               onChangeText={setEmail}
@@ -190,16 +192,16 @@ export default function LoginScreen() {
 
           <View style={styles.inputContainer}>
             <View style={styles.labelRow}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>{t('auth.login.passwordLabel')}</Text>
               <Link href={'/(auth)/forgot-password' as Href} asChild>
                 <TouchableOpacity>
-                  <Text style={styles.forgotLink}>Forgot password?</Text>
+                  <Text style={styles.forgotLink}>{t('auth.login.forgotPassword')}</Text>
                 </TouchableOpacity>
               </Link>
             </View>
             <TextInput
               style={[styles.input, state.errors.password && styles.inputError]}
-              placeholder="Your password"
+              placeholder={t('auth.login.passwordPlaceholder')}
               placeholderTextColor="#999"
               value={password}
               onChangeText={setPassword}
@@ -220,17 +222,17 @@ export default function LoginScreen() {
             {isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Sign In</Text>
+              <Text style={styles.buttonText}>{t('auth.login.signInButton')}</Text>
             )}
           </TouchableOpacity>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
+          <Text style={styles.footerText}>{t('auth.login.noAccount')}</Text>
           <Link href="/(auth)/register" asChild>
             <TouchableOpacity>
-              <Text style={styles.link}>Sign Up</Text>
+              <Text style={styles.link}>{t('auth.login.signUpLink')}</Text>
             </TouchableOpacity>
           </Link>
         </View>

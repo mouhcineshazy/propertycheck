@@ -7,8 +7,11 @@
 
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useI18n } from '@/contexts';
 
 export default function TabsLayout() {
+  const { t } = useI18n();
+
   return (
     <Tabs
       screenOptions={{
@@ -29,7 +32,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Properties',
+          title: t('tabs.properties'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -38,7 +41,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: t('tabs.settings'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="settings-outline" size={size} color={color} />
           ),

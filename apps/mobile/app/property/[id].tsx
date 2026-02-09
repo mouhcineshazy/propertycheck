@@ -21,15 +21,18 @@ import {
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { Inspection } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { fetchPropertyWithInspections, deleteProperty, checkFreeTierLimits, canGenerateComparison } from '../../lib';
 import type { PropertyWithInspections } from '../../lib';
 import { UpgradeModal } from '../../components';
+import { useTranslation } from '../../contexts';
 
 export default function PropertyDetailScreen() {
   const router = useRouter();
+  const { t, locale } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [property, setProperty] = useState<PropertyWithInspections | null>(null);
@@ -81,8 +84,8 @@ export default function PropertyDetailScreen() {
           }
         } catch (err) {
           console.error('Error loading property:', err);
-          Alert.alert('Error', 'Failed to load property', [
-            { text: 'OK', onPress: () => router.back() },
+          Alert.alert(t('alerts.error'), t('property.detail.loadError'), [
+            { text: t('common.ok'), onPress: () => router.back() },
           ]);
         } finally {
           setIsLoading(false);
@@ -95,24 +98,24 @@ export default function PropertyDetailScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Property',
-      'Are you sure you want to delete this property? This will also delete all associated inspections and photos.',
+      t('property.detail.deleteConfirm.title'),
+      t('property.detail.deleteConfirm.message'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('property.detail.deleteConfirm.confirmButton'),
           style: 'destructive',
           onPress: async () => {
             if (!id) return;
             setIsDeleting(true);
             try {
               await deleteProperty(id);
-              Alert.alert('Success', 'Property deleted', [
-                { text: 'OK', onPress: () => router.back() },
+              Alert.alert(t('common.success'), t('property.detail.deleteConfirm.title'), [
+                { text: t('common.ok'), onPress: () => router.back() },
               ]);
             } catch (err) {
               console.error('Error deleting property:', err);
-              Alert.alert('Error', 'Failed to delete property');
+              Alert.alert(t('common.error'), t('errors.generic'));
               setIsDeleting(false);
             }
           },
@@ -159,7 +162,7 @@ export default function PropertyDetailScreen() {
                 item.status === 'completed' && styles.statusBadgeTextCompleted,
               ]}
             >
-              {item.status === 'completed' ? 'Completed' : 'In Progress'}
+              {item.status === 'completed' ? t('inspection.status.completed') : t('inspection.status.inProgress')}
             </Text>
           </View>
         </View>
@@ -180,7 +183,7 @@ export default function PropertyDetailScreen() {
     return (
       <View style={styles.centered}>
         <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-        <Text style={styles.errorText}>Property not found</Text>
+        <Text style={styles.errorText}>{t('errors.notFound')}</Text>
       </View>
     );
   }
@@ -195,7 +198,7 @@ export default function PropertyDetailScreen() {
           <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
-          Property Details
+          {t('property.detail.title')}
         </Text>
         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
           {isDeleting ? (
@@ -215,15 +218,19 @@ export default function PropertyDetailScreen() {
           </View>
           <View style={styles.metaRow}>
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{property.property_type}</Text>
+              <Text style={styles.badgeText}>{t(`property.new.types.${property.property_type}`)}</Text>
             </View>
             <Text style={styles.createdAt}>
-              Added {format(new Date(property.created_at), 'MMM d, yyyy')}
+              {t('property.detail.added')} {format(
+                new Date(property.created_at),
+                locale === 'fr' ? 'd MMM yyyy' : 'MMM d, yyyy',
+                locale === 'fr' ? { locale: fr } : undefined
+              )}
             </Text>
           </View>
           {property.notes && (
             <View style={styles.notesContainer}>
-              <Text style={styles.notesLabel}>Notes</Text>
+              <Text style={styles.notesLabel}>{t('property.detail.notes')}</Text>
               <Text style={styles.notesText}>{property.notes}</Text>
             </View>
           )}
@@ -232,16 +239,16 @@ export default function PropertyDetailScreen() {
         {/* Inspections Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Inspections</Text>
+            <Text style={styles.sectionTitle}>{t('property.detail.inspections')}</Text>
             {/* Only show limit count for free users */}
             {isPremium ? (
               <Text style={styles.inspectionCount}>
-                {totalInspections} total
+                {totalInspections} {t('property.detail.total')}
               </Text>
             ) : (
               <Text style={[styles.inspectionCount, !canAddInspection && styles.inspectionCountWarning]}>
-                {totalInspections} / {FREE_TIER_LIMITS.maxInspectionsTotal} total
-                {!canAddInspection && ' (limit reached)'}
+                {totalInspections} / {FREE_TIER_LIMITS.maxInspectionsTotal} {t('property.detail.total')}
+                {!canAddInspection && ` (${t('property.detail.limitReached')})`}
               </Text>
             )}
           </View>
@@ -249,9 +256,9 @@ export default function PropertyDetailScreen() {
           {inspectionCount === 0 ? (
             <View style={styles.emptyInspections}>
               <Ionicons name="clipboard-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyText}>No inspections yet</Text>
+              <Text style={styles.emptyText}>{t('property.detail.noInspections')}</Text>
               <Text style={styles.emptySubtext}>
-                Start your first inspection to document the property condition.
+                {t('property.detail.noInspectionsHint')}
               </Text>
             </View>
           ) : (
@@ -273,14 +280,13 @@ export default function PropertyDetailScreen() {
             onPress={handleViewComparison}
           >
             <Ionicons name="git-compare-outline" size={22} color="#2563eb" />
-            <Text style={styles.compareButtonText}>Compare</Text>
+            <Text style={styles.compareButtonText}>{t('property.detail.compareInspections')}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
           style={[
             styles.startButton,
             !canAddInspection && styles.startButtonWarning,
-            canCompare && styles.startButtonFlex,
           ]}
           onPress={handleStartInspection}
         >
@@ -290,7 +296,7 @@ export default function PropertyDetailScreen() {
             color="#fff"
           />
           <Text style={styles.startButtonText}>
-            {canAddInspection ? 'Start New Inspection' : 'Upgrade to Add More'}
+            {canAddInspection ? t('property.detail.startInspection') : t('upgrade.title')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -508,6 +514,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   startButton: {
+    flex: 1,
     backgroundColor: '#2563eb',
     flexDirection: 'row',
     alignItems: 'center',
@@ -515,9 +522,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 10,
     gap: 8,
-  },
-  startButtonFlex: {
-    flex: 1,
   },
   startButtonText: {
     color: '#fff',

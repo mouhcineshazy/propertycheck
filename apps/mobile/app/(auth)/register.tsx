@@ -29,6 +29,7 @@ import * as Linking from 'expo-linking';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { registerSchema, formatZodError, APP_CONFIG, getProvinceOptions } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
+import { useTranslation } from '../../contexts';
 
 // Get province options for the dropdown
 const PROVINCE_OPTIONS = getProvinceOptions();
@@ -56,6 +57,7 @@ type RegisterPayload = {
   confirmPassword: string;
   province: string;
   onSuccess: () => void;
+  t: (key: string) => string;
 };
 
 // Register action - defined outside component
@@ -90,26 +92,27 @@ async function registerAction(
     });
 
     if (error) {
-      Alert.alert('Registration Failed', error.message);
+      Alert.alert(payload.t('auth.register.errors.registrationFailed'), error.message);
       return { errors: {}, success: false };
     }
 
     // Show success alert and call success callback
     Alert.alert(
-      'Check Your Email',
-      'We sent you a confirmation link. Please check your email to verify your account.',
-      [{ text: 'OK', onPress: payload.onSuccess }]
+      payload.t('auth.register.success.title'),
+      payload.t('auth.register.success.message'),
+      [{ text: payload.t('common.ok'), onPress: payload.onSuccess }]
     );
 
     return { errors: {}, success: true };
   } catch {
-    Alert.alert('Error', 'An unexpected error occurred');
+    Alert.alert(payload.t('alerts.error'), payload.t('auth.register.errors.unexpectedError'));
     return { errors: {}, success: false };
   }
 }
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   // Form state
   const [fullName, setFullName] = useState('');
@@ -131,11 +134,12 @@ export default function RegisterScreen() {
       confirmPassword,
       province,
       onSuccess: () => router.back(),
+      t,
     });
   };
 
   // Get selected province label
-  const selectedProvinceLabel = PROVINCE_OPTIONS.find(p => p.value === province)?.label || 'Select your province';
+  const selectedProvinceLabel = PROVINCE_OPTIONS.find(p => p.value === province)?.label || t('auth.register.provincePlaceholder');
 
   // Google OAuth Sign Up
   const handleGoogleSignUp = async () => {
@@ -154,7 +158,7 @@ export default function RegisterScreen() {
       });
 
       if (error) {
-        Alert.alert('Error', error.message);
+        Alert.alert(t('alerts.error'), error.message);
         return;
       }
 
@@ -179,7 +183,7 @@ export default function RegisterScreen() {
       }
     } catch (err) {
       console.error('Google sign up error:', err);
-      Alert.alert('Error', 'Failed to sign up with Google');
+      Alert.alert(t('alerts.error'), t('auth.register.errors.googleSignUpFailed'));
     } finally {
       setGoogleLoading(false);
     }
@@ -198,8 +202,8 @@ export default function RegisterScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join {APP_CONFIG.name} today</Text>
+          <Text style={styles.title}>{t('auth.register.title')}</Text>
+          <Text style={styles.subtitle}>{t('auth.register.subtitle', { appName: APP_CONFIG.name })}</Text>
         </View>
 
         {/* Google Sign Up Button */}
@@ -213,7 +217,7 @@ export default function RegisterScreen() {
           ) : (
             <>
               <Ionicons name="logo-google" size={20} color="#1a1a1a" />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
+              <Text style={styles.googleButtonText}>{t('auth.register.continueWithGoogle')}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -221,16 +225,16 @@ export default function RegisterScreen() {
         {/* Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
+          <Text style={styles.dividerText}>{t('common.or')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>{t('auth.register.fullNameLabel')}</Text>
             <TextInput
               style={[styles.input, state.errors.full_name && styles.inputError]}
-              placeholder="John Doe"
+              placeholder={t('auth.register.fullNamePlaceholder')}
               value={fullName}
               onChangeText={setFullName}
               autoCapitalize="words"
@@ -243,10 +247,10 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('auth.register.emailLabel')}</Text>
             <TextInput
               style={[styles.input, state.errors.email && styles.inputError]}
-              placeholder="you@example.com"
+              placeholder={t('auth.register.emailPlaceholder')}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -260,10 +264,10 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('auth.register.passwordLabel')}</Text>
             <TextInput
               style={[styles.input, state.errors.password && styles.inputError]}
-              placeholder="At least 6 characters"
+              placeholder={t('auth.register.passwordPlaceholder')}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -276,10 +280,10 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Confirm Password</Text>
+            <Text style={styles.label}>{t('auth.register.confirmPasswordLabel')}</Text>
             <TextInput
               style={[styles.input, state.errors.confirmPassword && styles.inputError]}
-              placeholder="Repeat your password"
+              placeholder={t('auth.register.confirmPasswordPlaceholder')}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
@@ -292,7 +296,7 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Province</Text>
+            <Text style={styles.label}>{t('auth.register.provinceLabel')}</Text>
             <TouchableOpacity
               style={[styles.input, styles.selectInput, state.errors.province && styles.inputError]}
               onPress={() => setShowProvincePicker(true)}
@@ -322,7 +326,7 @@ export default function RegisterScreen() {
             >
               <View style={styles.pickerContainer}>
                 <View style={styles.pickerHeader}>
-                  <Text style={styles.pickerTitle}>Select Province</Text>
+                  <Text style={styles.pickerTitle}>{t('auth.register.selectProvince')}</Text>
                   <TouchableOpacity onPress={() => setShowProvincePicker(false)}>
                     <Ionicons name="close" size={24} color="#666" />
                   </TouchableOpacity>
@@ -364,22 +368,21 @@ export default function RegisterScreen() {
             {isPending ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Create Account</Text>
+              <Text style={styles.buttonText}>{t('auth.register.createAccountButton')}</Text>
             )}
           </TouchableOpacity>
 
           <Text style={styles.terms}>
-            By creating an account, you agree to our Terms of Service and Privacy
-            Policy.
+            {t('auth.register.terms')}
           </Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account? </Text>
+          <Text style={styles.footerText}>{t('auth.register.hasAccount')}</Text>
           <Link href="/(auth)/login" asChild>
             <TouchableOpacity>
-              <Text style={styles.link}>Sign In</Text>
+              <Text style={styles.link}>{t('auth.register.signInLink')}</Text>
             </TouchableOpacity>
           </Link>
         </View>

@@ -20,10 +20,12 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
 import { format } from 'date-fns';
+import { fr as frLocale } from 'date-fns/locale';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { ComparisonReport, UpgradeModal } from '../../components';
 import { fetchComparisonData, getPhotoUrl } from '../../lib';
 import type { InspectionWithPhotos } from '../../lib';
+import { useTranslation } from '../../contexts';
 
 /**
  * Generate PDF filename from address: {streetNumber}-{streetName}-report.pdf
@@ -55,6 +57,7 @@ function generatePdfFilename(address: string): string {
 
 export default function ComparisonScreen() {
   const router = useRouter();
+  const { t, locale } = useTranslation();
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -73,8 +76,8 @@ export default function ComparisonScreen() {
     useCallback(() => {
       async function loadData() {
         if (!propertyId) {
-          Alert.alert('Error', 'No property specified', [
-            { text: 'OK', onPress: () => router.back() },
+          Alert.alert(t('common.error'), t('errors.generic'), [
+            { text: t('common.ok'), onPress: () => router.back() },
           ]);
           return;
         }
@@ -103,9 +106,9 @@ export default function ComparisonScreen() {
           setUserProvince(userResult.data?.province || undefined);
         } catch (err) {
           console.error('Error loading comparison:', err);
-          const message = err instanceof Error ? err.message : 'Failed to load comparison';
-          Alert.alert('Error', message, [
-            { text: 'OK', onPress: () => router.back() },
+          const message = err instanceof Error ? err.message : t('inspection.compare.loadError');
+          Alert.alert(t('alerts.error'), message, [
+            { text: t('common.ok'), onPress: () => router.back() },
           ]);
         } finally {
           setIsLoading(false);
@@ -127,7 +130,7 @@ export default function ComparisonScreen() {
 
     setIsGeneratingPdf(true);
     try {
-      const html = generateComparisonHtml(comparisonData, false);
+      const html = generateComparisonHtml(comparisonData, false, locale as 'en' | 'fr');
       const { uri } = await Print.printToFileAsync({ html, base64: false });
 
       // Generate filename from address: {streetNumber}-{streetName}-report.pdf
@@ -140,14 +143,14 @@ export default function ComparisonScreen() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(newUri, {
           mimeType: 'application/pdf',
-          dialogTitle: 'Share Comparison Report',
+          dialogTitle: t('inspection.compare.shareComparison'),
         });
       } else {
-        Alert.alert('Success', 'PDF generated successfully');
+        Alert.alert(t('alerts.success'), t('inspection.compare.pdfGenerated'));
       }
     } catch (err) {
       console.error('Error generating PDF:', err);
-      Alert.alert('Error', 'Failed to generate PDF');
+      Alert.alert(t('alerts.error'), t('inspection.compare.pdfError'));
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -157,7 +160,7 @@ export default function ComparisonScreen() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#2563eb" />
-        <Text style={styles.loadingText}>Loading comparison...</Text>
+        <Text style={styles.loadingText}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -166,9 +169,9 @@ export default function ComparisonScreen() {
     return (
       <View style={styles.centered}>
         <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-        <Text style={styles.errorText}>Failed to load comparison</Text>
+        <Text style={styles.errorText}>{t('errors.generic')}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={() => router.back()}>
-          <Text style={styles.retryText}>Go Back</Text>
+          <Text style={styles.retryText}>{t('common.back')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -181,7 +184,7 @@ export default function ComparisonScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Comparison</Text>
+        <Text style={styles.headerTitle}>{t('inspection.compare.title')}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.headerButton}
@@ -242,9 +245,30 @@ function generateComparisonHtml(
     moveInInspection: InspectionWithPhotos;
     moveOutInspection: InspectionWithPhotos;
   },
-  showWatermark: boolean
+  showWatermark: boolean,
+  locale: 'en' | 'fr' = 'en'
 ): string {
   const isPremium = !showWatermark;
+  const isFr = locale === 'fr';
+
+  // Comparison PDF translations
+  const ct = {
+    title: isFr ? 'Comparaison Emménagement vs Déménagement' : 'Move-in vs Move-out Comparison',
+    property: isFr ? 'Propriété' : 'Property',
+    moveIn: isFr ? 'Emménagement' : 'Move-in',
+    moveOut: isFr ? 'Déménagement' : 'Move-out',
+    photosDocumented: isFr ? 'photos documentées' : 'photos documented',
+    photos: 'photos',
+    noPhoto: isFr ? 'Aucune photo' : 'No photo',
+    noPhotosToCompare: isFr ? 'Aucune photo à comparer.' : 'No photos to compare.',
+    roomLabels: {
+      living_room: isFr ? 'Salon' : 'Living Room',
+      bedroom: isFr ? 'Chambre' : 'Bedroom',
+      bathroom: isFr ? 'Salle de bain' : 'Bathroom',
+      kitchen: isFr ? 'Cuisine' : 'Kitchen',
+      other: isFr ? 'Autres espaces' : 'Other Areas',
+    } as Record<string, string>,
+  };
 
   // Free tier uses grayscale colors for a clean B&W look
   const FREE_COLORS = {
@@ -263,13 +287,18 @@ function generateComparisonHtml(
   // Select color scheme based on tier
   const colors = isPremium ? BRAND_COLORS : FREE_COLORS;
 
+  const dateFormat = isFr ? 'd MMMM yyyy' : 'MMMM d, yyyy';
+  const dateLocale = isFr ? { locale: frLocale } : undefined;
+
   const moveInDate = format(
     new Date(data.moveInInspection.inspection_date),
-    'MMMM d, yyyy'
+    dateFormat,
+    dateLocale
   );
   const moveOutDate = format(
     new Date(data.moveOutInspection.inspection_date),
-    'MMMM d, yyyy'
+    dateFormat,
+    dateLocale
   );
 
   // Group photos by room type
@@ -288,13 +317,7 @@ function generateComparisonHtml(
   const moveInByRoom = groupByRoom(data.moveInInspection.photos);
   const moveOutByRoom = groupByRoom(data.moveOutInspection.photos);
 
-  const roomLabels: Record<string, string> = {
-    living_room: 'Living Room',
-    bedroom: 'Bedroom',
-    bathroom: 'Bathroom',
-    kitchen: 'Kitchen',
-    other: 'Other Areas',
-  };
+  const roomLabels = ct.roomLabels;
 
   const roomIcons: Record<string, string> = {
     living_room: '🏠',
@@ -329,7 +352,7 @@ function generateComparisonHtml(
               ${
                 miPhoto
                   ? `<div class="photo-wrapper"><img src="${getPhotoUrl(miPhoto.storage_path)}" alt="${miPhoto.caption || room}" /><span class="photo-number">${i + 1}</span></div>`
-                  : '<div class="no-photo">No photo</div>'
+                  : `<div class="no-photo">${ct.noPhoto}</div>`
               }
               ${miPhoto?.caption ? `<p class="caption">${miPhoto.caption}</p>` : ''}
             </td>
@@ -337,7 +360,7 @@ function generateComparisonHtml(
               ${
                 moPhoto
                   ? `<div class="photo-wrapper"><img src="${getPhotoUrl(moPhoto.storage_path)}" alt="${moPhoto.caption || room}" /><span class="photo-number">${i + 1}</span></div>`
-                  : '<div class="no-photo">No photo</div>'
+                  : `<div class="no-photo">${ct.noPhoto}</div>`
               }
               ${moPhoto?.caption ? `<p class="caption">${moPhoto.caption}</p>` : ''}
             </td>
@@ -351,18 +374,18 @@ function generateComparisonHtml(
           <div class="room-header">
             <span class="room-icon">${roomIcons[room] || '📷'}</span>
             <h3>${roomLabels[room] || room}</h3>
-            <span class="photo-count">${moveInPhotos.length + moveOutPhotos.length} photos</span>
+            <span class="photo-count">${moveInPhotos.length + moveOutPhotos.length} ${ct.photos}</span>
           </div>
           <table class="comparison-table">
             <thead>
               <tr>
                 <th class="move-in-header">
                   <span class="header-dot move-in"></span>
-                  Move-in (${moveInDate})
+                  ${ct.moveIn} (${moveInDate})
                 </th>
                 <th class="move-out-header">
                   <span class="header-dot move-out"></span>
-                  Move-out (${moveOutDate})
+                  ${ct.moveOut} (${moveOutDate})
                 </th>
               </tr>
             </thead>
@@ -775,9 +798,9 @@ function generateComparisonHtml(
             ${tierBadge}
           </div>
         </div>
-        <h1>Move-in vs Move-out Comparison</h1>
+        <h1>${ct.title}</h1>
         <div class="meta">
-          <strong>Property:</strong> ${data.propertyAddress}
+          <strong>${ct.property}:</strong> ${data.propertyAddress}
         </div>
       </div>
 
@@ -785,20 +808,20 @@ function generateComparisonHtml(
         <div class="summary-item move-in-item">
           <div class="summary-dot move-in"></div>
           <div class="summary-info">
-            <strong>Move-in: ${moveInDate}</strong>
-            <span>${data.moveInInspection.photos.length} photos documented</span>
+            <strong>${ct.moveIn}: ${moveInDate}</strong>
+            <span>${data.moveInInspection.photos.length} ${ct.photosDocumented}</span>
           </div>
         </div>
         <div class="summary-item move-out-item">
           <div class="summary-dot move-out"></div>
           <div class="summary-info">
-            <strong>Move-out: ${moveOutDate}</strong>
-            <span>${data.moveOutInspection.photos.length} photos documented</span>
+            <strong>${ct.moveOut}: ${moveOutDate}</strong>
+            <span>${data.moveOutInspection.photos.length} ${ct.photosDocumented}</span>
           </div>
         </div>
       </div>
 
-      ${roomSections || '<p style="text-align: center; color: #666; padding: 40px;">No photos to compare.</p>'}
+      ${roomSections || `<p style="text-align: center; color: #666; padding: 40px;">${ct.noPhotosToCompare}</p>`}
       </div><!-- end content-wrapper -->
     </body>
     </html>

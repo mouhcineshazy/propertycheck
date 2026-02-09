@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Sharing from 'expo-sharing';
 import * as MailComposer from 'expo-mail-composer';
 import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { APP_CONFIG } from '@propertycheck/shared';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import {
@@ -36,25 +37,21 @@ import {
   canGenerateComparison,
 } from '../../lib';
 import type { InspectionWithPhotos, PDFOptions } from '../../lib';
-
-// Room type labels
-const ROOM_TYPE_LABELS: Record<string, string> = {
-  living_room: 'Living Room',
-  bedroom: 'Bedroom',
-  bathroom: 'Bathroom',
-  kitchen: 'Kitchen',
-  other: 'Other',
-};
+import { useI18n } from '../../contexts';
 
 // Photo thumbnail with loading/error states
 function PhotoThumbnail({
   storagePath,
   onPress,
   roomType,
+  roomLabel,
+  errorText,
 }: {
   storagePath: string;
   onPress: () => void;
   roomType: string;
+  roomLabel: string;
+  errorText: string;
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -70,7 +67,7 @@ function PhotoThumbnail({
       {hasError && (
         <View style={styles.photoPlaceholder}>
           <Ionicons name="image-outline" size={24} color="#999" />
-          <Text style={styles.photoErrorText}>Failed to load</Text>
+          <Text style={styles.photoErrorText}>{errorText}</Text>
         </View>
       )}
       <Image
@@ -88,7 +85,7 @@ function PhotoThumbnail({
       />
       <View style={styles.thumbnailBadge}>
         <Text style={styles.thumbnailBadgeText}>
-          {ROOM_TYPE_LABELS[roomType || 'other']}
+          {roomLabel}
         </Text>
       </View>
     </TouchableOpacity>
@@ -97,7 +94,20 @@ function PhotoThumbnail({
 
 export default function InspectionDetailScreen() {
   const router = useRouter();
+  const { t, locale } = useI18n();
   const { id } = useLocalSearchParams<{ id: string }>();
+
+  // Room type labels with translations
+  const getRoomLabel = (roomType: string) => {
+    const labels: Record<string, string> = {
+      living_room: t('inspection.new.rooms.livingRoom'),
+      bedroom: t('inspection.new.rooms.bedroom'),
+      bathroom: t('inspection.new.rooms.bathroom'),
+      kitchen: t('inspection.new.rooms.kitchen'),
+      other: t('inspection.new.rooms.other'),
+    };
+    return labels[roomType] || labels.other;
+  };
 
   const [inspection, setInspection] = useState<InspectionWithPhotos | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -143,8 +153,8 @@ export default function InspectionDetailScreen() {
           }
         } catch (err) {
           console.error('Error loading inspection:', err);
-          Alert.alert('Error', 'Failed to load inspection', [
-            { text: 'OK', onPress: () => router.back() },
+          Alert.alert(t('common.error'), t('inspection.detail.loadError'), [
+            { text: t('common.ok'), onPress: () => router.back() },
           ]);
         } finally {
           setIsLoading(false);
@@ -159,12 +169,12 @@ export default function InspectionDetailScreen() {
     if (!id || !inspection) return;
 
     Alert.alert(
-      'Complete Inspection',
-      'Mark this inspection as complete? This will finalize the inspection.',
+      t('inspection.detail.completeTitle'),
+      t('inspection.detail.completeMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Complete',
+          text: t('inspection.detail.completeButton'),
           onPress: async () => {
             setIsCompleting(true);
             try {
@@ -178,12 +188,12 @@ export default function InspectionDetailScreen() {
               if (comparisonStatus.canCompare) {
                 // Show comparison prompt
                 Alert.alert(
-                  'Comparison Report Ready!',
-                  'You now have 2 completed inspections. Would you like to view a side-by-side comparison of move-in vs move-out?',
+                  t('inspection.detail.comparisonReadyTitle'),
+                  t('inspection.detail.comparisonReadyMessage'),
                   [
-                    { text: 'Maybe Later', style: 'cancel' },
+                    { text: t('upgrade.maybeLater'), style: 'cancel' },
                     {
-                      text: 'View Comparison',
+                      text: t('inspection.detail.viewComparison'),
                       onPress: () => {
                         router.push(`/inspection/compare?propertyId=${propertyId}` as Href);
                       },
@@ -191,11 +201,11 @@ export default function InspectionDetailScreen() {
                   ]
                 );
               } else {
-                Alert.alert('Success', 'Inspection marked as complete');
+                Alert.alert(t('common.success'), t('inspection.detail.completedSuccess'));
               }
             } catch (err) {
               console.error('Error completing inspection:', err);
-              Alert.alert('Error', 'Failed to complete inspection');
+              Alert.alert(t('common.error'), t('inspection.detail.completeError'));
             } finally {
               setIsCompleting(false);
             }
@@ -207,24 +217,24 @@ export default function InspectionDetailScreen() {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Inspection',
-      'Are you sure you want to delete this inspection? This will also delete all photos.',
+      t('inspection.detail.deleteConfirm.title'),
+      t('inspection.detail.deleteConfirm.message'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('inspection.detail.deleteConfirm.confirmButton'),
           style: 'destructive',
           onPress: async () => {
             if (!id) return;
             setIsDeleting(true);
             try {
               await deleteInspection(id);
-              Alert.alert('Success', 'Inspection deleted', [
-                { text: 'OK', onPress: () => router.back() },
+              Alert.alert(t('common.success'), t('inspection.detail.deletedSuccess'), [
+                { text: t('common.ok'), onPress: () => router.back() },
               ]);
             } catch (err) {
               console.error('Error deleting inspection:', err);
-              Alert.alert('Error', 'Failed to delete inspection');
+              Alert.alert(t('common.error'), t('errors.generic'));
               setIsDeleting(false);
             }
           },
@@ -238,24 +248,25 @@ export default function InspectionDetailScreen() {
 
     setIsGeneratingPdf(true);
     try {
-      const propertyAddress = inspection.property?.address || 'Unknown Property';
+      const propertyAddress = inspection.property?.address || (t('inspection.detail.unknownProperty'));
       const pdfOptions: PDFOptions = {
         isPremium,
         isFirstInspection,
+        locale: locale as 'en' | 'fr',
       };
       const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(pdfUri, {
           mimeType: 'application/pdf',
-          dialogTitle: 'Share Inspection Report',
+          dialogTitle: t('inspection.detail.shareReport'),
         });
       } else {
-        Alert.alert('Success', 'PDF generated successfully');
+        Alert.alert(t('common.success'), t('inspection.detail.pdfGenerated'));
       }
     } catch (err) {
       console.error('Error generating PDF:', err);
-      Alert.alert('Error', 'Failed to generate PDF');
+      Alert.alert(t('common.error'), t('errors.generic'));
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -269,23 +280,41 @@ export default function InspectionDetailScreen() {
       // Check if mail is available
       const isAvailable = await MailComposer.isAvailableAsync();
       if (!isAvailable) {
-        Alert.alert('Error', 'Email is not available on this device');
+        Alert.alert(t('common.error'), t('inspection.detail.emailNotAvailable'));
         return;
       }
 
       // Generate PDF first
-      const propertyAddress = inspection.property?.address || 'Unknown Property';
+      const propertyAddress = inspection.property?.address || (t('inspection.detail.unknownProperty'));
       const pdfOptions: PDFOptions = {
         isPremium,
         isFirstInspection,
+        locale: locale as 'en' | 'fr',
       };
       const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
-      const inspectionDate = format(new Date(inspection.inspection_date), 'MMMM d, yyyy');
+      const dateFormat = locale === 'fr' ? 'd MMMM yyyy' : 'MMMM d, yyyy';
+      const inspectionDate = format(new Date(inspection.inspection_date), dateFormat);
 
-      // Compose email with PDF attachment
-      await MailComposer.composeAsync({
-        subject: `Property Inspection Report - ${propertyAddress}`,
-        body: `Hello,
+      // Email content based on locale
+      const emailContent = locale === 'fr'
+        ? {
+            subject: `Rapport d'inspection de propriété - ${propertyAddress}`,
+            body: `Bonjour,
+
+Veuillez trouver ci-joint le rapport d'inspection de propriété pour :
+
+Propriété : ${propertyAddress}
+Date d'inspection : ${inspectionDate}
+Statut : ${inspection.status === 'completed' ? 'Terminée' : 'En cours'}
+Photos : ${inspection.photos?.length || 0}
+
+${inspection.notes ? `Notes : ${inspection.notes}\n\n` : ''}Ce rapport a été généré à l'aide de ${APP_CONFIG.name}.
+
+Cordialement`,
+          }
+        : {
+            subject: `Property Inspection Report - ${propertyAddress}`,
+            body: `Hello,
 
 Please find attached the property inspection report for:
 
@@ -297,12 +326,18 @@ Photos: ${inspection.photos?.length || 0}
 ${inspection.notes ? `Notes: ${inspection.notes}\n\n` : ''}This report was generated using ${APP_CONFIG.name}.
 
 Best regards`,
+          };
+
+      // Compose email with PDF attachment
+      await MailComposer.composeAsync({
+        subject: emailContent.subject,
+        body: emailContent.body,
         attachments: [pdfUri],
         isHtml: false,
       });
     } catch (err) {
       console.error('Error sending email:', err);
-      Alert.alert('Error', 'Failed to compose email');
+      Alert.alert(t('common.error'), t('inspection.detail.emailError'));
     } finally {
       setIsSendingEmail(false);
     }
@@ -320,7 +355,7 @@ Best regards`,
     return (
       <View style={styles.centered}>
         <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-        <Text style={styles.errorText}>Inspection not found</Text>
+        <Text style={styles.errorText}>{t('errors.notFound')}</Text>
       </View>
     );
   }
@@ -349,7 +384,7 @@ Best regards`,
 
           <View style={styles.modalInfo}>
             <Text style={styles.modalRoomType}>
-              {ROOM_TYPE_LABELS[photo.room_type || 'other']}
+              {getRoomLabel(photo.room_type || 'other')}
             </Text>
             {photo.caption && (
               <Text style={styles.modalCaption}>{photo.caption}</Text>
@@ -403,7 +438,7 @@ Best regards`,
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Inspection Details</Text>
+        <Text style={styles.headerTitle}>{t('inspection.detail.title')}</Text>
         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
           {isDeleting ? (
             <ActivityIndicator size="small" color="#ef4444" />
@@ -419,10 +454,14 @@ Best regards`,
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.inspectionDate}>
-                {format(new Date(inspection.created_at), 'MMMM d, yyyy')}
+                {format(
+                  new Date(inspection.created_at),
+                  locale === 'fr' ? 'd MMMM yyyy' : 'MMMM d, yyyy',
+                  locale === 'fr' ? { locale: fr } : undefined
+                )}
               </Text>
               <Text style={styles.inspectionTime}>
-                {format(new Date(inspection.created_at), 'h:mm a')}
+                {format(new Date(inspection.created_at), 'HH:mm')}
               </Text>
             </View>
             <View
@@ -434,7 +473,7 @@ Best regards`,
                   isCompleted && styles.statusBadgeTextCompleted,
                 ]}
               >
-                {isCompleted ? 'Completed' : 'In Progress'}
+                {isCompleted ? t('inspection.status.completed') : t('inspection.status.inProgress')}
               </Text>
             </View>
           </View>
@@ -448,7 +487,7 @@ Best regards`,
 
           {inspection.notes && (
             <View style={styles.notesContainer}>
-              <Text style={styles.notesLabel}>Notes</Text>
+              <Text style={styles.notesLabel}>{t('inspection.detail.notes')}</Text>
               <Text style={styles.notesText}>{inspection.notes}</Text>
             </View>
           )}
@@ -456,12 +495,12 @@ Best regards`,
 
         {/* Photos Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Photos ({photoCount})</Text>
+          <Text style={styles.sectionTitle}>{t('inspection.detail.photos', { count: photoCount })}</Text>
 
           {photoCount === 0 ? (
             <View style={styles.emptyPhotos}>
               <Ionicons name="images-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyText}>No photos</Text>
+              <Text style={styles.emptyText}>{t('inspection.detail.noPhotos')}</Text>
             </View>
           ) : (
             <View style={styles.photoGrid}>
@@ -470,6 +509,8 @@ Best regards`,
                   key={photo.id}
                   storagePath={photo.storage_path}
                   roomType={photo.room_type || 'other'}
+                  roomLabel={getRoomLabel(photo.room_type || 'other')}
+                  errorText={t('inspection.detail.photoLoadError')}
                   onPress={() => setSelectedPhotoIndex(index)}
                 />
               ))}
@@ -493,7 +534,7 @@ Best regards`,
             ) : (
               <>
                 <Ionicons name="checkmark-circle-outline" size={18} color="#166534" />
-                <Text style={styles.completeButtonText}>Complete</Text>
+                <Text style={styles.completeButtonText}>{t('inspection.detail.completeButton')}</Text>
               </>
             )}
           </TouchableOpacity>
