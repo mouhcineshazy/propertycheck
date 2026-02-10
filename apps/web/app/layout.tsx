@@ -1,13 +1,6 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { APP_CONFIG } from '@propertycheck/shared';
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
 
 export const metadata: Metadata = {
   title: {
@@ -46,9 +39,6 @@ export const metadata: Metadata = {
     follow: true,
   },
 };
-
-// Export the font variable for use in locale layout
-export { inter };
 
 type Props = {
   children: React.ReactNode;
