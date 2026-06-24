@@ -31,9 +31,13 @@ export async function uploadInspectionPhoto(
       encoding: 'base64',
     });
 
-    // Generate unique filename
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { path: '', error: 'Not authenticated' };
+
+    // Path: {user_id}/{inspection_id}/{timestamp}_{index}.{ext}
+    // The user_id prefix is enforced by the storage RLS policy
     const fileExt = uri.split('.').pop() || 'jpg';
-    const fileName = `${inspectionId}/${Date.now()}_${index}.${fileExt}`;
+    const fileName = `${user.id}/${inspectionId}/${Date.now()}_${index}.${fileExt}`;
 
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage

@@ -84,5 +84,5 @@ export function getMobileSupabaseClient(): TypedSupabaseClient {
   return mobileClient;
 }
 
-// Default export for convenience
-export const supabase = getMobileSupabaseClient;
+// Convenience singleton — same instance as getMobileSupabaseClient()
+export const supabase = getMobileSupabaseClient();

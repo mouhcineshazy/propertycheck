@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
-import { sendPremiumWelcomeEmail, sendPaymentFailedEmail } from '@/lib/email';
+import { sendPremiumWelcomeEmail, sendPaymentFailedEmail, sendTrialEndingEmail } from '@/lib/email';
 
 // Lazy-initialized Supabase admin client with service role to bypass RLS
 // This is required because webhooks don't have user context
@@ -346,14 +346,31 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   }
 }
 
-// Handle trial ending soon notification
+// Handle trial ending soon notification (fires 3 days before trial ends)
 async function handleTrialWillEnd(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.userId;
 
-  console.log(`Trial ending soon for subscription: ${subscription.id}`);
-
-  if (userId) {
-    // TODO: Send email reminder about trial ending
-    console.log(`Would send trial ending reminder to user: ${userId}`);
+  if (!userId) {
+    console.error('trial_will_end: no userId in subscription metadata', subscription.id);
+    return;
   }
+
+  const trialEndDate = new Date(subscription.trial_end! * 1000);
+
+  const { data: userData } = await getSupabaseAdmin()
+    .from('users')
+    .select('email, full_name')
+    .eq('id', userId)
+    .single();
+
+  if (!userData?.email) {
+    console.error('trial_will_end: could not find user email for', userId);
+    return;
+  }
+
+  await sendTrialEndingEmail({
+    to: userData.email,
+    userName: userData.full_name || undefined,
+    trialEndDate,
+  });
 }

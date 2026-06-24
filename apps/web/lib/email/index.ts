@@ -328,3 +328,141 @@ export async function sendPaymentFailedEmail(params: {
     return { success: false, error: message };
   }
 }
+
+/**
+ * Send trial ending reminder (3 days before trial expires)
+ */
+export async function sendTrialEndingEmail(params: {
+  to: string;
+  userName?: string;
+  trialEndDate: Date;
+}): Promise<{ success: boolean; error?: string }> {
+  const { to, userName, trialEndDate } = params;
+  const fromEmail = getFromEmail();
+
+  const endDateFormatted = trialEndDate.toLocaleDateString('en-CA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://propertycheck.app';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your PropertyCheck trial ends soon</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: ${BRAND.background};">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${BRAND.background};">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: ${BRAND.white}; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, ${BRAND.dark} 0%, #1e293b 100%); padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">
+                <span style="color: ${BRAND.white};">Property</span><span style="color: ${BRAND.primary};">Check</span>
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="margin: 0 0 16px; font-size: 24px; color: ${BRAND.dark}; font-weight: 700;">
+                Your trial ends on ${endDateFormatted}${userName ? `, ${userName}` : ''}
+              </h2>
+
+              <p style="margin: 0 0 24px; font-size: 16px; color: ${BRAND.gray}; line-height: 1.6;">
+                You have <strong>3 days left</strong> on your PropertyCheck Premium trial. After that, your account will revert to the free tier.
+              </p>
+
+              <!-- What you'll lose card -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: #fef3c7; border-radius: 12px; border-left: 4px solid #f59e0b; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 20px 24px;">
+                    <p style="margin: 0 0 12px; font-size: 15px; color: #92400e; font-weight: 600;">When your trial ends, you'll lose access to:</p>
+                    <p style="margin: 4px 0; font-size: 14px; color: #92400e;">✗ &nbsp;Properties beyond your first one</p>
+                    <p style="margin: 4px 0; font-size: 14px; color: #92400e;">✗ &nbsp;Inspections beyond the first two</p>
+                    <p style="margin: 4px 0; font-size: 14px; color: #92400e;">✗ &nbsp;Move-in vs. move-out comparison reports</p>
+                    <p style="margin: 4px 0; font-size: 14px; color: #92400e;">✗ &nbsp;Unlimited PDF exports (watermark-free)</p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 24px; font-size: 16px; color: ${BRAND.gray}; line-height: 1.6;">
+                Keep protecting yourself. Subscribe to Premium and keep everything you've documented — from <strong>$7.99/month</strong> with an annual plan.
+              </p>
+
+              <!-- CTA -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="text-align: center;">
+                    <a href="${appUrl}/checkout"
+                       style="display: inline-block; background: linear-gradient(135deg, ${BRAND.primary} 0%, ${BRAND.primaryDark} 100%); color: ${BRAND.white}; text-decoration: none; padding: 16px 32px; border-radius: 10px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+                      Keep My Premium Access →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 24px 0 0; font-size: 14px; color: ${BRAND.gray}; text-align: center;">
+                No commitment required. Cancel anytime.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: ${BRAND.background}; padding: 24px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0 0 8px; font-size: 14px; color: ${BRAND.gray};">
+                Questions? Contact us at support@propertycheck.app
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+                © ${new Date().getFullYear()} PropertyCheck. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_YOUR_RESEND_API_KEY') {
+    console.log('=== EMAIL (DEV MODE - NOT SENT) ===');
+    console.log('To:', to);
+    console.log('Subject: Your PropertyCheck trial ends in 3 days');
+    return { success: true };
+  }
+
+  try {
+    const resend = getResendClient();
+    const { error } = await resend.emails.send({
+      from: `PropertyCheck <${fromEmail}>`,
+      to: [to],
+      subject: `Your PropertyCheck trial ends on ${endDateFormatted}`,
+      html,
+    });
+
+    if (error) {
+      console.error('Failed to send trial ending email:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log(`Trial ending email sent to ${to}`);
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Error sending trial ending email:', message);
+    return { success: false, error: message };
+  }
+}
