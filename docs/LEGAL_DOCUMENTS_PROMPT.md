@@ -61,7 +61,7 @@ PropertyCheck is a Software-as-a-Service (SaaS) application designed to help Can
 - PDF reports with watermark
 - Basic features
 
-#### Premium Tier ($9.99 CAD/month or $99.90 CAD/year)
+#### Premium Tier ($9.99 CAD/month or $95.88 CAD/year — $7.99/month, save 20%)
 - Unlimited properties
 - Unlimited inspections
 - Unlimited photos per inspection
@@ -212,7 +212,7 @@ Please generate comprehensive legal documents for PropertyCheck, a Canadian SaaS
 ### Subscription Pricing (CAD):
 - Free tier: Limited features, no cost
 - Premium Monthly: $9.99/month
-- Premium Annual: $99.90/year (2 months free)
+- Premium Annual: $95.88/year ($7.99/month billed annually — save 20%)
 
 ### Payment Processor:
 - Stripe (PCI-DSS compliant)

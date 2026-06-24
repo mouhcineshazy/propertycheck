@@ -54,7 +54,7 @@
 - [x] Single plan: Premium $9.99 CAD/month
 - [x] Stripe Checkout integration
 - [x] Cancel subscription
-- [x] Free tier limits: 2 properties, 5 inspections total
+- [x] Free tier limits: 1 property, 2 inspections total (move-in + move-out)
 
 ### Landing Page
 - [x] Hero section with value proposition
