@@ -430,12 +430,12 @@ BEGIN
 
   result := jsonb_build_object(
     'properties', property_count,
-    'properties_limit', 3,
-    'properties_remaining', GREATEST(0, 3 - property_count),
+    'properties_limit', 1,
+    'properties_remaining', GREATEST(0, 1 - property_count),
     'inspections', inspection_count,
-    'inspections_limit', 15,
-    'inspections_remaining', GREATEST(0, 15 - inspection_count),
-    'within_limits', property_count <= 3 AND inspection_count <= 15
+    'inspections_limit', 2,
+    'inspections_remaining', GREATEST(0, 2 - inspection_count),
+    'within_limits', property_count <= 1 AND inspection_count <= 2
   );
 
   RETURN result;

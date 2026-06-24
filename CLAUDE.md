@@ -36,11 +36,12 @@ Deep reference: `docs/technical/` (ARCHITECTURE.md, DATABASE_SCHEMA.md, PAYMENTS
 
 | Plan | Monthly | Annual | Limits |
 |------|---------|--------|--------|
-| Free | $0 | — | 3 properties, 5 inspections/property, 3 PDF exports/month |
-| Premium | $9.99 | $99.99 | Unlimited properties + inspections, comparison reports |
-| Pro | $19.99 | $199.99 | Premium + 5 team members, API access, custom branding |
+| Free | $0 | — | 1 property, 2 inspections total, 1 PDF/month (7-day expiry), 50 MB |
+| Premium | $9.99 CAD | $95.88 CAD ($7.99/mo × 12, **save 20%**) | Unlimited everything, watermark-free PDFs, comparison reports |
 
-14-day free trial on paid plans. `user_subscriptions` table is the source of truth; Stripe webhooks drive every status change.
+Pro plan is **not yet implemented** — not in DB, not in code. Remove from any UI until V2.
+
+14-day free trial on Premium. `subscriptions` table is the source of truth; Stripe webhooks drive every status change.
 
 ---
 

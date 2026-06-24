@@ -348,11 +348,10 @@ VALUES
 
 2. **Create Products**
    ```
-   Premium Monthly: $9.99 CAD/month
-   Premium Annual: $99.99 CAD/year
-   Pro Monthly: $19.99 CAD/month
-   Pro Annual: $199.99 CAD/year
+   Premium Monthly: $9.99 CAD/month  → NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID
+   Premium Annual:  $95.88 CAD/year  → NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID
    ```
+   Pro plan is V2 — do not create in Stripe for MVP.
 
 3. **Configure Webhook**
    - Endpoint: `https://propertycheck.app/api/stripe/webhook`

@@ -120,8 +120,9 @@ export default function TermsPage() {
             <p className="font-semibold">Free Tier:</p>
             <ul className="list-disc pl-6 text-sm">
               <li>1 property maximum</li>
-              <li>3 inspections maximum</li>
-              <li>30 photos per inspection</li>
+              <li>2 inspections total (move-in + move-out)</li>
+              <li>20 photos per inspection</li>
+              <li>1 PDF export per month (PDFs expire after 7 days)</li>
               <li>PDF reports with watermark</li>
             </ul>
           </div>
@@ -129,7 +130,7 @@ export default function TermsPage() {
             <p className="font-semibold">Premium Tier:</p>
             <ul className="list-disc pl-6 text-sm">
               <li>Monthly: $9.99 CAD per month</li>
-              <li>Annual: $99.90 CAD per year (equivalent to 2 months free)</li>
+              <li>Annual: $95.88 CAD per year ($7.99/month — save 20%)</li>
               <li>Unlimited properties and inspections</li>
               <li>Unlimited photos per inspection</li>
               <li>Professional PDF reports (no watermark)</li>

@@ -86,60 +86,37 @@ export const PLANS = {
     priceId: null,
     annualPriceId: null,
     features: [
-      '3 properties',
-      '5 inspections per property',
-      'Basic PDF reports',
+      '1 property',
+      '2 inspections total (move-in + move-out)',
+      'Basic PDF reports (watermarked, 7-day expiry)',
       'Email support',
     ],
     limits: {
-      properties: 3,
-      inspectionsPerProperty: 5,
-      teamMembers: 1,
+      properties: 1,
+      inspectionsTotal: 2,
     },
   },
   premium: {
     name: 'Premium',
     description: 'Perfect for landlords & tenants',
     price: 9.99,
-    annualPrice: 99.99,
-    priceId: process.env.STRIPE_PREMIUM_PRICE_ID,
-    annualPriceId: process.env.STRIPE_PREMIUM_ANNUAL_PRICE_ID,
+    annualPrice: 95.88, // $7.99/month × 12 — 20% savings
+    priceId: process.env.STRIPE_MONTHLY_PRICE_ID,
+    annualPriceId: process.env.STRIPE_ANNUAL_PRICE_ID,
     features: [
       'Unlimited properties',
       'Unlimited inspections',
-      'Professional PDF reports',
+      'Professional PDF reports (no watermark)',
       'Priority support',
       'Comparison reports',
       'Share with landlords',
     ],
     limits: {
       properties: -1, // Unlimited
-      inspectionsPerProperty: -1,
-      teamMembers: 1,
+      inspectionsTotal: -1,
     },
   },
-  pro: {
-    name: 'Pro',
-    description: 'For property managers & agencies',
-    price: 19.99,
-    annualPrice: 199.99,
-    priceId: process.env.STRIPE_PRO_PRICE_ID,
-    annualPriceId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID,
-    features: [
-      'Everything in Premium',
-      'Team collaboration (up to 5)',
-      'API access',
-      'Custom branding on reports',
-      'Bulk property import',
-      'Dedicated account manager',
-      'Phone support',
-    ],
-    limits: {
-      properties: -1,
-      inspectionsPerProperty: -1,
-      teamMembers: 5,
-    },
-  },
+  // Pro plan is V2 — not yet implemented in DB or code
 } as const;
 
 export type PlanType = keyof typeof PLANS;
@@ -511,10 +488,8 @@ Create these products in Stripe Dashboard:
 
 | Product | Price ID Environment Variable | Amount |
 |---------|-------------------------------|--------|
-| Premium Monthly | STRIPE_PREMIUM_PRICE_ID | $9.99 CAD |
-| Premium Annual | STRIPE_PREMIUM_ANNUAL_PRICE_ID | $99.99 CAD |
-| Pro Monthly | STRIPE_PRO_PRICE_ID | $19.99 CAD |
-| Pro Annual | STRIPE_PRO_ANNUAL_PRICE_ID | $199.99 CAD |
+| Premium Monthly | NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID | $9.99 CAD/month |
+| Premium Annual | NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID | $95.88 CAD/year ($7.99/mo) |
 
 ### Webhook Configuration
 

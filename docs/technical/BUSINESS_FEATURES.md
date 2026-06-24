@@ -104,25 +104,24 @@ Select Property → New Inspection → Capture Photos → Add Details → Save
 ### Free Plan ($0/month)
 
 **Features**:
-- Up to 3 properties
-- 5 inspections per property
-- Basic PDF reports
+- 1 property
+- 2 inspections total (move-in + move-out)
+- Basic PDF reports (watermarked, expire after 7 days)
 - Photo documentation
 - Email support
 
 **Limits**:
 - 20 photos per inspection
-- 3 PDF exports per month
-- 100 MB total storage
-- 1 team member
+- 1 PDF export per month
+- 50 MB total storage
 
-### Premium Plan ($9.99 CAD/month or $99.99 CAD/year)
+### Premium Plan ($9.99 CAD/month or $95.88 CAD/year — save 20%)
 
 **Features**:
 - Unlimited properties
 - Unlimited inspections
-- Professional PDF reports
-- Comparison reports (before/after)
+- Professional PDF reports (no watermark, never expire)
+- Comparison reports (move-in vs move-out)
 - Share with landlords
 - Priority support
 
@@ -130,25 +129,10 @@ Select Property → New Inspection → Capture Photos → Add Details → Save
 - 50 photos per inspection
 - Unlimited PDF exports
 - 1 GB storage
-- 1 team member
 
-**Trial**: 14 days free, no credit card required
+**Trial**: 14 days free
 
-### Pro Plan ($19.99 CAD/month or $199.99 CAD/year)
-
-**Features**:
-- Everything in Premium
-- Team collaboration (up to 5 members)
-- API access
-- Custom branding on reports
-- Bulk property import
-- Dedicated account manager
-- Phone support
-
-**Limits**:
-- 50 photos per inspection
-- Unlimited everything
-- 5 team members
+> **Note**: Pro plan is not yet implemented. It will be introduced in V2 with team collaboration features.
 
 ## User Workflows
 
@@ -197,50 +181,19 @@ Select Property → New Inspection → Capture Photos → Add Details → Save
    └─▶ Upgrade for more features
 ```
 
-### Property Manager Workflow
+## Feature Comparison (MVP — two tiers)
 
-```
-1. Sign Up (Pro)
-   └─▶ Start 14-day trial
-   └─▶ Or upgrade from Free
-
-2. Bulk Import Properties
-   └─▶ CSV upload with addresses
-   └─▶ Or manual entry
-
-3. Invite Team Members
-   └─▶ Add up to 5 users
-   └─▶ Assign properties
-
-4. Conduct Inspections
-   └─▶ Mobile app for field work
-   └─▶ Dashboard for management
-
-5. Generate Reports
-   └─▶ Custom branding
-   └─▶ Bulk export
-
-6. API Integration
-   └─▶ Connect to property management software
-```
-
-## Feature Comparison
-
-| Feature | Free | Premium | Pro |
-|---------|------|---------|-----|
-| Properties | 3 | Unlimited | Unlimited |
-| Inspections | 5/property | Unlimited | Unlimited |
-| Photos/Inspection | 20 | 50 | 50 |
-| PDF Reports | 3/month | Unlimited | Unlimited |
-| Storage | 100 MB | 1 GB | 5 GB |
-| Comparison Reports | - | Yes | Yes |
-| Share Links | Yes | Yes | Yes |
-| Team Members | 1 | 1 | 5 |
-| Custom Branding | - | - | Yes |
-| API Access | - | - | Yes |
-| Priority Support | - | Yes | Yes |
-| Phone Support | - | - | Yes |
-| Account Manager | - | - | Yes |
+| Feature | Free | Premium |
+|---------|------|---------|
+| Properties | 1 | Unlimited |
+| Inspections | 2 total | Unlimited |
+| Photos/Inspection | 20 | 50 |
+| PDF Reports | 1/month (7-day expiry) | Unlimited (no expiry) |
+| PDF Watermark | Yes | No |
+| Storage | 50 MB | 1 GB |
+| Comparison Reports | Watermarked preview | Full, clean |
+| Share Links | Yes | Yes |
+| Priority Support | - | Yes |
 
 ## Growth Strategy
 
