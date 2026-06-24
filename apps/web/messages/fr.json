@@ -68,8 +68,8 @@
       },
       "premium": {
         "shareLinks": {
-          "title": "Partager des liens sécurisés",
-          "description": "Envoyez des liens d'inspection horodatés directement à votre propriétaire. Ils peuvent voir vos preuves sans créer de compte."
+          "title": "Envoyer le PDF au propriétaire",
+          "description": "Envoyez votre rapport PDF d'inspection directement dans la boîte de réception de votre propriétaire — une seule touche, sans application de messagerie nécessaire."
         },
         "comparison": {
           "title": "Rapports de comparaison",
@@ -107,8 +107,8 @@
         "description": "Notre caméra guidée vous aide à documenter systématiquement chaque pièce. Ajoutez des notes et signalez les dommages existants."
       },
       "step3": {
-        "title": "Générez et partagez le rapport",
-        "description": "Obtenez un rapport PDF professionnel instantanément. Partagez-le avec votre propriétaire via un lien sécurisé ou par courriel."
+        "title": "Envoyez le rapport",
+        "description": "Obtenez un rapport PDF professionnel instantanément. Envoyez-le directement dans la boîte de réception de votre propriétaire en une seule touche."
       },
       "stepComplete": "Étape {step} terminée",
       "cta": "Commencer maintenant"
@@ -117,7 +117,7 @@
       "badge": "Tarifs",
       "title": "Des prix simples et",
       "titleHighlight": "transparents",
-      "subtitle": "Documentez votre emménagement et déménagement gratuitement. Passez à Premium pour partager des preuves que les propriétaires respectent.",
+      "subtitle": "Documentez votre emménagement et déménagement gratuitement. Passez à Premium pour envoyer vos rapports PDF directement à votre propriétaire.",
       "monthly": "Mensuel",
       "annual": "Annuel",
       "perMonth": "mois",
@@ -137,7 +137,7 @@
           "storage": "Stockage infonuagique de {days} jours"
         },
         "limitations": {
-          "noLinks": "Pas de liens partageables",
+          "noLinks": "Pas d'envoi direct au propriétaire",
           "watermark": "Rapports de comparaison avec filigrane",
           "noSupport": "Pas de soutien prioritaire"
         }
@@ -147,7 +147,7 @@
         "description": "Pour les locataires qui veulent des preuves juridiquement défendables",
         "cta": "Commencer l'essai gratuit de 14 jours",
         "features": {
-          "shareLinks": "Partagez des liens sécurisés horodatés avec les propriétaires",
+          "shareLinks": "Envoyez le PDF directement dans la boîte de réception du propriétaire",
           "legalEvidence": "Preuves juridiquement défendables pour les litiges",
           "unlimitedProperties": "Propriétés illimitées",
           "unlimitedInspections": "Inspections illimitées",
@@ -276,7 +276,7 @@
       "freePlanIncludes": "Le plan gratuit inclut :",
       "premiumIncludes": "Premium inclut :",
       "freeFeatures": ["1 propriété", "Inspections d'emménagement et de déménagement", "Rapports PDF de base", "Documentation photo"],
-      "premiumFeatures": ["Propriétés et inspections illimitées", "Partagez des liens sécurisés horodatés", "Rapports PDF professionnels", "Soutien par courriel prioritaire"],
+      "premiumFeatures": ["Propriétés et inspections illimitées", "Envoi du PDF directement au propriétaire", "Rapports PDF professionnels", "Soutien par courriel prioritaire"],
       "trustIndicators": {
         "ssl": "SSL 256 bits",
         "gdpr": "Conforme au RGPD"
@@ -335,8 +335,8 @@
         "description": "Les comparaisons côte à côte facilitent la preuve de ce qui était préexistant."
       },
       "tip4": {
-        "title": "Partagez avec votre propriétaire",
-        "description": "Envoyez des liens sécurisés aux propriétaires pour que tout le monde ait les mêmes dossiers."
+        "title": "Envoyez à votre propriétaire",
+        "description": "Envoyez votre rapport PDF directement par courriel à votre propriétaire — une seule touche depuis l'application."
       }
     }
   },
@@ -373,7 +373,7 @@
         },
         "step2": {
           "title": "Générez des rapports",
-          "description": "Créez des rapports PDF professionnels avec vos photos et notes. Partagez-les avec votre propriétaire."
+          "description": "Créez des rapports PDF professionnels avec vos photos et notes. Envoyez-les directement à votre propriétaire par courriel."
         },
         "step3": {
           "title": "Protégez votre dépôt",
@@ -431,7 +431,7 @@
             },
             "q2": {
               "question": "PropertyCheck est-il gratuit?",
-              "answer": "Oui! PropertyCheck offre un plan gratuit qui inclut 1 propriété avec des inspections d'emménagement et de déménagement, des rapports PDF de base et une documentation photo avec stockage infonuagique de 90 jours. Des plans Premium sont disponibles pour les locataires qui ont besoin de propriétés illimitées, de liens partageables et de fonctionnalités supplémentaires."
+              "answer": "Oui! PropertyCheck offre un plan gratuit qui inclut 1 propriété avec des inspections d'emménagement et de déménagement, des rapports PDF de base et une documentation photo avec 50 Mo de stockage infonuagique. Des plans Premium sont disponibles pour les locataires qui ont besoin de propriétés illimitées, d'envoi direct au propriétaire et de fonctionnalités supplémentaires."
             },
             "q3": {
               "question": "Sur quelles plateformes PropertyCheck est-il disponible?",
@@ -456,11 +456,11 @@
             },
             "q3": {
               "question": "Puis-je partager des rapports avec mon propriétaire?",
-              "answer": "Les abonnés Premium peuvent générer des liens sécurisés et partageables qui permettent aux propriétaires de consulter les rapports d'inspection sans créer de compte. Cela garantit que les deux parties ont accès à la même documentation."
+              "answer": "Les abonnés Premium peuvent envoyer leurs rapports PDF directement dans la boîte de réception de leur propriétaire — une seule touche depuis l'application, sans application de messagerie nécessaire. Le propriétaire reçoit un PDF professionnel en pièce jointe et n'a pas besoin de créer un compte."
             },
             "q4": {
               "question": "Combien de temps mes rapports sont-ils stockés?",
-              "answer": "Les comptes gratuits incluent un stockage infonuagique de 90 jours. Les comptes Premium incluent un stockage illimité, donc vos rapports sont disponibles aussi longtemps que vous en avez besoin."
+              "answer": "Les comptes gratuits incluent 50 Mo de stockage infonuagique. Les comptes Premium incluent un stockage illimité, donc vos rapports sont disponibles aussi longtemps que vous en avez besoin."
             }
           }
         },
@@ -486,7 +486,7 @@
           "questions": {
             "q1": {
               "question": "Quelle est la différence entre Gratuit et Premium?",
-              "answer": "Le plan Gratuit inclut 1 propriété, 2 inspections au total (emménagement + déménagement), des rapports PDF de base avec filigrane (expirent après 7 jours) et 50 Mo de stockage. Premium ajoute des propriétés et inspections illimitées, des liens partageables, des rapports de comparaison sans filigrane, un stockage illimité et un soutien prioritaire. Premium est disponible avec un essai gratuit de 14 jours."
+              "answer": "Le plan Gratuit inclut 1 propriété, 2 inspections au total (emménagement + déménagement), des rapports PDF de base avec filigrane (expirent après 7 jours) et 50 Mo de stockage. Premium ajoute des propriétés et inspections illimitées, l'envoi direct au propriétaire, des rapports de comparaison sans filigrane, un stockage illimité et un soutien prioritaire. Premium est disponible avec un essai gratuit de 14 jours."
             },
             "q2": {
               "question": "Comment annuler mon abonnement?",

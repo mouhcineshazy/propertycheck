@@ -68,8 +68,8 @@
       },
       "premium": {
         "shareLinks": {
-          "title": "Share Secure Links",
-          "description": "Send timestamped inspection links directly to your landlord. They can view your evidence without creating an account."
+          "title": "Email PDF to Landlord",
+          "description": "Send your inspection PDF directly to your landlord's inbox — one tap, no mail app needed. They receive the full report as an email attachment."
         },
         "comparison": {
           "title": "Comparison Reports",
@@ -107,8 +107,8 @@
         "description": "Our guided camera helps you systematically document every room. Add notes and flag any existing damage."
       },
       "step3": {
-        "title": "Generate & Share Report",
-        "description": "Get a professional PDF report instantly. Share it with your landlord via secure link or email."
+        "title": "Email the Report",
+        "description": "Get a professional PDF report instantly. Tap 'Email Report' to send it directly to your landlord's inbox — they receive the PDF as an attachment, no account needed."
       },
       "stepComplete": "Step {step} Complete",
       "cta": "Get Started Now"
@@ -117,7 +117,7 @@
       "badge": "Pricing",
       "title": "Simple,",
       "titleHighlight": "Transparent Pricing",
-      "subtitle": "Document your move-in & move-out for free. Upgrade to share evidence landlords trust.",
+      "subtitle": "Document your move-in & move-out for free. Upgrade to email PDF reports directly to your landlord.",
       "monthly": "Monthly",
       "annual": "Annual",
       "perMonth": "month",
@@ -137,7 +137,7 @@
           "storage": "{days}-day cloud storage"
         },
         "limitations": {
-          "noLinks": "No shareable links",
+          "noLinks": "No direct email to landlord",
           "watermark": "Watermarked comparison reports",
           "noSupport": "No priority support"
         }
@@ -147,7 +147,7 @@
         "description": "For renters who want legally defensible evidence",
         "cta": "Start 14-Day Free Trial",
         "features": {
-          "shareLinks": "Share secure timestamped links with landlords",
+          "shareLinks": "Email PDF reports directly to landlord's inbox",
           "legalEvidence": "Legally defensible evidence for disputes",
           "unlimitedProperties": "Unlimited properties",
           "unlimitedInspections": "Unlimited inspections",
@@ -276,7 +276,7 @@
       "freePlanIncludes": "Free plan includes:",
       "premiumIncludes": "Premium includes:",
       "freeFeatures": ["1 property", "Move-in & move-out inspections", "Basic PDF reports", "Photo documentation"],
-      "premiumFeatures": ["Unlimited properties & inspections", "Share secure timestamped links", "Professional PDF reports", "Priority email support"],
+      "premiumFeatures": ["Unlimited properties & inspections", "Email PDF directly to landlord", "Professional PDF reports", "Priority email support"],
       "trustIndicators": {
         "ssl": "256-bit SSL",
         "gdpr": "GDPR compliant"
@@ -335,8 +335,8 @@
         "description": "Side-by-side comparisons make it easy to prove what was pre-existing."
       },
       "tip4": {
-        "title": "Share with Your Landlord",
-        "description": "Send secure links to landlords so everyone has the same records."
+        "title": "Email Your Landlord",
+        "description": "Email your PDF inspection report directly to your landlord from within the app — one tap, no mail app required."
       }
     }
   },
@@ -373,7 +373,7 @@
         },
         "step2": {
           "title": "Generate Reports",
-          "description": "Create professional PDF reports with your photos and notes. Share them with your landlord."
+          "description": "Create professional PDF reports with your photos and notes. Email them directly to your landlord."
         },
         "step3": {
           "title": "Protect Your Deposit",
@@ -431,7 +431,7 @@
             },
             "q2": {
               "question": "Is PropertyCheck free to use?",
-              "answer": "Yes! PropertyCheck offers a free plan that includes 1 property with move-in and move-out inspections, basic PDF reports, and photo documentation with 90-day cloud storage. Premium plans are available for renters who need unlimited properties, shareable links, and additional features."
+              "answer": "Yes! PropertyCheck offers a free plan that includes 1 property with move-in and move-out inspections, basic PDF reports, and photo documentation with 50 MB cloud storage. Premium plans are available for renters who need unlimited properties, direct email to landlord, and additional features."
             },
             "q3": {
               "question": "What platforms is PropertyCheck available on?",
@@ -456,11 +456,11 @@
             },
             "q3": {
               "question": "Can I share reports with my landlord?",
-              "answer": "Premium subscribers can generate secure, shareable links that allow landlords to view inspection reports without creating an account. This ensures both parties have access to the same documentation."
+              "answer": "Premium subscribers can email PDF reports directly to their landlord's inbox — one tap from the app, no mail app needed. The landlord receives a professional PDF attached to a branded email and doesn't need to create an account."
             },
             "q4": {
               "question": "How long are my reports stored?",
-              "answer": "Free accounts include 90-day cloud storage. Premium accounts include unlimited storage, so your reports are available for as long as you need them."
+              "answer": "Free accounts include 50 MB of cloud storage. Premium accounts include unlimited storage, so your reports are available for as long as you need them."
             }
           }
         },
@@ -486,7 +486,7 @@
           "questions": {
             "q1": {
               "question": "What's the difference between Free and Premium?",
-              "answer": "The Free plan includes 1 property, 2 inspections total (move-in + move-out), basic watermarked PDF reports (expire after 7 days), and 50 MB storage. Premium adds unlimited properties and inspections, shareable links, watermark-free comparison reports, unlimited storage, and priority support. Premium is available with a 14-day free trial."
+              "answer": "The Free plan includes 1 property, 2 inspections total (move-in + move-out), basic watermarked PDF reports (expire after 7 days), and 50 MB storage. Premium adds unlimited properties and inspections, direct email to landlord, watermark-free comparison reports, unlimited storage, and priority support. Premium is available with a 14-day free trial."
             },
             "q2": {
               "question": "How do I cancel my subscription?",
