@@ -254,10 +254,25 @@ export default function InspectionDetailScreen() {
     setIsGeneratingPdf(true);
     try {
       const propertyAddress = inspection.property?.address || (t('inspection.detail.unknownProperty'));
+
+      // Refresh share link expiry to 30 days so the QR code stays valid
+      const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app';
+      let shareUrl: string | undefined;
+      if (inspection.share_token) {
+        const supabase = getMobileSupabaseClient();
+        const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        await supabase
+          .from('inspections')
+          .update({ share_expires_at: thirtyDaysFromNow })
+          .eq('id', inspection.id);
+        shareUrl = `${appUrl}/${locale}/share/${inspection.share_token}`;
+      }
+
       const pdfOptions: PDFOptions = {
         isPremium,
         isFirstInspection,
         locale: locale as 'en' | 'fr',
+        shareUrl,
       };
       const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
 
@@ -296,7 +311,12 @@ export default function InspectionDetailScreen() {
     setIsSendingEmail(true);
     try {
       const propertyAddress = inspection.property?.address || t('inspection.detail.unknownProperty');
-      const pdfOptions: PDFOptions = { isPremium, isFirstInspection, locale: locale as 'en' | 'fr' };
+      const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app';
+      const shareUrl = inspection.share_token
+        ? `${appUrl}/${locale}/share/${inspection.share_token}`
+        : undefined;
+      // Email API route refreshes share_expires_at to 30 days server-side
+      const pdfOptions: PDFOptions = { isPremium, isFirstInspection, locale: locale as 'en' | 'fr', shareUrl };
       const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
 
       const { success, error } = await sendReportByEmail({

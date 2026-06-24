@@ -565,6 +565,33 @@
     }
   },
 
+  "share": {
+    "inspectionReport": "Rapport d'inspection",
+    "sharedBy": "Partagé par",
+    "inspectionDate": "Date d'inspection",
+    "photoCount": "{count} photos",
+    "notes": "Notes de l'inspecteur",
+    "roomTypes": {
+      "kitchen": "Cuisine",
+      "bathroom": "Salle de bain",
+      "bedroom": "Chambre",
+      "living_room": "Salon",
+      "other": "Autres pièces"
+    },
+    "disclaimer": "À titre de documentation uniquement. Pas de conseil juridique. Consultez un professionnel juridique qualifié pour les litiges locatifs.",
+    "cta": {
+      "title": "Protégez votre dépôt aussi",
+      "subtitle": "Créez des rapports d'inspection professionnels en quelques minutes — gratuit pour les locataires canadiens.",
+      "button": "Obtenir PropertyCheck gratuitement"
+    },
+    "expired": {
+      "title": "Ce lien a expiré",
+      "description": "Ce lien vers le rapport d'inspection n'est plus actif. L'expéditeur peut générer un nouveau lien depuis l'application PropertyCheck.",
+      "button": "En savoir plus sur PropertyCheck"
+    },
+    "poweredBy": "Propulsé par PropertyCheck"
+  },
+
   "legal": {
     "terms": {
       "title": "Conditions d'utilisation",

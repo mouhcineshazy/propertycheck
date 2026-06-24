@@ -565,6 +565,33 @@
     }
   },
 
+  "share": {
+    "inspectionReport": "Inspection Report",
+    "sharedBy": "Shared by",
+    "inspectionDate": "Inspection Date",
+    "photoCount": "{count} photos",
+    "notes": "Inspector Notes",
+    "roomTypes": {
+      "kitchen": "Kitchen",
+      "bathroom": "Bathroom",
+      "bedroom": "Bedroom",
+      "living_room": "Living Room",
+      "other": "Other Areas"
+    },
+    "disclaimer": "For documentation purposes only. Not legal advice. Consult a qualified legal professional for tenancy disputes.",
+    "cta": {
+      "title": "Protect Your Deposit Too",
+      "subtitle": "Create professional inspection reports in minutes — free for Canadian renters.",
+      "button": "Get PropertyCheck Free"
+    },
+    "expired": {
+      "title": "This link has expired",
+      "description": "This inspection report link is no longer active. The sender can generate a new link from the PropertyCheck app.",
+      "button": "Learn About PropertyCheck"
+    },
+    "poweredBy": "Powered by PropertyCheck"
+  },
+
   "legal": {
     "terms": {
       "title": "Terms of Service",

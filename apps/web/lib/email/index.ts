@@ -339,8 +339,9 @@ export async function sendInspectionReportEmail(params: {
   inspectionDate: string;
   photoCount: number;
   pdfBase64: string;
+  shareUrl?: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const { to, senderName, propertyAddress, inspectionDate, photoCount, pdfBase64 } = params;
+  const { to, senderName, propertyAddress, inspectionDate, photoCount, pdfBase64, shareUrl } = params;
   const fromEmail = getFromEmail();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://propertycheck.app';
 
@@ -402,6 +403,20 @@ export async function sendInspectionReportEmail(params: {
               <p style="margin: 0 0 24px; font-size: 15px; color: ${BRAND.gray}; line-height: 1.6;">
                 Please open the attached PDF to view the full inspection report, including all photos organized by room.
               </p>
+
+              ${shareUrl ? `
+              <!-- View online button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 28px;">
+                <tr>
+                  <td style="text-align: center;">
+                    <a href="${shareUrl}" style="display: inline-block; background-color: ${BRAND.primary}; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 14px 28px; border-radius: 10px;">
+                      View Report Online
+                    </a>
+                    <p style="margin: 10px 0 0; font-size: 12px; color: #94a3b8;">Link expires in 30 days</p>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
 
               <!-- Legal notice -->
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: #f8fafc; border-radius: 8px; border-left: 3px solid #cbd5e1;">

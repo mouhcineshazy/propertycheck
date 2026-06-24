@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
         id,
         inspection_date,
         user_id,
+        share_token,
         property:properties(address),
         photos:inspection_photos(id)
       `)
@@ -98,6 +99,19 @@ export async function POST(request: NextRequest) {
     const photoCount = Array.isArray(inspection.photos) ? inspection.photos.length : 0;
     const inspectionDate = format(new Date(inspection.inspection_date), 'MMMM d, yyyy');
 
+    // Refresh share link expiry to 30 days so the QR code / email link stays valid
+    const shareToken = (inspection as unknown as { share_token: string | null }).share_token;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://propertycheck.app';
+    const shareUrl = shareToken ? `${appUrl}/en/share/${shareToken}` : undefined;
+
+    if (shareToken) {
+      const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      await adminClient
+        .from('inspections')
+        .update({ share_expires_at: thirtyDaysFromNow })
+        .eq('id', inspectionId);
+    }
+
     const result = await sendInspectionReportEmail({
       to: recipientEmail,
       senderName,
@@ -105,6 +119,7 @@ export async function POST(request: NextRequest) {
       inspectionDate,
       photoCount,
       pdfBase64,
+      shareUrl,
     });
 
     if (!result.success) {
