@@ -5,25 +5,23 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { locales, localeNames, type Locale } from '@/i18n/config';
 import { useState, useRef, useEffect } from 'react';
 
-// Map locales to flag-icons country codes
-const localeFlagCodes: Record<Locale, string> = {
-  en: 'ca', // Canada flag for English
-  fr: 'fr', // France flag for French
-};
-
-// Flag component using flag-icons library
-function FlagIcon({ locale, className = '' }: { locale: Locale; className?: string }) {
-  const flagCode = localeFlagCodes[locale];
+function GlobeIcon({ className = '' }: { className?: string }) {
   return (
-    <span
-      className={`fi fi-${flagCode} fis ${className}`}
-      style={{
-        display: 'inline-block',
-        width: '1.33333em',
-        lineHeight: '1em',
-        verticalAlign: 'middle',
-      }}
-    />
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
+      />
+    </svg>
   );
 }
 
@@ -69,13 +67,12 @@ export function LanguageSwitcher({
           <button
             key={loc}
             onClick={() => handleLocaleChange(loc)}
-            className={`flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded transition-colors ${
+            className={`px-2 py-1 text-sm font-medium rounded transition-colors ${
               locale === loc
                 ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
             }`}
           >
-            <FlagIcon locale={loc} className="w-5 h-4 rounded-sm overflow-hidden" />
             {loc.toUpperCase()}
           </button>
         ))}
@@ -90,14 +87,16 @@ export function LanguageSwitcher({
         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
         aria-expanded={isOpen}
         aria-haspopup="true"
+        aria-label="Select language"
       >
-        <FlagIcon locale={locale} className="w-5 h-4 rounded-sm overflow-hidden" />
+        <GlobeIcon className="w-4 h-4" />
         <span>{localeNames[locale]}</span>
         <svg
           className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -109,7 +108,7 @@ export function LanguageSwitcher({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-44 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
           {locales.map((loc) => (
             <button
               key={loc}
@@ -120,7 +119,6 @@ export function LanguageSwitcher({
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <FlagIcon locale={loc} className="w-5 h-4 rounded-sm overflow-hidden" />
               {localeNames[loc]}
             </button>
           ))}
