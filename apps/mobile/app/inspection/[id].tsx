@@ -12,6 +12,7 @@ import { useState, useCallback } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -19,14 +20,14 @@ import {
   ScrollView,
   Image,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Sharing from 'expo-sharing';
-import * as MailComposer from 'expo-mail-composer';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { APP_CONFIG } from '@propertycheck/shared';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import {
   fetchInspectionWithPhotos,
@@ -35,6 +36,7 @@ import {
   generateInspectionPdf,
   getPhotoUrl,
   canGenerateComparison,
+  sendReportByEmail,
 } from '../../lib';
 import type { InspectionWithPhotos, PDFOptions } from '../../lib';
 import { useI18n } from '../../contexts';
@@ -115,6 +117,9 @@ export default function InspectionDetailScreen() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [recipientEmail, setRecipientEmail] = useState('');
+  const [emailFieldError, setEmailFieldError] = useState('');
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [isFirstInspection, setIsFirstInspection] = useState(true);
@@ -272,72 +277,46 @@ export default function InspectionDetailScreen() {
     }
   };
 
-  const handleSendEmail = async () => {
-    if (!inspection) return;
+  const handleEmailButtonPress = () => {
+    setRecipientEmail('');
+    setEmailFieldError('');
+    setShowEmailModal(true);
+  };
 
+  const handleSendEmail = async () => {
+    if (!inspection || !id) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(recipientEmail.trim())) {
+      setEmailFieldError(t('inspection.detail.invalidEmail'));
+      return;
+    }
+
+    setShowEmailModal(false);
     setIsSendingEmail(true);
     try {
-      // Check if mail is available
-      const isAvailable = await MailComposer.isAvailableAsync();
-      if (!isAvailable) {
-        Alert.alert(t('common.error'), t('inspection.detail.emailNotAvailable'));
-        return;
-      }
-
-      // Generate PDF first
-      const propertyAddress = inspection.property?.address || (t('inspection.detail.unknownProperty'));
-      const pdfOptions: PDFOptions = {
-        isPremium,
-        isFirstInspection,
-        locale: locale as 'en' | 'fr',
-      };
+      const propertyAddress = inspection.property?.address || t('inspection.detail.unknownProperty');
+      const pdfOptions: PDFOptions = { isPremium, isFirstInspection, locale: locale as 'en' | 'fr' };
       const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
-      const dateFormat = locale === 'fr' ? 'd MMMM yyyy' : 'MMMM d, yyyy';
-      const inspectionDate = format(new Date(inspection.inspection_date), dateFormat);
 
-      // Email content based on locale
-      const emailContent = locale === 'fr'
-        ? {
-            subject: `Rapport d'inspection de propriété - ${propertyAddress}`,
-            body: `Bonjour,
-
-Veuillez trouver ci-joint le rapport d'inspection de propriété pour :
-
-Propriété : ${propertyAddress}
-Date d'inspection : ${inspectionDate}
-Statut : ${inspection.status === 'completed' ? 'Terminée' : 'En cours'}
-Photos : ${inspection.photos?.length || 0}
-
-${inspection.notes ? `Notes : ${inspection.notes}\n\n` : ''}Ce rapport a été généré à l'aide de ${APP_CONFIG.name}.
-
-Cordialement`,
-          }
-        : {
-            subject: `Property Inspection Report - ${propertyAddress}`,
-            body: `Hello,
-
-Please find attached the property inspection report for:
-
-Property: ${propertyAddress}
-Inspection Date: ${inspectionDate}
-Status: ${inspection.status === 'completed' ? 'Completed' : 'In Progress'}
-Photos: ${inspection.photos?.length || 0}
-
-${inspection.notes ? `Notes: ${inspection.notes}\n\n` : ''}This report was generated using ${APP_CONFIG.name}.
-
-Best regards`,
-          };
-
-      // Compose email with PDF attachment
-      await MailComposer.composeAsync({
-        subject: emailContent.subject,
-        body: emailContent.body,
-        attachments: [pdfUri],
-        isHtml: false,
+      const { success, error } = await sendReportByEmail({
+        inspectionId: id,
+        recipientEmail: recipientEmail.trim(),
+        pdfUri,
       });
+
+      if (success) {
+        Alert.alert(
+          t('inspection.detail.reportSent'),
+          t('inspection.detail.reportSentTo', { email: recipientEmail.trim() })
+        );
+      } else {
+        console.error('Email send error:', error);
+        Alert.alert(t('common.error'), t('inspection.detail.sendEmailError'));
+      }
     } catch (err) {
-      console.error('Error sending email:', err);
-      Alert.alert(t('common.error'), t('inspection.detail.emailError'));
+      console.error('Error sending report email:', err);
+      Alert.alert(t('common.error'), t('inspection.detail.sendEmailError'));
     } finally {
       setIsSendingEmail(false);
     }
@@ -557,7 +536,7 @@ Best regards`,
 
         <TouchableOpacity
           style={[styles.emailButton, isSendingEmail && styles.buttonDisabled]}
-          onPress={handleSendEmail}
+          onPress={handleEmailButtonPress}
           disabled={isSendingEmail}
         >
           {isSendingEmail ? (
@@ -570,6 +549,58 @@ Best regards`,
           )}
         </TouchableOpacity>
       </View>
+
+      {/* Email recipient modal */}
+      <Modal
+        visible={showEmailModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowEmailModal(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.emailModal}>
+            <Text style={styles.emailModalTitle}>{t('inspection.detail.sendToLandlordTitle')}</Text>
+            <Text style={styles.emailModalSubtitle}>{t('inspection.detail.sendToLandlordSubtitle')}</Text>
+
+            <TextInput
+              style={[styles.emailInput, emailFieldError ? styles.emailInputError : null]}
+              placeholder={t('inspection.detail.landlordEmailPlaceholder')}
+              placeholderTextColor="#aaa"
+              value={recipientEmail}
+              onChangeText={(text) => {
+                setRecipientEmail(text);
+                if (emailFieldError) setEmailFieldError('');
+              }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoFocus
+            />
+            {emailFieldError ? (
+              <Text style={styles.emailInputErrorText}>{emailFieldError}</Text>
+            ) : null}
+
+            <View style={styles.emailModalActions}>
+              <TouchableOpacity
+                style={styles.emailModalCancel}
+                onPress={() => setShowEmailModal(false)}
+              >
+                <Text style={styles.emailModalCancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.emailModalSend}
+                onPress={handleSendEmail}
+              >
+                <Ionicons name="send" size={16} color="#fff" />
+                <Text style={styles.emailModalSendText}>{t('inspection.detail.sendButton')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
@@ -878,5 +909,81 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     fontWeight: '500',
+  },
+  // Email recipient modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  emailModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+  },
+  emailModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 8,
+  },
+  emailModalSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  emailInput: {
+    borderWidth: 1.5,
+    borderColor: '#e5e5e5',
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 15,
+    color: '#1a1a1a',
+    backgroundColor: '#fafafa',
+  },
+  emailInputError: {
+    borderColor: '#ef4444',
+  },
+  emailInputErrorText: {
+    fontSize: 13,
+    color: '#ef4444',
+    marginTop: 6,
+  },
+  emailModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  emailModalCancel: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+  },
+  emailModalCancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#666',
+  },
+  emailModalSend: {
+    flex: 2,
+    flexDirection: 'row',
+    padding: 14,
+    borderRadius: 10,
+    backgroundColor: '#059669',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  emailModalSendText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#fff',
   },
 });

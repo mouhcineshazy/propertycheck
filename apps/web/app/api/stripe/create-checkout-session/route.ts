@@ -126,8 +126,7 @@ export async function POST(request: NextRequest) {
           plan: 'premium',
           billingCycle: billingCycle,
         },
-        // 7-day free trial
-        trial_period_days: 7,
+        trial_period_days: 14,
       },
       // Allow promotion codes for marketing
       allow_promotion_codes: true,

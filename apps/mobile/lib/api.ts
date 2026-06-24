@@ -5,6 +5,7 @@
  * Uses the shared database client with proper error handling.
  */
 
+import * as FileSystem from 'expo-file-system/legacy';
 import { getMobileSupabaseClient } from './supabase';
 import type { Property, Inspection } from '@propertycheck/database';
 import type {
@@ -467,6 +468,53 @@ export async function fetchComparisonData(propertyId: string): Promise<{
     };
   } catch {
     return { data: null, error: 'Failed to fetch comparison data' };
+  }
+}
+
+/**
+ * Send an inspection PDF report to a recipient by email via the server
+ */
+export async function sendReportByEmail(params: {
+  inspectionId: string;
+  recipientEmail: string;
+  pdfUri: string;
+}): Promise<{ success: boolean; error: string | null }> {
+  try {
+    const supabase = getMobileSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    const pdfBase64 = await FileSystem.readAsStringAsync(params.pdfUri, {
+      encoding: 'base64',
+    });
+
+    const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app';
+    const response = await fetch(`${appUrl}/api/reports/email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        inspectionId: params.inspectionId,
+        recipientEmail: params.recipientEmail,
+        pdfBase64,
+      }),
+    });
+
+    const data = await response.json() as { success?: boolean; error?: string };
+
+    if (!response.ok) {
+      return { success: false, error: data.error ?? 'Failed to send email' };
+    }
+
+    return { success: true, error: null };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to send email';
+    return { success: false, error: message };
   }
 }
 

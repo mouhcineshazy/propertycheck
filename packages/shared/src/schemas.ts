@@ -133,6 +133,17 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 /**
+ * Send Report by Email Schema
+ */
+export const sendReportEmailSchema = z.object({
+  inspectionId: z.string().uuid('Invalid inspection ID'),
+  recipientEmail: z.string().email('Please enter a valid email address'),
+  pdfBase64: z.string().min(1, 'PDF content is required'),
+});
+
+export type SendReportEmailInput = z.infer<typeof sendReportEmailSchema>;
+
+/**
  * Helper function to format Zod errors for display
  */
 export function formatZodError(error: z.ZodError): Record<string, string> {

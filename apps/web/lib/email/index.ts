@@ -330,6 +330,149 @@ export async function sendPaymentFailedEmail(params: {
 }
 
 /**
+ * Send inspection report to landlord with PDF attachment
+ */
+export async function sendInspectionReportEmail(params: {
+  to: string;
+  senderName: string;
+  propertyAddress: string;
+  inspectionDate: string;
+  photoCount: number;
+  pdfBase64: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const { to, senderName, propertyAddress, inspectionDate, photoCount, pdfBase64 } = params;
+  const fromEmail = getFromEmail();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://propertycheck.app';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Property Inspection Report</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: ${BRAND.background};">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: ${BRAND.background};">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: ${BRAND.white}; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, ${BRAND.dark} 0%, #1e293b 100%); padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">
+                <span style="color: ${BRAND.white};">Property</span><span style="color: ${BRAND.primary};">Check</span>
+              </h1>
+              <p style="margin: 8px 0 0; color: #94a3b8; font-size: 14px;">Property Inspection Report</p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 24px; font-size: 16px; color: ${BRAND.gray}; line-height: 1.6;">
+                <strong style="color: ${BRAND.dark};">${senderName}</strong> has shared a property inspection report with you.
+                The full report with all photos is attached as a PDF.
+              </p>
+
+              <!-- Report Details Card -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; border-left: 4px solid ${BRAND.primary}; margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <p style="margin: 0 0 16px; font-size: 14px; color: ${BRAND.gray}; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Inspection Details</p>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 14px; color: ${BRAND.gray}; width: 140px;">Property</td>
+                        <td style="padding: 6px 0; font-size: 14px; color: ${BRAND.dark}; font-weight: 600;">${propertyAddress}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 14px; color: ${BRAND.gray};">Inspection Date</td>
+                        <td style="padding: 6px 0; font-size: 14px; color: ${BRAND.dark}; font-weight: 600;">${inspectionDate}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 6px 0; font-size: 14px; color: ${BRAND.gray};">Photos</td>
+                        <td style="padding: 6px 0; font-size: 14px; color: ${BRAND.dark}; font-weight: 600;">${photoCount} timestamped photo${photoCount !== 1 ? 's' : ''}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0 0 24px; font-size: 15px; color: ${BRAND.gray}; line-height: 1.6;">
+                Please open the attached PDF to view the full inspection report, including all photos organized by room.
+              </p>
+
+              <!-- Legal notice -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: #f8fafc; border-radius: 8px; border-left: 3px solid #cbd5e1;">
+                <tr>
+                  <td style="padding: 16px 20px;">
+                    <p style="margin: 0; font-size: 12px; color: ${BRAND.gray}; line-height: 1.6;">
+                      <strong>Legal Notice:</strong> This report documents the property condition at the time of inspection. For documentation purposes only. Not legal advice. Consult a qualified legal professional for tenancy disputes.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: ${BRAND.background}; padding: 24px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+              <p style="margin: 0 0 8px; font-size: 13px; color: ${BRAND.gray};">
+                Report generated by <a href="${appUrl}" style="color: ${BRAND.primary}; text-decoration: none; font-weight: 600;">PropertyCheck</a> — Rental inspections made simple
+              </p>
+              <p style="margin: 0; font-size: 11px; color: #94a3b8;">
+                © ${new Date().getFullYear()} PropertyCheck. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_YOUR_RESEND_API_KEY') {
+    console.log('=== EMAIL (DEV MODE - NOT SENT) ===');
+    console.log('To:', to);
+    console.log('Subject:', `Property Inspection Report — ${propertyAddress}`);
+    console.log('PDF size (base64 chars):', pdfBase64.length);
+    return { success: true };
+  }
+
+  try {
+    const resend = getResendClient();
+    const { error } = await resend.emails.send({
+      from: `PropertyCheck Reports <${fromEmail}>`,
+      to: [to],
+      replyTo: undefined,
+      subject: `Property Inspection Report — ${propertyAddress}`,
+      html,
+      attachments: [{
+        filename: `inspection-report-${new Date().toISOString().split('T')[0]}.pdf`,
+        content: Buffer.from(pdfBase64, 'base64'),
+      }],
+    });
+
+    if (error) {
+      console.error('Failed to send inspection report email:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log(`Inspection report emailed to ${to}`);
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Error sending inspection report email:', message);
+    return { success: false, error: message };
+  }
+}
+
+/**
  * Send trial ending reminder (3 days before trial expires)
  */
 export async function sendTrialEndingEmail(params: {

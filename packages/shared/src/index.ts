@@ -35,6 +35,7 @@ export {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  sendReportEmailSchema,
   formatZodError,
   safeParse,
   type PropertyInput,
@@ -47,6 +48,7 @@ export {
   type LoginInput,
   type RegisterInput,
   type ResetPasswordInput,
+  type SendReportEmailInput,
 } from './schemas';
 
 // Logo components
