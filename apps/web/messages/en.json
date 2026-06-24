@@ -51,7 +51,7 @@
       "freePlan": "Free Plan",
       "getStarted": "Get Started",
       "premiumPlan": "Premium Plan",
-      "freeTrial": "7-Day Free Trial",
+      "freeTrial": "14-Day Free Trial",
       "free": {
         "photoDoc": {
           "title": "Photo Documentation",
@@ -145,7 +145,7 @@
       "premium": {
         "name": "Premium",
         "description": "For renters who want legally defensible evidence",
-        "cta": "Start 7-Day Free Trial",
+        "cta": "Start 14-Day Free Trial",
         "features": {
           "shareLinks": "Share secure timestamped links with landlords",
           "legalEvidence": "Legally defensible evidence for disputes",
@@ -197,7 +197,7 @@
       "trust": {
         "easyToUse": "Easy to use",
         "freePlan": "Free plan for 1 property",
-        "freeTrial": "7-day free trial for Premium"
+        "freeTrial": "14-day free trial for Premium"
       }
     }
   },
@@ -247,7 +247,7 @@
       "titleFree": "Start for free",
       "titlePremium": "Start Premium trial",
       "subtitleFree": "Document your move-in & move-out",
-      "subtitlePremium": "7-day free trial, cancel anytime",
+      "subtitlePremium": "14-day free trial, cancel anytime",
       "badgePremium": "Most Popular",
       "fullNameLabel": "Full name",
       "fullNamePlaceholder": "John Smith",
@@ -486,7 +486,7 @@
           "questions": {
             "q1": {
               "question": "What's the difference between Free and Premium?",
-              "answer": "The Free plan includes 1 property, basic reports, and 90-day storage. Premium adds unlimited properties, shareable links, comparison reports, unlimited storage, and priority support. Premium is available with a 7-day free trial."
+              "answer": "The Free plan includes 1 property, 2 inspections total (move-in + move-out), basic watermarked PDF reports (expire after 7 days), and 50 MB storage. Premium adds unlimited properties and inspections, shareable links, watermark-free comparison reports, unlimited storage, and priority support. Premium is available with a 14-day free trial."
             },
             "q2": {
               "question": "How do I cancel my subscription?",

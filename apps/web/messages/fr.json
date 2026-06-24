@@ -51,7 +51,7 @@
       "freePlan": "Plan Gratuit",
       "getStarted": "Commencer",
       "premiumPlan": "Plan Premium",
-      "freeTrial": "Essai gratuit de 7 jours",
+      "freeTrial": "Essai gratuit de 14 jours",
       "free": {
         "photoDoc": {
           "title": "Documentation photo",
@@ -145,7 +145,7 @@
       "premium": {
         "name": "Premium",
         "description": "Pour les locataires qui veulent des preuves juridiquement défendables",
-        "cta": "Commencer l'essai gratuit de 7 jours",
+        "cta": "Commencer l'essai gratuit de 14 jours",
         "features": {
           "shareLinks": "Partagez des liens sécurisés horodatés avec les propriétaires",
           "legalEvidence": "Preuves juridiquement défendables pour les litiges",
@@ -197,7 +197,7 @@
       "trust": {
         "easyToUse": "Facile à utiliser",
         "freePlan": "Plan gratuit pour 1 propriété",
-        "freeTrial": "Essai gratuit de 7 jours pour Premium"
+        "freeTrial": "Essai gratuit de 14 jours pour Premium"
       }
     }
   },
@@ -247,7 +247,7 @@
       "titleFree": "Commencez gratuitement",
       "titlePremium": "Commencer l'essai Premium",
       "subtitleFree": "Documentez votre emménagement et déménagement",
-      "subtitlePremium": "Essai gratuit de 7 jours, annulez à tout moment",
+      "subtitlePremium": "Essai gratuit de 14 jours, annulez à tout moment",
       "badgePremium": "Le plus populaire",
       "fullNameLabel": "Nom complet",
       "fullNamePlaceholder": "Jean Tremblay",
@@ -486,7 +486,7 @@
           "questions": {
             "q1": {
               "question": "Quelle est la différence entre Gratuit et Premium?",
-              "answer": "Le plan Gratuit inclut 1 propriété, des rapports de base et un stockage de 90 jours. Premium ajoute des propriétés illimitées, des liens partageables, des rapports de comparaison, un stockage illimité et un soutien prioritaire. Premium est disponible avec un essai gratuit de 7 jours."
+              "answer": "Le plan Gratuit inclut 1 propriété, 2 inspections au total (emménagement + déménagement), des rapports PDF de base avec filigrane (expirent après 7 jours) et 50 Mo de stockage. Premium ajoute des propriétés et inspections illimitées, des liens partageables, des rapports de comparaison sans filigrane, un stockage illimité et un soutien prioritaire. Premium est disponible avec un essai gratuit de 14 jours."
             },
             "q2": {
               "question": "Comment annuler mon abonnement?",
