@@ -112,6 +112,10 @@ supabase db push             # push migrations to production
 stripe listen --forward-to localhost:3000/api/stripe/webhook
 ```
 
+## Git Commits
+
+Never add `Co-Authored-By: Claude` (or any AI attribution) to commit messages.
+
 ## Definition of Done
 
 1. `npm run type-check` passes — zero errors
