@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { getProvinceOptions } from '@propertycheck/shared';
@@ -16,6 +17,7 @@ interface Subscription {
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [fullName, setFullName] = useState('');
@@ -23,6 +25,9 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const getUserAndSubscription = async () => {
@@ -80,6 +85,41 @@ export default function SettingsPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const response = await fetch('/api/account/export');
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `propertycheck-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to export data. Please try again.' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/account/delete', { method: 'DELETE' });
+      if (!response.ok) throw new Error('Delete failed');
+      // Sign out locally then redirect to home
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push('/');
+    } catch {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+      setMessage({ type: 'error', text: 'Failed to delete account. Please try again or contact support.' });
     }
   };
 
@@ -236,19 +276,43 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* Danger Zone */}
-        <div className="bg-white rounded-xl border border-red-200 p-6">
-          <h2 className="text-lg font-semibold text-red-600 mb-4">Danger Zone</h2>
+        {/* Privacy & Data */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">Privacy & Your Data</h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Under PIPEDA you have the right to access and erase your personal data at any time.
+          </p>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between py-4 border-b border-gray-100">
             <div>
-              <p className="font-medium text-gray-900">Delete account</p>
-              <p className="text-sm text-gray-500">
-                Permanently delete your account and all associated data
-              </p>
+              <p className="font-medium text-gray-900">Export my data</p>
+              <p className="text-sm text-gray-500">Download a copy of all your inspections, photos, and account data as JSON.</p>
             </div>
             <button
               type="button"
+              onClick={handleExportData}
+              disabled={isExporting}
+              className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isExporting ? (
+                <div className="w-4 h-4 border-2 border-gray-400/30 border-t-gray-600 rounded-full animate-spin" />
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              )}
+              {isExporting ? 'Exporting…' : 'Export data'}
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between pt-4">
+            <div>
+              <p className="font-medium text-red-700">Delete account</p>
+              <p className="text-sm text-gray-500">Permanently delete your account and all associated data. This cannot be undone.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirm(true)}
               className="px-4 py-2 border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors"
             >
               Delete account
@@ -256,6 +320,44 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete your account?</h3>
+            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+              This will permanently delete your account, all properties, all inspection reports, and all photos. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : null}
+                {isDeleting ? 'Deleting…' : 'Yes, delete everything'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

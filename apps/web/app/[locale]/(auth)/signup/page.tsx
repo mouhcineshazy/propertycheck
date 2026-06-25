@@ -133,6 +133,7 @@ function SignupContent() {
   const [fullName, setFullName] = useState('');
   const [province, setProvince] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +159,7 @@ function SignupContent() {
           data: {
             full_name: fullName,
             province: province,
+            marketing_consent: marketingConsent,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback${plan ? `?plan=${plan}` : ''}`,
         },
@@ -453,6 +455,21 @@ function SignupContent() {
                     {t('privacyLink')}
                   </Link>
                   , and consent to the collection and use of my personal information as described.
+                </label>
+              </motion.div>
+
+              {/* CASL marketing consent — optional, explicit opt-in required */}
+              <motion.div variants={itemVariants} className="flex items-start gap-3">
+                <input
+                  id="marketingConsent"
+                  type="checkbox"
+                  checked={marketingConsent}
+                  onChange={(e) => setMarketingConsent(e.target.checked)}
+                  disabled={isLoading || isGoogleLoading}
+                  className="mt-1 w-4 h-4 text-primary-600 border-2 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed"
+                />
+                <label htmlFor="marketingConsent" className="text-sm text-gray-500 cursor-pointer">
+                  I&apos;d like to receive tips, product updates, and deposit-protection advice by email. You can unsubscribe at any time.
                 </label>
               </motion.div>
 

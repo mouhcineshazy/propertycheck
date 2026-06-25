@@ -136,18 +136,18 @@ export default function ReportsPage() {
                 >
                   View
                 </Link>
-                <button
-                  onClick={() => {
-                    // TODO: Implement PDF generation
-                    alert('PDF generation will be available soon!');
-                  }}
+                <a
+                  href="https://apps.apple.com/ca/app/propertycheck"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Generate PDF in the mobile app"
                   className="flex-1 px-3 py-2 text-center text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-1.5"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   PDF
-                </button>
+                </a>
               </div>
             </div>
           ))}
@@ -163,11 +163,11 @@ export default function ReportsPage() {
             </svg>
           </div>
           <div>
-            <h3 className="font-medium text-gray-900 mb-1">About PDF Reports</h3>
+            <h3 className="font-medium text-gray-900 mb-1">PDF Reports — Mobile App</h3>
             <p className="text-sm text-gray-600">
-              PDF reports include timestamped photos, property details, and inspection notes.
-              They serve as legal evidence for deposit disputes and can be shared with
-              landlords or letting agents.
+              PDF generation and emailing to your landlord is available in the PropertyCheck mobile app.
+              Use this dashboard to browse your inspection history. Tap the PDF button above to open the
+              App Store and download the app.
             </p>
           </div>
         </div>
