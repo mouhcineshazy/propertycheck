@@ -267,6 +267,146 @@ export function PricingSection() {
             <span>{t('guarantee')}</span>
           </div>
         </motion.div>
+
+        {/* Pay-as-you-go add-ons */}
+        <motion.div
+          className="flex items-center gap-4 max-w-4xl mx-auto mt-16 mb-8"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          <div className="flex-1 h-px bg-gray-200" />
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+              {t('addons.title')}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">{t('addons.subtitle')}</p>
+          </div>
+          <div className="flex-1 h-px bg-gray-200" />
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {/* Report Unlock */}
+          <motion.div
+            className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-primary-200 hover:shadow-md transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.55 }}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-gray-900">
+                  {t('addons.reportUnlock.name')}
+                </h3>
+                <span className="bg-amber-50 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  {t('addons.reportUnlock.period')}
+                </span>
+              </div>
+              <p className="text-gray-500 text-sm mb-4">
+                {t('addons.reportUnlock.description')}
+              </p>
+              <div className="flex items-baseline gap-1.5 mb-5">
+                <span className="text-3xl font-bold text-gray-900">
+                  {t('addons.reportUnlock.price')}
+                </span>
+                <span className="text-gray-400 text-sm">
+                  {t('addons.reportUnlock.period')}
+                </span>
+              </div>
+              <Link
+                href="#download"
+                className="block w-full py-2.5 px-5 rounded-xl font-semibold text-center text-sm bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors"
+              >
+                {t('addons.reportUnlock.cta')}
+              </Link>
+              <ul className="mt-5 space-y-2.5">
+                {(['feature1', 'feature2', 'feature3'] as const).map((key) => (
+                  <li key={key} className="flex items-center gap-2.5 text-sm text-gray-600">
+                    <svg
+                      className="w-4 h-4 text-green-500 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    {t(`addons.reportUnlock.${key}`)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+
+          {/* Moving Bundle */}
+          <motion.div
+            className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-primary-200 hover:shadow-md transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-bold text-gray-900">
+                  {t('addons.bundle.name')}
+                </h3>
+                <span className="bg-amber-50 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  {t('addons.bundle.period')}
+                </span>
+              </div>
+              <p className="text-gray-500 text-sm mb-4">
+                {t('addons.bundle.description')}
+              </p>
+              <div className="flex items-baseline gap-1.5 mb-5">
+                <span className="text-3xl font-bold text-gray-900">
+                  {t('addons.bundle.price')}
+                </span>
+                <span className="text-gray-400 text-sm">
+                  {t('addons.bundle.period')}
+                </span>
+              </div>
+              <Link
+                href="#download"
+                className="block w-full py-2.5 px-5 rounded-xl font-semibold text-center text-sm bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+              >
+                {t('addons.bundle.cta')}
+              </Link>
+              <ul className="mt-5 space-y-2.5">
+                {(['feature1', 'feature2', 'feature3', 'feature4'] as const).map((key) => (
+                  <li key={key} className="flex items-center gap-2.5 text-sm text-gray-600">
+                    <svg
+                      className="w-4 h-4 text-green-500 flex-shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    {t(`addons.bundle.${key}`)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        </div>
+
+        <motion.p
+          className="text-center text-xs text-gray-400 mt-4"
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.5, delay: 0.65 }}
+        >
+          {t('addons.appNote')}
+        </motion.p>
       </div>
     </section>
   );

@@ -98,6 +98,7 @@ export interface Database {
           notes: string | null;
           share_token: string | null;
           share_expires_at: string | null;
+          report_unlocked: boolean;
           created_at: string;
         };
         Insert: {
@@ -108,6 +109,7 @@ export interface Database {
           notes?: string | null;
           share_token?: string;
           share_expires_at?: string;
+          report_unlocked?: boolean;
           created_at?: string;
         };
         Update: {
@@ -116,6 +118,7 @@ export interface Database {
           notes?: string | null;
           share_token?: string | null;
           share_expires_at?: string | null;
+          report_unlocked?: boolean;
         };
         Relationships: [
           {
@@ -200,6 +203,43 @@ export interface Database {
           }
         ];
       };
+      bundle_purchases: {
+        Row: {
+          id: string;
+          user_id: string;
+          property_id: string;
+          stripe_payment_intent_id: string | null;
+          purchased_at: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          property_id: string;
+          stripe_payment_intent_id?: string | null;
+          purchased_at?: string;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: {
+          expires_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'bundle_purchases_user_id_fkey';
+            columns: ['user_id'];
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'bundle_purchases_property_id_fkey';
+            columns: ['property_id'];
+            referencedRelation: 'properties';
+            referencedColumns: ['id'];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -243,6 +283,9 @@ export type InspectionPhotoUpdate = Database['public']['Tables']['inspection_pho
 export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 export type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert'];
 export type SubscriptionUpdate = Database['public']['Tables']['subscriptions']['Update'];
+
+export type BundlePurchase = Database['public']['Tables']['bundle_purchases']['Row'];
+export type BundlePurchaseInsert = Database['public']['Tables']['bundle_purchases']['Insert'];
 
 // Inspection with related data (for queries with joins)
 export type InspectionWithPhotos = Inspection & {

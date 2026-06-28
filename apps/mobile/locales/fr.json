@@ -153,7 +153,13 @@
         "title": "Supprimer la propriété",
         "message": "Êtes-vous sûr de vouloir supprimer cette propriété? Cela supprimera également toutes les inspections et photos.",
         "confirmButton": "Supprimer"
-      }
+      },
+      "bundleTitle": "Forfait déménagement",
+      "bundleDesc": "Obtenez les rapports d'emménagement, de déménagement et de comparaison sans filigrane pour cette propriété. Valide 18 mois.",
+      "bundleButton": "Acheter le forfait — 19,99 $",
+      "bundleActive": "Forfait déménagement actif",
+      "bundleActiveDesc": "Votre forfait couvre cette propriété pour 18 mois. Le PDF de comparaison est sans filigrane.",
+      "bundlePurchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer."
     }
   },
 
@@ -222,7 +228,14 @@
         "title": "Supprimer l'inspection",
         "message": "Êtes-vous sûr de vouloir supprimer cette inspection? Cela supprimera également toutes les photos.",
         "confirmButton": "Supprimer"
-      }
+      },
+      "unlockReport": "Déverrouiller le PDF sans filigrane",
+      "unlockReportDesc": "Achat unique — aucun abonnement requis",
+      "unlockReportPrice": "5,99 $ CAD",
+      "unlockReportButton": "Déverrouiller — 5,99 $",
+      "reportUnlocked": "Rapport déverrouillé",
+      "reportUnlockedDesc": "Votre PDF n'a pas de filigrane. Appuyez sur PDF pour générer votre rapport propre.",
+      "purchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer."
     },
     "compare": {
       "title": "Comparer les inspections",

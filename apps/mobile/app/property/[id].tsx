@@ -20,12 +20,20 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Inspection } from '@propertycheck/database';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { getMobileSupabaseClient } from '../../lib/supabase';
-import { fetchPropertyWithInspections, deleteProperty, checkFreeTierLimits, canGenerateComparison } from '../../lib';
+import {
+  fetchPropertyWithInspections,
+  deleteProperty,
+  checkFreeTierLimits,
+  canGenerateComparison,
+  checkBundleAccess,
+  createBundleCheckout,
+} from '../../lib';
 import type { PropertyWithInspections } from '../../lib';
 import { UpgradeModal } from '../../components';
 import { useTranslation } from '../../contexts';
@@ -45,6 +53,8 @@ export default function PropertyDetailScreen() {
   const [canCompare, setCanCompare] = useState(false);
   const [userProvince, setUserProvince] = useState<string | undefined>();
   const [isPremium, setIsPremium] = useState(false);
+  const [hasBundle, setHasBundle] = useState(false);
+  const [isPurchasingBundle, setIsPurchasingBundle] = useState(false);
 
   // Refetch data when screen gains focus (after creating/editing/deleting inspections)
   useFocusEffect(
@@ -55,18 +65,20 @@ export default function PropertyDetailScreen() {
         try {
           const supabase = getMobileSupabaseClient();
 
-          // Load property, limits, comparison status, user province, and subscription in parallel
-          const [data, limitsResult, comparisonResult, userResult, subResult] = await Promise.all([
+          // Load property, limits, comparison status, user province, subscription, and bundle in parallel
+          const [data, limitsResult, comparisonResult, userResult, subResult, bundleResult] = await Promise.all([
             fetchPropertyWithInspections(id),
             checkFreeTierLimits(),
             canGenerateComparison(id),
             supabase.from('users').select('province').single(),
             supabase.from('subscriptions').select('status').single(),
+            checkBundleAccess(id),
           ]);
 
           setProperty(data);
           setCanCompare(comparisonResult.canCompare);
           setUserProvince(userResult.data?.province || undefined);
+          setHasBundle(bundleResult.hasBundle);
 
           // Check if user is premium
           const userIsPremium = subResult.data?.status === 'premium';
@@ -95,6 +107,23 @@ export default function PropertyDetailScreen() {
       loadProperty();
     }, [id, router, t])
   );
+
+  const handlePurchaseBundle = async () => {
+    if (!id) return;
+    setIsPurchasingBundle(true);
+    try {
+      const { url, error } = await createBundleCheckout(id);
+      if (error || !url) {
+        Alert.alert(t('common.error'), t('property.detail.bundlePurchaseFailed'));
+        return;
+      }
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert(t('common.error'), t('property.detail.bundlePurchaseFailed'));
+    } finally {
+      setIsPurchasingBundle(false);
+    }
+  };
 
   const handleDelete = () => {
     Alert.alert(
@@ -270,6 +299,40 @@ export default function PropertyDetailScreen() {
             />
           )}
         </View>
+
+        {/* Moving Bundle upsell — shown when comparison is possible */}
+        {canCompare && !isPremium && (
+          <View style={hasBundle ? styles.bundleActiveCard : styles.bundleUpsellCard}>
+            {hasBundle ? (
+              <>
+                <View style={styles.bundleIconRow}>
+                  <Ionicons name="shield-checkmark" size={20} color="#15803d" />
+                  <Text style={styles.bundleTitleGreen}>{t('property.detail.bundleActive')}</Text>
+                </View>
+                <Text style={styles.bundleDesc}>{t('property.detail.bundleActiveDesc')}</Text>
+              </>
+            ) : (
+              <>
+                <View style={styles.bundleIconRow}>
+                  <Ionicons name="briefcase-outline" size={20} color="#2563eb" />
+                  <Text style={styles.bundleTitle}>{t('property.detail.bundleTitle')}</Text>
+                </View>
+                <Text style={styles.bundleDesc}>{t('property.detail.bundleDesc')}</Text>
+                <TouchableOpacity
+                  style={[styles.bundleButton, isPurchasingBundle && styles.buttonDisabled]}
+                  onPress={handlePurchaseBundle}
+                  disabled={isPurchasingBundle}
+                >
+                  {isPurchasingBundle ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text style={styles.bundleButtonText}>{t('property.detail.bundleButton')}</Text>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
       </ScrollView>
 
       {/* Bottom Actions */}
@@ -494,6 +557,58 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginTop: 4,
+  },
+  bundleUpsellCard: {
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  bundleActiveCard: {
+    backgroundColor: '#f0fdf4',
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  bundleIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  bundleTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1e40af',
+  },
+  bundleTitleGreen: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#15803d',
+  },
+  bundleDesc: {
+    fontSize: 13,
+    color: '#4b5563',
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  bundleButton: {
+    backgroundColor: '#2563eb',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  bundleButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   errorText: {
     fontSize: 16,

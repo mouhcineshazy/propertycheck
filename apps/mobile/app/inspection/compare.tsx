@@ -23,7 +23,7 @@ import { format } from 'date-fns';
 import { fr as frLocale } from 'date-fns/locale';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { ComparisonReport, UpgradeModal } from '../../components';
-import { fetchComparisonData, getPhotoUrl } from '../../lib';
+import { fetchComparisonData, getPhotoUrl, checkBundleAccess } from '../../lib';
 import type { InspectionWithPhotos } from '../../lib';
 import { useTranslation } from '../../contexts';
 
@@ -62,6 +62,7 @@ export default function ComparisonScreen() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [hasBundle, setHasBundle] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [comparisonData, setComparisonData] = useState<{
@@ -85,11 +86,12 @@ export default function ComparisonScreen() {
         try {
           const supabase = getMobileSupabaseClient();
 
-          // Fetch comparison data and subscription status in parallel
-          const [compResult, subResult, userResult] = await Promise.all([
+          // Fetch comparison data, subscription status, and bundle access in parallel
+          const [compResult, subResult, userResult, bundleResult] = await Promise.all([
             fetchComparisonData(propertyId),
             supabase.from('subscriptions').select('status').single(),
             supabase.from('users').select('province').single(),
+            checkBundleAccess(propertyId),
           ]);
 
           if (compResult.error || !compResult.data) {
@@ -103,6 +105,7 @@ export default function ComparisonScreen() {
           });
 
           setIsPremium(subResult.data?.status === 'premium');
+          setHasBundle(bundleResult.hasBundle);
           setUserProvince(userResult.data?.province || undefined);
         } catch (err) {
           console.error('Error loading comparison:', err);
@@ -122,8 +125,8 @@ export default function ComparisonScreen() {
   const handleGeneratePdf = async () => {
     if (!comparisonData) return;
 
-    // For free tier, show upgrade modal
-    if (!isPremium) {
+    // Gate PDF generation behind premium OR moving bundle
+    if (!isPremium && !hasBundle) {
       setShowUpgradeModal(true);
       return;
     }
@@ -207,7 +210,7 @@ export default function ComparisonScreen() {
         moveOutDate={comparisonData.moveOutInspection.inspection_date}
         moveInPhotos={comparisonData.moveInInspection.photos}
         moveOutPhotos={comparisonData.moveOutInspection.photos}
-        showWatermark={!isPremium}
+        showWatermark={!isPremium && !hasBundle}
         onUpgradePress={() => setShowUpgradeModal(true)}
       />
 

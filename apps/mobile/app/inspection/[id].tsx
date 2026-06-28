@@ -26,6 +26,7 @@ import {
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Sharing from 'expo-sharing';
+import * as Linking from 'expo-linking';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { getMobileSupabaseClient } from '../../lib/supabase';
@@ -37,6 +38,7 @@ import {
   getPhotoUrl,
   canGenerateComparison,
   sendReportByEmail,
+  createReportUnlockCheckout,
 } from '../../lib';
 import type { InspectionWithPhotos, PDFOptions } from '../../lib';
 import { useI18n } from '../../contexts';
@@ -123,6 +125,7 @@ export default function InspectionDetailScreen() {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [isFirstInspection, setIsFirstInspection] = useState(true);
+  const [isPurchasingReport, setIsPurchasingReport] = useState(false);
 
   // Refetch data when screen gains focus (after completing/editing inspection elsewhere)
   useFocusEffect(
@@ -269,7 +272,7 @@ export default function InspectionDetailScreen() {
       }
 
       const pdfOptions: PDFOptions = {
-        isPremium,
+        isPremium: isPremium || !!inspection.report_unlocked,
         isFirstInspection,
         locale: locale as 'en' | 'fr',
         shareUrl,
@@ -316,7 +319,12 @@ export default function InspectionDetailScreen() {
         ? `${appUrl}/${locale}/share/${inspection.share_token}`
         : undefined;
       // Email API route refreshes share_expires_at to 30 days server-side
-      const pdfOptions: PDFOptions = { isPremium, isFirstInspection, locale: locale as 'en' | 'fr', shareUrl };
+      const pdfOptions: PDFOptions = {
+        isPremium: isPremium || !!inspection.report_unlocked,
+        isFirstInspection,
+        locale: locale as 'en' | 'fr',
+        shareUrl,
+      };
       const pdfUri = await generateInspectionPdf(inspection, propertyAddress, pdfOptions);
 
       const { success, error } = await sendReportByEmail({
@@ -339,6 +347,23 @@ export default function InspectionDetailScreen() {
       Alert.alert(t('common.error'), t('inspection.detail.sendEmailError'));
     } finally {
       setIsSendingEmail(false);
+    }
+  };
+
+  const handlePurchaseReport = async () => {
+    if (!inspection || !id) return;
+    setIsPurchasingReport(true);
+    try {
+      const { url, error } = await createReportUnlockCheckout(id);
+      if (error || !url) {
+        Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
+        return;
+      }
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
+    } finally {
+      setIsPurchasingReport(false);
     }
   };
 
@@ -516,6 +541,40 @@ export default function InspectionDetailScreen() {
             </View>
           )}
         </View>
+
+        {/* Report Unlock Card — only for completed inspections */}
+        {isCompleted && !isPremium && (
+          <View style={styles.unlockCard}>
+            {inspection.report_unlocked ? (
+              <>
+                <View style={styles.unlockIconRow}>
+                  <Ionicons name="checkmark-circle" size={20} color="#16a34a" />
+                  <Text style={styles.unlockTitleGreen}>{t('inspection.detail.reportUnlocked')}</Text>
+                </View>
+                <Text style={styles.unlockDesc}>{t('inspection.detail.reportUnlockedDesc')}</Text>
+              </>
+            ) : (
+              <>
+                <View style={styles.unlockIconRow}>
+                  <Ionicons name="lock-closed-outline" size={20} color="#2563eb" />
+                  <Text style={styles.unlockTitle}>{t('inspection.detail.unlockReport')}</Text>
+                </View>
+                <Text style={styles.unlockDesc}>{t('inspection.detail.unlockReportDesc')}</Text>
+                <TouchableOpacity
+                  style={[styles.unlockButton, isPurchasingReport && styles.buttonDisabled]}
+                  onPress={handlePurchaseReport}
+                  disabled={isPurchasingReport}
+                >
+                  {isPurchasingReport ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text style={styles.unlockButtonText}>{t('inspection.detail.unlockReportButton')}</Text>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
 
         <View style={styles.bottomPadding} />
       </ScrollView>
@@ -808,6 +867,46 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40,
+  },
+  unlockCard: {
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+  },
+  unlockIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  unlockTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1e40af',
+  },
+  unlockTitleGreen: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#15803d',
+  },
+  unlockDesc: {
+    fontSize: 13,
+    color: '#4b5563',
+    marginBottom: 12,
+  },
+  unlockButton: {
+    backgroundColor: '#2563eb',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  unlockButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
   },
   bottomBar: {
     position: 'absolute',

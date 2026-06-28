@@ -153,7 +153,13 @@
         "title": "Delete Property",
         "message": "Are you sure you want to delete this property? This will also delete all inspections and photos.",
         "confirmButton": "Delete"
-      }
+      },
+      "bundleTitle": "Moving Bundle",
+      "bundleDesc": "Get watermark-free move-in, move-out, and comparison reports for this property. Valid 18 months.",
+      "bundleButton": "Buy Moving Bundle — $19.99",
+      "bundleActive": "Moving Bundle Active",
+      "bundleActiveDesc": "Your bundle covers this property for 18 months. Comparison PDF is watermark-free.",
+      "bundlePurchaseFailed": "Could not open checkout. Please try again."
     }
   },
 
@@ -222,7 +228,14 @@
         "title": "Delete Inspection",
         "message": "Are you sure you want to delete this inspection? This will also delete all photos.",
         "confirmButton": "Delete"
-      }
+      },
+      "unlockReport": "Unlock Watermark-Free PDF",
+      "unlockReportDesc": "One-time purchase — no subscription needed",
+      "unlockReportPrice": "$5.99 CAD",
+      "unlockReportButton": "Unlock — $5.99",
+      "reportUnlocked": "Report Unlocked",
+      "reportUnlockedDesc": "Your PDF has no watermark. Tap PDF to generate your clean report.",
+      "purchaseFailed": "Could not open checkout. Please try again."
     },
     "compare": {
       "title": "Compare Inspections",

@@ -13,7 +13,6 @@
     "next": "Next",
     "submit": "Submit"
   },
-
   "navigation": {
     "features": "Features",
     "howItWorks": "How It Works",
@@ -27,7 +26,6 @@
     "settings": "Settings",
     "signOut": "Sign out"
   },
-
   "landing": {
     "hero": {
       "badge": "Built for Canadian Renters",
@@ -156,6 +154,32 @@
           "unlimitedStorage": "Unlimited cloud storage",
           "prioritySupport": "Priority email support"
         }
+      },
+      "addons": {
+        "title": "Pay As You Go",
+        "subtitle": "No subscription needed — unlock what you need, when you need it.",
+        "appNote": "Available in the free app — download to purchase",
+        "reportUnlock": {
+          "name": "Report Unlock",
+          "price": "$5.99",
+          "period": "one-time",
+          "description": "Remove the watermark from one completed inspection report.",
+          "feature1": "Watermark-free PDF",
+          "feature2": "Email directly to your landlord",
+          "feature3": "Per inspection",
+          "cta": "Get the App"
+        },
+        "bundle": {
+          "name": "Moving Bundle",
+          "price": "$19.99",
+          "period": "one-time",
+          "description": "Move-in, move-out, and comparison report for one property.",
+          "feature1": "Move-in & move-out coverage",
+          "feature2": "Watermark-free comparison PDF",
+          "feature3": "One property",
+          "feature4": "Valid for 18 months",
+          "cta": "Get the App"
+        }
       }
     },
     "download": {
@@ -201,7 +225,6 @@
       }
     }
   },
-
   "footer": {
     "description": "Protect your damage deposit with professional inspection reports.",
     "sections": {
@@ -223,7 +246,6 @@
     "copyright": "© {year} PropertyCheck. All rights reserved.",
     "madeIn": "Proudly Canadian"
   },
-
   "auth": {
     "login": {
       "title": "Welcome back",
@@ -275,8 +297,18 @@
       },
       "freePlanIncludes": "Free plan includes:",
       "premiumIncludes": "Premium includes:",
-      "freeFeatures": ["1 property", "Move-in & move-out inspections", "Basic PDF reports", "Photo documentation"],
-      "premiumFeatures": ["Unlimited properties & inspections", "Email PDF directly to landlord", "Professional PDF reports", "Priority email support"],
+      "freeFeatures": [
+        "1 property",
+        "Move-in & move-out inspections",
+        "Basic PDF reports",
+        "Photo documentation"
+      ],
+      "premiumFeatures": [
+        "Unlimited properties & inspections",
+        "Email PDF directly to landlord",
+        "Professional PDF reports",
+        "Priority email support"
+      ],
       "trustIndicators": {
         "ssl": "256-bit SSL",
         "gdpr": "GDPR compliant"
@@ -340,7 +372,6 @@
       }
     }
   },
-
   "pages": {
     "about": {
       "title": "Protecting Renters Across Canada",
@@ -564,7 +595,6 @@
       }
     }
   },
-
   "share": {
     "inspectionReport": "Inspection Report",
     "sharedBy": "Shared by",
@@ -591,7 +621,6 @@
     },
     "poweredBy": "Powered by PropertyCheck"
   },
-
   "legal": {
     "terms": {
       "title": "Terms of Service",
@@ -609,13 +638,11 @@
     "lastUpdated": "Last Updated",
     "tableOfContents": "Table of Contents"
   },
-
   "languageSwitcher": {
     "label": "Language",
     "english": "English",
     "french": "Francais"
   },
-
   "metadata": {
     "home": {
       "title": "PropertyCheck - Protect Your Damage Deposit",

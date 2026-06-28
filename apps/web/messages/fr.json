@@ -13,7 +13,6 @@
     "next": "Suivant",
     "submit": "Soumettre"
   },
-
   "navigation": {
     "features": "Fonctionnalités",
     "howItWorks": "Comment ça marche",
@@ -27,7 +26,6 @@
     "settings": "Paramètres",
     "signOut": "Déconnexion"
   },
-
   "landing": {
     "hero": {
       "badge": "Conçu pour les locataires canadiens",
@@ -156,6 +154,32 @@
           "unlimitedStorage": "Stockage infonuagique illimité",
           "prioritySupport": "Soutien par courriel prioritaire"
         }
+      },
+      "addons": {
+        "title": "Paiement à l'utilisation",
+        "subtitle": "Sans abonnement — payez uniquement ce dont vous avez besoin.",
+        "appNote": "Disponible dans l'application gratuite — téléchargez pour acheter",
+        "reportUnlock": {
+          "name": "Rapport sans filigrane",
+          "price": "5,99 $",
+          "period": "paiement unique",
+          "description": "Supprimez le filigrane d'un rapport d'inspection complété.",
+          "feature1": "PDF sans filigrane",
+          "feature2": "Envoi direct au propriétaire",
+          "feature3": "Par inspection",
+          "cta": "Télécharger l'application"
+        },
+        "bundle": {
+          "name": "Forfait déménagement",
+          "price": "19,99 $",
+          "period": "paiement unique",
+          "description": "Rapport d'entrée, de sortie et de comparaison pour une propriété.",
+          "feature1": "Couverture entrée et sortie",
+          "feature2": "Rapport de comparaison sans filigrane",
+          "feature3": "Une propriété",
+          "feature4": "Valide 18 mois",
+          "cta": "Télécharger l'application"
+        }
       }
     },
     "download": {
@@ -201,7 +225,6 @@
       }
     }
   },
-
   "footer": {
     "description": "Protégez votre dépôt de garantie avec des rapports d'inspection professionnels.",
     "sections": {
@@ -223,7 +246,6 @@
     "copyright": "© {year} PropertyCheck. Tous droits réservés.",
     "madeIn": "Fièrement Canadien"
   },
-
   "auth": {
     "login": {
       "title": "Bon retour",
@@ -275,8 +297,18 @@
       },
       "freePlanIncludes": "Le plan gratuit inclut :",
       "premiumIncludes": "Premium inclut :",
-      "freeFeatures": ["1 propriété", "Inspections d'emménagement et de déménagement", "Rapports PDF de base", "Documentation photo"],
-      "premiumFeatures": ["Propriétés et inspections illimitées", "Envoi du PDF directement au propriétaire", "Rapports PDF professionnels", "Soutien par courriel prioritaire"],
+      "freeFeatures": [
+        "1 propriété",
+        "Inspections d'emménagement et de déménagement",
+        "Rapports PDF de base",
+        "Documentation photo"
+      ],
+      "premiumFeatures": [
+        "Propriétés et inspections illimitées",
+        "Envoi du PDF directement au propriétaire",
+        "Rapports PDF professionnels",
+        "Soutien par courriel prioritaire"
+      ],
       "trustIndicators": {
         "ssl": "SSL 256 bits",
         "gdpr": "Conforme au RGPD"
@@ -340,7 +372,6 @@
       }
     }
   },
-
   "pages": {
     "about": {
       "title": "Protéger les locataires à travers le Canada",
@@ -564,7 +595,6 @@
       }
     }
   },
-
   "share": {
     "inspectionReport": "Rapport d'inspection",
     "sharedBy": "Partagé par",
@@ -591,7 +621,6 @@
     },
     "poweredBy": "Propulsé par PropertyCheck"
   },
-
   "legal": {
     "terms": {
       "title": "Conditions d'utilisation",
@@ -609,13 +638,11 @@
     "lastUpdated": "Dernière mise à jour",
     "tableOfContents": "Table des matières"
   },
-
   "languageSwitcher": {
     "label": "Langue",
     "english": "English",
     "french": "Français"
   },
-
   "metadata": {
     "home": {
       "title": "PropertyCheck – Protégez votre dépôt de garantie",
