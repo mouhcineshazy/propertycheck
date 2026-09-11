@@ -39,6 +39,16 @@
         "timestamped": "Timestamped Photos",
         "pdfReports": "PDF Reports",
         "secure": "Secure & Private"
+      },
+      "howItWorks": "See how it works",
+      "mockup": {
+        "verified": "Verified",
+        "reportLabel": "Inspection Report",
+        "address": "48 Wellesley St, Toronto",
+        "moveIn": "Move-in",
+        "damageNoted": "Damage noted",
+        "timestamp": "Documented Jan 14, 2026 · 2:14 PM",
+        "depositProtected": "Deposit protected"
       }
     },
     "features": {

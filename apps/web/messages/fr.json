@@ -39,6 +39,16 @@
         "timestamped": "Photos horodatées",
         "pdfReports": "Rapports PDF",
         "secure": "Sécurisé et privé"
+      },
+      "howItWorks": "Voir comment ça marche",
+      "mockup": {
+        "verified": "Vérifié",
+        "reportLabel": "Rapport d'inspection",
+        "address": "48 rue Wellesley, Toronto",
+        "moveIn": "Emménagement",
+        "damageNoted": "Dommage noté",
+        "timestamp": "Documenté le 14 janv. 2026 · 14 h 14",
+        "depositProtected": "Dépôt protégé"
       }
     },
     "features": {

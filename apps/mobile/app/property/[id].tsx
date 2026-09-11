@@ -1,10 +1,10 @@
 /**
  * Property Detail Screen - React 19 Pattern
  *
- * Features:
  * - View property details with inspections list
  * - Start new inspection
- * - Edit/Delete property
+ * - Delete property, comparison + moving-bundle upsell
+ * - Trust Ink theme tokens (lib/theme.ts)
  */
 
 import { useState, useCallback } from 'react';
@@ -19,6 +19,7 @@ import {
   FlatList,
 } from 'react-native';
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { format } from 'date-fns';
@@ -37,9 +38,11 @@ import {
 import type { PropertyWithInspections } from '../../lib';
 import { UpgradeModal } from '../../components';
 import { useTranslation } from '../../contexts';
+import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
 
 export default function PropertyDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t, locale } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -48,7 +51,6 @@ export default function PropertyDetailScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [totalInspections, setTotalInspections] = useState(0);
-  // Default to false (blocked) until we confirm user can add - prevents bypass on API errors
   const [canAddInspection, setCanAddInspection] = useState(false);
   const [canCompare, setCanCompare] = useState(false);
   const [userProvince, setUserProvince] = useState<string | undefined>();
@@ -56,41 +58,34 @@ export default function PropertyDetailScreen() {
   const [hasBundle, setHasBundle] = useState(false);
   const [isPurchasingBundle, setIsPurchasingBundle] = useState(false);
 
-  // Refetch data when screen gains focus (after creating/editing/deleting inspections)
   useFocusEffect(
     useCallback(() => {
       async function loadProperty() {
         if (!id) return;
-
         try {
           const supabase = getMobileSupabaseClient();
-
-          // Load property, limits, comparison status, user province, subscription, and bundle in parallel
-          const [data, limitsResult, comparisonResult, userResult, subResult, bundleResult] = await Promise.all([
-            fetchPropertyWithInspections(id),
-            checkFreeTierLimits(),
-            canGenerateComparison(id),
-            supabase.from('users').select('province').single(),
-            supabase.from('subscriptions').select('status').single(),
-            checkBundleAccess(id),
-          ]);
+          const [data, limitsResult, comparisonResult, userResult, subResult, bundleResult] =
+            await Promise.all([
+              fetchPropertyWithInspections(id),
+              checkFreeTierLimits(),
+              canGenerateComparison(id),
+              supabase.from('users').select('province').single(),
+              supabase.from('subscriptions').select('status').single(),
+              checkBundleAccess(id),
+            ]);
 
           setProperty(data);
           setCanCompare(comparisonResult.canCompare);
           setUserProvince(userResult.data?.province || undefined);
           setHasBundle(bundleResult.hasBundle);
 
-          // Check if user is premium
           const userIsPremium = subResult.data?.status === 'premium';
           setIsPremium(userIsPremium);
 
-          // Update inspection limits - default to blocked if API fails
           if (limitsResult.data) {
             setTotalInspections(limitsResult.data.inspectionCount);
-            // Premium users can always add inspections
             setCanAddInspection(userIsPremium || limitsResult.data.canAddInspection);
           } else {
-            // API error - premium users still get access, free users blocked
             console.warn('Failed to check limits:', limitsResult.error);
             setCanAddInspection(userIsPremium);
           }
@@ -103,7 +98,6 @@ export default function PropertyDetailScreen() {
           setIsLoading(false);
         }
       }
-
       loadProperty();
     }, [id, router, t])
   );
@@ -155,13 +149,10 @@ export default function PropertyDetailScreen() {
 
   const handleStartInspection = () => {
     if (!property) return;
-
-    // Check free tier limits (total inspections across ALL properties)
     if (!canAddInspection) {
       setShowUpgradeModal(true);
       return;
     }
-
     router.push(`/inspection/new?propertyId=${id}` as Href);
   };
 
@@ -169,41 +160,36 @@ export default function PropertyDetailScreen() {
     router.push(`/inspection/compare?propertyId=${id}` as Href);
   };
 
-  const renderInspection = ({ item }: { item: Inspection }) => (
-    <TouchableOpacity
-      style={styles.inspectionCard}
-      onPress={() => router.push(`/inspection/${item.id}` as Href)}
-    >
-      <View style={styles.inspectionInfo}>
-        <Text style={styles.inspectionDate}>
-          {format(new Date(item.created_at), 'MMM d, yyyy')}
-        </Text>
-        <View style={styles.inspectionMeta}>
-          <View
-            style={[
-              styles.statusBadge,
-              item.status === 'completed' && styles.statusBadgeCompleted,
-            ]}
-          >
-            <Text
-              style={[
-                styles.statusBadgeText,
-                item.status === 'completed' && styles.statusBadgeTextCompleted,
-              ]}
-            >
-              {item.status === 'completed' ? t('inspection.status.completed') : t('inspection.status.inProgress')}
-            </Text>
+  const renderInspection = ({ item }: { item: Inspection }) => {
+    const completed = item.status === 'completed';
+    return (
+      <TouchableOpacity
+        style={styles.inspectionCard}
+        activeOpacity={0.7}
+        onPress={() => router.push(`/inspection/${item.id}` as Href)}
+      >
+        <View style={styles.inspectionAvatar}>
+          <Ionicons name="clipboard-outline" size={18} color={semantic.fgMuted} />
+        </View>
+        <View style={styles.inspectionInfo}>
+          <Text style={styles.inspectionDate}>{format(new Date(item.created_at), 'MMM d, yyyy')}</Text>
+          <View style={styles.inspectionMeta}>
+            <View style={[styles.statusBadge, completed ? styles.statusBadgeCompleted : styles.statusBadgeProgress]}>
+              <Text style={[styles.statusBadgeText, completed ? styles.statusTextCompleted : styles.statusTextProgress]}>
+                {completed ? t('inspection.status.completed') : t('inspection.status.inProgress')}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color="#999" />
-    </TouchableOpacity>
-  );
+        <Ionicons name="chevron-forward" size={20} color={semantic.fgSubtle} />
+      </TouchableOpacity>
+    );
+  };
 
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={semantic.primary} />
       </View>
     );
   }
@@ -211,7 +197,9 @@ export default function PropertyDetailScreen() {
   if (!property) {
     return (
       <View style={styles.centered}>
-        <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
+        <View style={styles.errorIcon}>
+          <Ionicons name="alert-circle-outline" size={40} color={semantic.danger} />
+        </View>
         <Text style={styles.errorText}>{t('errors.notFound')}</Text>
       </View>
     );
@@ -222,27 +210,29 @@ export default function PropertyDetailScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
+          <Ionicons name="arrow-back" size={24} color={semantic.fg} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
           {t('property.detail.title')}
         </Text>
-        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+        <TouchableOpacity onPress={handleDelete} style={styles.iconButton} hitSlop={8}>
           {isDeleting ? (
-            <ActivityIndicator size="small" color="#ef4444" />
+            <ActivityIndicator size="small" color={semantic.danger} />
           ) : (
-            <Ionicons name="trash-outline" size={22} color="#ef4444" />
+            <Ionicons name="trash-outline" size={22} color={semantic.danger} />
           )}
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
-        {/* Property Info Card */}
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentInner} showsVerticalScrollIndicator={false}>
+        {/* Property info */}
         <View style={styles.card}>
           <View style={styles.addressRow}>
-            <Ionicons name="location-outline" size={24} color="#2563eb" />
+            <View style={styles.addressAvatar}>
+              <Ionicons name="location" size={20} color={semantic.primary} />
+            </View>
             <Text style={styles.address}>{property.address}</Text>
           </View>
           <View style={styles.metaRow}>
@@ -250,7 +240,8 @@ export default function PropertyDetailScreen() {
               <Text style={styles.badgeText}>{t(`property.new.types.${property.property_type}`)}</Text>
             </View>
             <Text style={styles.createdAt}>
-              {t('property.detail.added')} {format(
+              {t('property.detail.added')}{' '}
+              {format(
                 new Date(property.created_at),
                 locale === 'fr' ? 'd MMM yyyy' : 'MMM d, yyyy',
                 locale === 'fr' ? { locale: fr } : undefined
@@ -265,11 +256,10 @@ export default function PropertyDetailScreen() {
           )}
         </View>
 
-        {/* Inspections Section */}
+        {/* Inspections */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('property.detail.inspections')}</Text>
-            {/* Only show limit count for free users */}
             {isPremium ? (
               <Text style={styles.inspectionCount}>
                 {totalInspections} {t('property.detail.total')}
@@ -284,11 +274,11 @@ export default function PropertyDetailScreen() {
 
           {inspectionCount === 0 ? (
             <View style={styles.emptyInspections}>
-              <Ionicons name="clipboard-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyText}>{t('property.detail.noInspections')}</Text>
-              <Text style={styles.emptySubtext}>
-                {t('property.detail.noInspectionsHint')}
-              </Text>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="clipboard-outline" size={32} color={semantic.primary} />
+              </View>
+              <Text style={styles.emptyText2}>{t('property.detail.noInspections')}</Text>
+              <Text style={styles.emptySubtext}>{t('property.detail.noInspectionsHint')}</Text>
             </View>
           ) : (
             <FlatList
@@ -300,13 +290,13 @@ export default function PropertyDetailScreen() {
           )}
         </View>
 
-        {/* Moving Bundle upsell — shown when comparison is possible */}
+        {/* Moving bundle upsell */}
         {canCompare && !isPremium && (
           <View style={hasBundle ? styles.bundleActiveCard : styles.bundleUpsellCard}>
             {hasBundle ? (
               <>
                 <View style={styles.bundleIconRow}>
-                  <Ionicons name="shield-checkmark" size={20} color="#15803d" />
+                  <Ionicons name="shield-checkmark" size={20} color={semantic.verified} />
                   <Text style={styles.bundleTitleGreen}>{t('property.detail.bundleActive')}</Text>
                 </View>
                 <Text style={styles.bundleDesc}>{t('property.detail.bundleActiveDesc')}</Text>
@@ -314,7 +304,7 @@ export default function PropertyDetailScreen() {
             ) : (
               <>
                 <View style={styles.bundleIconRow}>
-                  <Ionicons name="briefcase-outline" size={20} color="#2563eb" />
+                  <Ionicons name="briefcase-outline" size={20} color={semantic.primary} />
                   <Text style={styles.bundleTitle}>{t('property.detail.bundleTitle')}</Text>
                 </View>
                 <Text style={styles.bundleDesc}>{t('property.detail.bundleDesc')}</Text>
@@ -322,9 +312,10 @@ export default function PropertyDetailScreen() {
                   style={[styles.bundleButton, isPurchasingBundle && styles.buttonDisabled]}
                   onPress={handlePurchaseBundle}
                   disabled={isPurchasingBundle}
+                  activeOpacity={0.85}
                 >
                   {isPurchasingBundle ? (
-                    <ActivityIndicator color="#fff" size="small" />
+                    <ActivityIndicator color={semantic.primaryContrast} size="small" />
                   ) : (
                     <Text style={styles.bundleButtonText}>{t('property.detail.bundleButton')}</Text>
                   )}
@@ -335,36 +326,26 @@ export default function PropertyDetailScreen() {
         )}
       </ScrollView>
 
-      {/* Bottom Actions */}
-      <View style={styles.bottomBar}>
+      {/* Bottom actions */}
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
         {canCompare && (
-          <TouchableOpacity
-            style={styles.compareButton}
-            onPress={handleViewComparison}
-          >
-            <Ionicons name="git-compare-outline" size={22} color="#2563eb" />
+          <TouchableOpacity style={styles.compareButton} onPress={handleViewComparison} activeOpacity={0.8}>
+            <Ionicons name="git-compare-outline" size={20} color={semantic.primary} />
             <Text style={styles.compareButtonText}>{t('property.detail.compareInspections')}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity
-          style={[
-            styles.startButton,
-            !canAddInspection && styles.startButtonWarning,
-          ]}
+          style={[styles.startButton, !canAddInspection && styles.startButtonWarning]}
           onPress={handleStartInspection}
+          activeOpacity={0.85}
         >
-          <Ionicons
-            name={canAddInspection ? 'camera-outline' : 'star'}
-            size={22}
-            color="#fff"
-          />
+          <Ionicons name={canAddInspection ? 'camera-outline' : 'star'} size={20} color={semantic.primaryContrast} />
           <Text style={styles.startButtonText}>
             {canAddInspection ? t('property.detail.startInspection') : t('upgrade.title')}
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Upgrade Modal */}
       <UpgradeModal
         visible={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
@@ -376,28 +357,25 @@ export default function PropertyDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
+  container: { flex: 1, backgroundColor: semantic.canvas },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: semantic.canvas,
+    padding: spacing.lg,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+    backgroundColor: semantic.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: semantic.line,
   },
-  backButton: {
+  iconButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
@@ -406,259 +384,225 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontWeight: '700',
+    color: semantic.fg,
     textAlign: 'center',
   },
-  deleteButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
+  content: { flex: 1 },
+  contentInner: { padding: spacing.md, paddingBottom: 140 },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: semantic.card,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: semantic.line,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadows.sm,
   },
   addressRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  addressAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   address: {
     flex: 1,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    lineHeight: 24,
+    fontSize: 17,
+    fontWeight: '700',
+    color: semantic.fg,
+    lineHeight: 23,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: semantic.line,
   },
   badge: {
-    backgroundColor: '#e0e7ff',
+    backgroundColor: semantic.cardMuted,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: radius.sm,
   },
   badgeText: {
     fontSize: 12,
-    fontWeight: '500',
-    color: '#3730a3',
+    fontWeight: '600',
+    color: semantic.fgMuted,
     textTransform: 'capitalize',
   },
-  createdAt: {
-    fontSize: 13,
-    color: '#666',
-  },
+  createdAt: { fontSize: 13, color: semantic.fgSubtle },
   notesContainer: {
-    marginTop: 12,
-    paddingTop: 12,
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: semantic.line,
   },
   notesLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: semantic.fgSubtle,
     marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  notesText: {
-    fontSize: 14,
-    color: '#1a1a1a',
-    lineHeight: 20,
-  },
-  section: {
-    marginBottom: 100,
-  },
+  notesText: { fontSize: 14, color: semantic.fg, lineHeight: 20 },
+  section: { marginBottom: spacing.md },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.sm + 4,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  inspectionCount: {
-    fontSize: 13,
-    color: '#666',
-  },
-  inspectionCountWarning: {
-    color: '#f59e0b',
-    fontWeight: '500',
-  },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: semantic.fg },
+  inspectionCount: { fontSize: 13, color: semantic.fgMuted },
+  inspectionCountWarning: { color: semantic.warning, fontWeight: '600' },
   inspectionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: semantic.card,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: semantic.line,
     padding: 14,
-    marginBottom: 8,
-    flexDirection: 'row',
+    marginBottom: spacing.sm,
+  },
+  inspectionAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: semantic.cardMuted,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  inspectionInfo: {
-    flex: 1,
-  },
-  inspectionDate: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 4,
-  },
-  inspectionMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  inspectionInfo: { flex: 1 },
+  inspectionDate: { fontSize: 15, fontWeight: '600', color: semantic.fg, marginBottom: 5 },
+  inspectionMeta: { flexDirection: 'row', alignItems: 'center' },
   statusBadge: {
-    backgroundColor: '#fef3c7',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radius.sm,
   },
-  statusBadgeCompleted: {
-    backgroundColor: '#dcfce7',
-  },
-  statusBadgeText: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#92400e',
-  },
-  statusBadgeTextCompleted: {
-    color: '#166534',
-  },
+  statusBadgeCompleted: { backgroundColor: colors.verified[50] },
+  statusBadgeProgress: { backgroundColor: colors.amber[50] },
+  statusBadgeText: { fontSize: 11, fontWeight: '600' },
+  statusTextCompleted: { color: colors.verified[600] },
+  statusTextProgress: { color: colors.amber[700] },
   emptyInspections: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 32,
+    backgroundColor: semantic.card,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: semantic.line,
+    padding: spacing.xl,
     alignItems: 'center',
   },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginTop: 12,
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.lg,
+    backgroundColor: colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
   },
+  emptyText2: { fontSize: 16, fontWeight: '600', color: semantic.fg },
   emptySubtext: {
     fontSize: 14,
-    color: '#666',
+    color: semantic.fgMuted,
     textAlign: 'center',
     marginTop: 4,
   },
+  errorIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.xl,
+    backgroundColor: colors.red[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  errorText: { fontSize: 15, color: semantic.fgMuted, marginTop: 4 },
   bundleUpsellCard: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.primary[50],
     borderWidth: 1,
-    borderColor: '#bfdbfe',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderColor: colors.primary[100],
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
   },
   bundleActiveCard: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: colors.verified[50],
     borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderColor: colors.verified[100],
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.md,
   },
   bundleIconRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
     marginBottom: 6,
   },
-  bundleTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1e40af',
-  },
-  bundleTitleGreen: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#15803d',
-  },
+  bundleTitle: { fontSize: 15, fontWeight: '700', color: colors.primary[800] },
+  bundleTitleGreen: { fontSize: 15, fontWeight: '700', color: colors.verified[600] },
   bundleDesc: {
     fontSize: 13,
-    color: '#4b5563',
-    marginBottom: 12,
+    color: semantic.fgMuted,
+    marginBottom: spacing.sm + 4,
     lineHeight: 18,
   },
   bundleButton: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
+    backgroundColor: semantic.primary,
+    borderRadius: radius.md,
     paddingVertical: 12,
     alignItems: 'center',
   },
-  bundleButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 12,
-  },
+  bundleButtonText: { color: semantic.primaryContrast, fontSize: 15, fontWeight: '700' },
+  buttonDisabled: { opacity: 0.6 },
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
-    padding: 16,
-    paddingBottom: 32,
+    backgroundColor: semantic.card,
+    padding: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
+    borderTopColor: semantic.line,
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.sm + 4,
+    ...shadows.md,
   },
   startButton: {
     flex: 1,
-    backgroundColor: '#2563eb',
+    backgroundColor: semantic.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 10,
-    gap: 8,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    gap: spacing.sm,
   },
-  startButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  startButtonWarning: {
-    backgroundColor: '#f59e0b',
-  },
+  startButtonText: { color: semantic.primaryContrast, fontSize: 16, fontWeight: '600' },
+  startButtonWarning: { backgroundColor: semantic.warning },
   compareButton: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: colors.primary[50],
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 10,
-    gap: 8,
-    marginRight: 12,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    gap: spacing.sm,
   },
-  compareButtonText: {
-    color: '#2563eb',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  compareButtonText: { color: semantic.primary, fontSize: 15, fontWeight: '600' },
 });

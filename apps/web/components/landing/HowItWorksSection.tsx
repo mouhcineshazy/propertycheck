@@ -1,23 +1,15 @@
 'use client';
 
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
-const stepImages = [
-  'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=2070',
-  'https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?q=80&w=2070',
-  'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070',
-];
+const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
 export function HowItWorksSection() {
   const t = useTranslations('landing.howItWorks');
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
 
   const steps = [
     { number: '01', titleKey: 'step1.title', descKey: 'step1.description', time: '30 sec' },
@@ -26,156 +18,180 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section id="how-it-works" ref={ref} className="py-24 bg-white overflow-hidden">
-      <div className="container mx-auto px-6">
-        {/* Section header */}
+    <section id="how-it-works" ref={ref} className="overflow-hidden py-24 sm:py-28">
+      <div className="container-page">
         <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 30 }}
+          className="mx-auto max-w-2xl text-center"
+          initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: easeOut }}
         >
-          <span className="inline-block text-primary-600 font-semibold text-sm uppercase tracking-wider mb-4">
-            {t('badge')}
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <span className="eyebrow">{t('badge')}</span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-fg sm:text-4xl lg:text-display-sm">
             {t('title')}{' '}
-            <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-primary-600 to-primary-800 bg-clip-text text-transparent">
               {t('titleHighlight')}
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {t('subtitle')}
-          </p>
+          <p className="mt-4 text-lg text-fg-muted">{t('subtitle')}</p>
         </motion.div>
 
-        {/* Steps */}
-        <div className="space-y-32">
+        <div className="mt-20 space-y-24">
           {steps.map((step, i) => (
             <motion.div
-              key={i}
-              className={`flex flex-col ${
+              key={step.number}
+              className={`flex flex-col items-center gap-12 lg:gap-20 ${
                 i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'
-              } gap-12 lg:gap-20 items-center`}
-              initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.8, delay: i * 0.2 }}
+              }`}
+              initial={{ opacity: 0, y: 40 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, delay: i * 0.1, ease: easeOut }}
             >
-              {/* Content */}
-              <div className="flex-1 max-w-xl">
-                <motion.div
-                  className="inline-block"
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <span className="text-8xl font-bold bg-gradient-to-br from-primary-100 to-primary-200 bg-clip-text text-transparent">
-                    {step.number}
-                  </span>
-                </motion.div>
-                <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mt-4 mb-6">
+              {/* Copy */}
+              <div className="max-w-xl flex-1">
+                <div className="flex items-center gap-3">
+                  <span className="text-6xl font-bold tracking-tight text-ink-100">{step.number}</span>
+                  <span className="badge-neutral">~{step.time}</span>
+                </div>
+                <h3 className="mt-4 text-2xl font-bold tracking-tight text-fg sm:text-3xl">
                   {t(step.titleKey)}
                 </h3>
-                <p className="text-xl text-gray-600 leading-relaxed mb-8">
-                  {t(step.descKey)}
-                </p>
-
-                {/* Progress indicator */}
-                <div className="flex items-center gap-3">
+                <p className="mt-4 text-lg leading-relaxed text-fg-muted">{t(step.descKey)}</p>
+                <div className="mt-8 flex items-center gap-2.5">
                   {steps.map((_, j) => (
                     <div
                       key={j}
-                      className={`h-2 rounded-full transition-all ${
-                        j <= i
-                          ? 'w-12 bg-primary-600'
-                          : 'w-8 bg-gray-200'
+                      className={`h-1.5 rounded-full transition-all ${
+                        j <= i ? 'w-10 bg-primary-600' : 'w-6 bg-ink-200'
                       }`}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Image */}
-              <div className="flex-1 w-full max-w-xl">
-                <motion.div
-                  className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Image
-                    src={stepImages[i]}
-                    alt={t(step.titleKey)}
-                    fill
-                    className="object-cover"
-                  />
-                  {/* Overlay gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-
-                  {/* Floating badge */}
-                  <motion.div
-                    className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3 shadow-lg"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.5 + i * 0.2 }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 text-primary-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">
-                          {t('stepComplete', { step: i + 1 })}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          ~{step.time}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </motion.div>
+              {/* Visual */}
+              <div className="w-full max-w-md flex-1">
+                <StepVisual index={i} label={t('stepComplete', { step: i + 1 })} time={step.time} />
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* CTA */}
         <motion.div
-          className="text-center mt-20"
-          initial={{ opacity: 0, y: 30 }}
+          className="mt-20 text-center"
+          initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: easeOut }}
         >
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-2 bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-700 transition-all hover:shadow-xl hover:shadow-primary-600/30 hover:scale-105"
-          >
+          <Link href="/signup" className="btn-primary px-7 py-3.5 text-base">
             {t('cta')}
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
             </svg>
           </Link>
         </motion.div>
       </div>
     </section>
+  );
+}
+
+function StepVisual({ index, label, time }: { index: number; label: string; time: string }) {
+  return (
+    <div className="relative">
+      <div className="relative overflow-hidden rounded-3xl border border-line bg-card p-6 shadow-lg">
+        <div className="rounded-2xl bg-card-muted p-5">
+          {index === 0 && <StepAddProperty />}
+          {index === 1 && <StepPhotograph />}
+          {index === 2 && <StepReport />}
+        </div>
+      </div>
+
+      {/* Floating completion badge */}
+      <div className="absolute -bottom-4 left-6 z-10 flex items-center gap-3 rounded-2xl border border-line bg-card px-4 py-3 shadow-md">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-verified-50 text-verified-500">
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 13l4 4L19 7" />
+          </svg>
+        </span>
+        <div>
+          <p className="text-sm font-semibold text-fg">{label}</p>
+          <p className="text-xs text-fg-subtle">~{time}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepAddProperty() {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-xs">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 12l9-9 9 9M5 10v10h14V10" />
+          </svg>
+        </span>
+        <div className="flex-1">
+          <div className="h-2.5 w-2/3 rounded-full bg-ink-200" />
+          <div className="mt-1.5 h-2 w-1/3 rounded-full bg-ink-100" />
+        </div>
+      </div>
+      {['Kitchen', 'Bathroom', 'Bedroom'].map((room, i) => (
+        <div key={room} className="flex items-center gap-3 rounded-xl bg-card/60 p-2.5">
+          <span className={`h-2 w-2 rounded-full ${i === 0 ? 'bg-primary-600' : 'bg-ink-200'}`} />
+          <div className="h-2 w-24 rounded-full bg-ink-100" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StepPhotograph() {
+  return (
+    <div className="grid grid-cols-3 gap-2.5">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-ink-100 to-ink-200"
+        >
+          <svg className="absolute inset-0 m-auto h-5 w-5 text-ink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z" />
+          </svg>
+          {i === 4 && <span className="absolute bottom-1 left-1 h-1.5 w-1.5 rounded-full bg-amber-500" />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StepReport() {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </span>
+          <div>
+            <div className="h-2.5 w-24 rounded-full bg-ink-200" />
+            <div className="mt-1.5 h-2 w-16 rounded-full bg-ink-100" />
+          </div>
+        </div>
+        <span className="badge-verified">PDF</span>
+      </div>
+      <div className="space-y-2 rounded-xl bg-card p-3 shadow-xs">
+        {[3, 5, 4].map((w, i) => (
+          <div key={i} className={`h-2 rounded-full bg-ink-100`} style={{ width: `${w * 18}%` }} />
+        ))}
+      </div>
+      <div className="flex items-center gap-2 rounded-xl bg-primary-600 px-3 py-2.5 text-white">
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+        </svg>
+        <div className="h-2 w-28 rounded-full bg-white/50" />
+      </div>
+    </div>
   );
 }

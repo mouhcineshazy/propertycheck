@@ -1,6 +1,19 @@
 import type { Config } from 'tailwindcss';
 
+/**
+ * PropertyCheck — "Trust Ink" design system.
+ *
+ * Two kinds of color tokens live here on purpose:
+ *  1. Static scales (ink / primary / verified / amber) — fixed brand ramps.
+ *  2. Semantic tokens (canvas / card / fg / line) — mapped to CSS variables in
+ *     globals.css so a dark theme can be enabled later by flipping the vars,
+ *     without touching component markup.
+ *
+ * New tokens are additive: default Tailwind gray/white utilities still work,
+ * so screens not yet migrated to the new system keep rendering correctly.
+ */
 const config: Config = {
+  darkMode: ['class', '[data-theme="dark"]'],
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,33 +22,112 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand colors
+        // Semantic, theme-switchable (see :root in globals.css)
+        canvas: 'rgb(var(--canvas) / <alpha-value>)',
+        card: {
+          DEFAULT: 'rgb(var(--card) / <alpha-value>)',
+          muted: 'rgb(var(--card-muted) / <alpha-value>)',
+        },
+        fg: {
+          DEFAULT: 'rgb(var(--fg) / <alpha-value>)',
+          muted: 'rgb(var(--fg-muted) / <alpha-value>)',
+          subtle: 'rgb(var(--fg-subtle) / <alpha-value>)',
+        },
+        line: {
+          DEFAULT: 'rgb(var(--line) / <alpha-value>)',
+          strong: 'rgb(var(--line-strong) / <alpha-value>)',
+        },
+
+        // Ink — cool navy-tinted neutral ramp (text, nav, surfaces)
+        ink: {
+          50: '#F2F4F8',
+          100: '#E6E9EF',
+          200: '#D3DAE4',
+          300: '#AEB9C9',
+          400: '#8695AB',
+          500: '#63748D',
+          600: '#45566E',
+          700: '#2C3B52',
+          800: '#1C2A3E',
+          900: '#0F1B2D',
+          950: '#0B1524',
+        },
+
+        // Primary — brand blue (trust, security). 600 = #2563EB.
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          200: '#BFDBFE',
+          300: '#93C5FD',
+          400: '#60A5FA',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1D4ED8',
+          800: '#1E40AF',
+          900: '#1E3A8A',
           950: '#172554',
+        },
+
+        // Verified — the "protected / documented" success signal
+        verified: {
+          50: '#E9F7F1',
+          100: '#C9EFDF',
+          200: '#95E0C1',
+          300: '#5CCda0',
+          400: '#2FB981',
+          500: '#15966E',
+          600: '#0F7757',
+          700: '#0C5F46',
+          800: '#0A4B38',
+          900: '#083B2D',
+        },
+
+        // Amber — plan limits / warnings
+        amber: {
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          200: '#FDE68A',
+          400: '#FBBF24',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        // Tightened display sizes with baked-in line-height + tracking
+        'display-sm': ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
+        'display': ['3rem', { lineHeight: '1.05', letterSpacing: '-0.025em' }],
+        'display-lg': ['3.75rem', { lineHeight: '1.02', letterSpacing: '-0.03em' }],
+        'display-xl': ['4.5rem', { lineHeight: '1', letterSpacing: '-0.035em' }],
+      },
+      borderRadius: {
+        '4xl': '2rem',
+      },
+      boxShadow: {
+        // Soft, layered elevation tuned for light ink-tinted surfaces
+        xs: '0 1px 2px 0 rgb(11 21 36 / 0.04)',
+        sm: '0 1px 3px 0 rgb(11 21 36 / 0.06), 0 1px 2px -1px rgb(11 21 36 / 0.05)',
+        DEFAULT: '0 2px 8px -2px rgb(11 21 36 / 0.08), 0 1px 3px -1px rgb(11 21 36 / 0.05)',
+        md: '0 8px 24px -6px rgb(11 21 36 / 0.10), 0 3px 8px -4px rgb(11 21 36 / 0.06)',
+        lg: '0 20px 40px -12px rgb(11 21 36 / 0.14), 0 6px 14px -8px rgb(11 21 36 / 0.08)',
+        xl: '0 32px 64px -16px rgb(11 21 36 / 0.20)',
+        'primary': '0 8px 24px -6px rgb(37 99 235 / 0.35)',
+        'primary-lg': '0 16px 40px -10px rgb(37 99 235 / 0.45)',
+        'focus': '0 0 0 4px rgb(37 99 235 / 0.15)',
+      },
+      backgroundImage: {
+        'grid-ink':
+          'linear-gradient(to right, rgb(15 27 45 / 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgb(15 27 45 / 0.04) 1px, transparent 1px)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.6s ease-out',
-        'fade-in-up': 'fadeInUp 0.6s ease-out',
-        'slide-up': 'slideUp 0.6s ease-out',
-        'slide-down': 'slideDown 0.3s ease-out',
-        'float': 'float 3s ease-in-out infinite',
-        'pulse-slow': 'pulse 3s ease-in-out infinite',
-        'bounce-slow': 'bounce 2s ease-in-out infinite',
-        'gradient': 'gradient 8s ease infinite',
+        'fade-in': 'fadeIn 0.5s cubic-bezier(0.25,0.1,0.25,1) forwards',
+        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.25,0.1,0.25,1) forwards',
+        'scale-in': 'scaleIn 0.3s cubic-bezier(0.25,0.1,0.25,1) forwards',
+        'shimmer': 'shimmer 1.6s linear infinite',
+        'float': 'float 8s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -43,33 +135,21 @@ const config: Config = {
           '100%': { opacity: '1' },
         },
         fadeInUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.97)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
-        slideDown: {
-          '0%': { transform: 'translateY(-10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         },
         float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' },
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-14px)' },
         },
-        gradient: {
-          '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
-        },
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'hero-pattern': 'linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.3), rgba(255,255,255,1))',
-      },
-      boxShadow: {
-        'glow': '0 0 20px rgba(37, 99, 235, 0.3)',
-        'glow-lg': '0 0 40px rgba(37, 99, 235, 0.4)',
       },
     },
   },

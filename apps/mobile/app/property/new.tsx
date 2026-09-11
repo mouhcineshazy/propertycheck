@@ -1,10 +1,8 @@
 /**
  * New Property Screen - React 19 Pattern
  *
- * Features:
- * - Create new property with form validation
- * - useActionState for form handling
- * - Property type selection
+ * - Create property with useActionState + Zod validation
+ * - Trust Ink theme tokens (lib/theme.ts)
  */
 
 import { useState } from 'react';
@@ -21,37 +19,30 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { z } from 'zod';
 import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { createProperty } from '../../lib';
 import { useTranslation } from '../../contexts';
+import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
 
-// Property types (must match database PropertyType)
 const PROPERTY_TYPES = [
-  { value: 'apartment', label: 'Apartment' },
-  { value: 'house', label: 'House' },
-  { value: 'condo', label: 'Condo' },
+  { value: 'apartment', icon: 'business-outline' },
+  { value: 'house', icon: 'home-outline' },
+  { value: 'condo', icon: 'grid-outline' },
 ] as const;
 
-// Validation schema
 const newPropertySchema = z.object({
   address: z.string().min(5, 'Address must be at least 5 characters'),
   property_type: z.enum(['apartment', 'house', 'condo']),
   notes: z.string().optional(),
 });
 
-// Type for action state
-type NewPropertyState = {
-  errors: Record<string, string>;
-};
+type NewPropertyState = { errors: Record<string, string> };
+const initialState: NewPropertyState = { errors: {} };
 
-const initialState: NewPropertyState = {
-  errors: {},
-};
-
-// Create property action
 async function createPropertyAction(
   _prevState: NewPropertyState,
   payload: {
@@ -78,7 +69,6 @@ async function createPropertyAction(
       property_type: result.data.property_type,
       notes: result.data.notes,
     });
-
     payload.onSuccess();
     return { errors: {} };
   } catch (err) {
@@ -90,6 +80,7 @@ async function createPropertyAction(
 
 export default function NewPropertyScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [propertyType, setPropertyType] = useState<string>('apartment');
@@ -116,73 +107,67 @@ export default function NewPropertyScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="close" size={24} color="#1a1a1a" />
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
+          <Ionicons name="close" size={24} color={semantic.fg} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('property.new.title')}</Text>
-        <View style={styles.headerRight} />
+        <View style={styles.iconButton} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Address Input */}
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        {/* Address */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>{t('property.new.addressLabel')} *</Text>
           <TextInput
             style={[styles.input, state.errors.address && styles.inputError]}
             placeholder={t('property.new.addressPlaceholder')}
-            placeholderTextColor="#999"
+            placeholderTextColor={semantic.fgSubtle}
             value={address}
             onChangeText={setAddress}
             autoCapitalize="words"
+            autoComplete="street-address"
             editable={!isPending}
           />
-          {state.errors.address && (
-            <Text style={styles.errorText}>{state.errors.address}</Text>
-          )}
+          {state.errors.address && <Text style={styles.errorText}>{state.errors.address}</Text>}
         </View>
 
-        {/* Property Type Selection */}
+        {/* Property type */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>{t('property.new.typeLabel')} *</Text>
           <View style={styles.typeGrid}>
-            {PROPERTY_TYPES.map((type) => (
-              <TouchableOpacity
-                key={type.value}
-                style={[
-                  styles.typeButton,
-                  propertyType === type.value && styles.typeButtonActive,
-                ]}
-                onPress={() => setPropertyType(type.value)}
-                disabled={isPending}
-              >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    propertyType === type.value && styles.typeButtonTextActive,
-                  ]}
+            {PROPERTY_TYPES.map((type) => {
+              const active = propertyType === type.value;
+              return (
+                <TouchableOpacity
+                  key={type.value}
+                  style={[styles.typeButton, active && styles.typeButtonActive]}
+                  onPress={() => setPropertyType(type.value)}
+                  disabled={isPending}
+                  activeOpacity={0.8}
                 >
-                  {t(`property.new.types.${type.value}`)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Ionicons
+                    name={type.icon}
+                    size={22}
+                    color={active ? semantic.primary : semantic.fgSubtle}
+                  />
+                  <Text style={[styles.typeButtonText, active && styles.typeButtonTextActive]}>
+                    {t(`property.new.types.${type.value}`)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-          {state.errors.property_type && (
-            <Text style={styles.errorText}>{state.errors.property_type}</Text>
-          )}
+          {state.errors.property_type && <Text style={styles.errorText}>{state.errors.property_type}</Text>}
         </View>
 
-        {/* Notes Input */}
+        {/* Notes */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>{t('property.new.notesLabel')}</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder={t('property.new.notesPlaceholder')}
-            placeholderTextColor="#999"
+            placeholderTextColor={semantic.fgSubtle}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -192,17 +177,17 @@ export default function NewPropertyScreen() {
           />
         </View>
 
-        {/* Submit Button */}
         <TouchableOpacity
           style={[styles.submitButton, isPending && styles.submitButtonDisabled]}
           onPress={handleSubmit}
           disabled={isPending}
+          activeOpacity={0.85}
         >
           {isPending ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={semantic.primaryContrast} />
           ) : (
             <>
-              <Ionicons name="add-circle-outline" size={20} color="#fff" />
+              <Ionicons name="add-circle-outline" size={20} color={semantic.primaryContrast} />
               <Text style={styles.submitButtonText}>{t('property.new.createButton')}</Text>
             </>
           )}
@@ -213,109 +198,73 @@ export default function NewPropertyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, backgroundColor: semantic.canvas },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+    backgroundColor: semantic.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: semantic.line,
   },
-  backButton: {
+  iconButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  headerRight: {
-    width: 40,
-  },
-  content: {
-    padding: 24,
-    paddingBottom: 40,
-  },
-  inputContainer: {
-    marginBottom: 24,
-  },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: semantic.fg },
+  content: { padding: spacing.lg, paddingBottom: 40 },
+  inputContainer: { marginBottom: spacing.lg },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    color: semantic.fg,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: semantic.lineStrong,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     fontSize: 16,
-    backgroundColor: '#fafafa',
-    color: '#1a1a1a',
+    backgroundColor: semantic.card,
+    color: semantic.fg,
   },
-  inputError: {
-    borderColor: '#ef4444',
-  },
-  textArea: {
-    height: 100,
-    paddingTop: 12,
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#ef4444',
-    marginTop: 4,
-  },
-  typeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
+  inputError: { borderColor: semantic.danger },
+  textArea: { height: 110, paddingTop: 13 },
+  errorText: { fontSize: 12, color: semantic.danger, marginTop: 6 },
+  typeGrid: { flexDirection: 'row', gap: spacing.sm },
   typeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: semantic.lineStrong,
+    backgroundColor: semantic.card,
   },
   typeButtonActive: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: colors.primary[50],
+    borderColor: semantic.primary,
   },
-  typeButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
-  },
-  typeButtonTextActive: {
-    color: '#fff',
-  },
+  typeButtonText: { fontSize: 13, fontWeight: '600', color: semantic.fgMuted },
+  typeButtonTextActive: { color: semantic.primary },
   submitButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: semantic.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
-    borderRadius: 8,
-    gap: 8,
-    marginTop: 16,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    ...shadows.primary,
   },
-  submitButtonDisabled: {
-    opacity: 0.7,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  submitButtonDisabled: { opacity: 0.7 },
+  submitButtonText: { color: semantic.primaryContrast, fontSize: 16, fontWeight: '600' },
 });

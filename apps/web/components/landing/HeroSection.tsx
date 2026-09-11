@@ -1,133 +1,194 @@
 'use client';
 
-import Image from 'next/image';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
+const valueProps = [
+  {
+    labelKey: 'valueProps.timestamped',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.8}
+        d="M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    ),
+  },
+  {
+    labelKey: 'valueProps.pdfReports',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.8}
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      />
+    ),
+  },
+  {
+    labelKey: 'valueProps.secure',
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.8}
+        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+      />
+    ),
+  },
+];
+
+const easeOut = [0.25, 0.1, 0.25, 1] as const;
+
 export function HeroSection() {
   const t = useTranslations('landing.hero');
-  const { scrollY } = useScroll();
-  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
-  const heroScale = useTransform(scrollY, [0, 400], [1, 0.95]);
-  const textY = useTransform(scrollY, [0, 300], [0, 50]);
-
-  const valueProps = [
-    { icon: '📸', labelKey: 'valueProps.timestamped' },
-    { icon: '📄', labelKey: 'valueProps.pdfReports' },
-    { icon: '🔒', labelKey: 'valueProps.secure' },
-  ];
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      {/* Background image with parallax */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        style={{ opacity: heroOpacity, scale: heroScale }}
-      >
-        <Image
-          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073"
-          alt="Modern apartment interior"
-          fill
-          className="object-cover"
-          priority
-          quality={90}
-        />
-        {/* Multi-layer gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-white" />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-900/30 to-transparent" />
-      </motion.div>
-
-      {/* Animated background elements */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
+    <section className="relative overflow-hidden pt-28 pb-20 sm:pt-32 lg:pt-36 lg:pb-28">
+      {/* Ambient background: faint grid + soft brand glows */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_-10%,rgb(37_99_235/0.08),transparent)]" />
+        <div className="absolute inset-0 opacity-[0.6] [mask-image:radial-gradient(70%_60%_at_50%_0%,black,transparent)] bg-grid-ink bg-[size:44px_44px]" />
         <motion.div
-          className="absolute top-20 left-10 w-72 h-72 bg-primary-500/20 rounded-full blur-3xl"
-          animate={{
-            x: [0, 30, 0],
-            y: [0, -20, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-        <motion.div
-          className="absolute bottom-40 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -20, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
+          className="absolute -top-24 -left-10 h-72 w-72 rounded-full bg-primary-500/10 blur-3xl"
+          animate={{ y: [0, 20, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
 
-      {/* Hero Content */}
-      <motion.div
-        className="relative z-10 container mx-auto px-6 text-center"
-        style={{ y: textY }}
-      >
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-8"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-          </span>
-          <span className="text-white/90 text-sm font-medium">
-            {t('badge')}
-          </span>
-        </motion.div>
-
-        {/* Main headline */}
-        <motion.h1
-          className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-        >
-          {t('title')}
-          <span className="block mt-2 bg-gradient-to-r from-blue-400 via-primary-400 to-blue-500 bg-clip-text text-transparent">
-            {t('titleHighlight')}
-          </span>
-        </motion.h1>
-
-        {/* Subheadline */}
-        <motion.p
-          className="text-lg md:text-xl lg:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto leading-relaxed"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          {t('subtitle')}{' '}
-          <span className="text-white font-medium">
-            {t('subtitleHighlight')}
-          </span>
-        </motion.p>
-
-        {/* CTA Buttons */}
-        <motion.div
-          className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          <Link
-            href="/signup"
-            className="group relative bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold text-lg overflow-hidden transition-all hover:shadow-2xl hover:shadow-primary-500/40 hover:scale-105"
+      <div className="container-page grid grid-cols-1 items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+        {/* ---- Copy ---- */}
+        <div className="min-w-0 max-w-xl">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: easeOut }}
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-3.5 py-1.5 shadow-xs"
           >
-            <span className="relative z-10 flex items-center justify-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-verified-500/70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-verified-500" />
+            </span>
+            <span className="text-xs font-semibold text-fg-muted">{t('badge')}</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.05, ease: easeOut }}
+            className="mt-6 text-balance text-4xl font-bold tracking-tight text-fg sm:text-5xl lg:text-display-lg"
+          >
+            {t('title')}{' '}
+            <span className="bg-gradient-to-br from-primary-600 to-primary-800 bg-clip-text text-transparent">
+              {t('titleHighlight')}
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.12, ease: easeOut }}
+            className="mt-6 text-pretty text-lg leading-relaxed text-fg-muted"
+          >
+            {t('subtitle')}{' '}
+            <span className="font-semibold text-fg">{t('subtitleHighlight')}</span>
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.18, ease: easeOut }}
+            className="mt-9 flex flex-col gap-3 sm:flex-row"
+          >
+            <Link href="/signup" className="btn-primary group px-6 py-3.5 text-base">
               {t('cta')}
               <svg
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                className="h-5 w-5 transition-transform group-hover:translate-x-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+              </svg>
+            </Link>
+            <a href="#how-it-works" className="btn-secondary px-6 py-3.5 text-base">
+              {t('howItWorks')}
+            </a>
+          </motion.div>
+
+          <motion.dl
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="mt-10 grid grid-cols-3 gap-4 border-t border-line pt-8"
+          >
+            {valueProps.map((item) => (
+              <div key={item.labelKey} className="flex flex-col gap-2">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary-50 text-primary-600">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {item.icon}
+                  </svg>
+                </span>
+                <dt className="text-sm font-medium text-fg-muted">{t(item.labelKey)}</dt>
+              </div>
+            ))}
+          </motion.dl>
+        </div>
+
+        {/* ---- Report mockup ---- */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, rotate: -1 }}
+          animate={{ opacity: 1, y: 0, rotate: 0 }}
+          transition={{ duration: 0.7, delay: 0.15, ease: easeOut }}
+          className="relative mx-auto w-full min-w-0 max-w-md lg:mx-0"
+        >
+          <ReportMockup t={t} />
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function ReportMockup({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
+    <div className="relative">
+      {/* Floating verified stamp */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.5, ease: easeOut }}
+        className="absolute -right-3 -top-4 z-20 flex items-center gap-2 rounded-full border border-verified-100 bg-card px-3 py-1.5 shadow-md"
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-verified-500 text-white">
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </span>
+        <span className="text-xs font-semibold text-verified-600">{t('mockup.verified')}</span>
+      </motion.div>
+
+      {/* Report card */}
+      <div className="overflow-hidden rounded-3xl border border-line bg-card shadow-xl">
+        <div className="flex items-center justify-between border-b border-line bg-card-muted px-5 py-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fg-subtle">
+              {t('mockup.reportLabel')}
+            </p>
+            <p className="mt-0.5 text-sm font-bold text-fg">{t('mockup.address')}</p>
+          </div>
+          <span className="badge-primary">{t('mockup.moveIn')}</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 p-5">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-ink-100 to-ink-200"
+            >
+              <svg
+                className="absolute inset-0 m-auto h-7 w-7 text-ink-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -135,64 +196,37 @@ export function HeroSection() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  strokeWidth={1.5}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z"
                 />
               </svg>
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-700 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </Link>
-
-          {/* Watch Demo button hidden for MVP - no demo video yet */}
-        </motion.div>
-
-        {/* Value Props */}
-        <motion.div
-          className="grid grid-cols-3 gap-8 max-w-2xl mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-        >
-          {valueProps.map((item, i) => (
-            <motion.div
-              key={i}
-              className="text-white"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 + i * 0.1 }}
-            >
-              <div className="text-3xl md:text-4xl mb-1">
-                {item.icon}
-              </div>
-              <div className="text-sm text-gray-300 font-medium">{t(item.labelKey)}</div>
-            </motion.div>
+              {i === 2 && (
+                <span className="absolute bottom-1.5 left-1.5 rounded-md bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                  {t('mockup.damageNoted')}
+                </span>
+              )}
+            </div>
           ))}
-        </motion.div>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      >
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-white/60 text-sm">{t('scrollToExplore')}</span>
-          <svg
-            className="w-6 h-6 text-white/60"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
         </div>
+
+        <div className="flex items-center gap-2 border-t border-line px-5 py-3.5 text-xs text-fg-muted">
+          <svg className="h-4 w-4 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="font-medium tabular-nums">{t('mockup.timestamp')}</span>
+        </div>
+      </div>
+
+      {/* Supporting stat card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6, ease: easeOut }}
+        className="absolute -bottom-6 -left-5 z-20 hidden rounded-2xl border border-line bg-card px-4 py-3 shadow-lg sm:block"
+      >
+        <p className="text-2xl font-bold tracking-tight text-fg tabular-nums">$2,000</p>
+        <p className="text-xs font-medium text-fg-muted">{t('mockup.depositProtected')}</p>
       </motion.div>
-    </section>
+    </div>
   );
 }

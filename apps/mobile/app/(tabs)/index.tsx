@@ -1,11 +1,9 @@
 /**
  * Properties Screen (Home) - React 19 Pattern
  *
- * Key React 19 changes:
- * - useSyncExternalStore via useProperties hook (no useEffect for data fetching)
- * - useOptimistic for delete operations (instant UI updates)
- * - No useCallback needed for render functions (compiler handles it)
- * - Cleaner component - no manual loading/error state management
+ * - useProperties hook (useSyncExternalStore) for data — no useEffect fetch
+ * - useOptimistic for delete operations
+ * - Trust Ink theme tokens (lib/theme.ts)
  */
 
 import { useState, useCallback, useEffect } from 'react';
@@ -26,19 +24,17 @@ import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { useProperties, useOptimistic, useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 import { useTranslation } from '../../contexts';
+import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
 
 export default function PropertiesScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useTranslation();
-  // Fetch properties using React 19 pattern (useSyncExternalStore internally)
-  // No useEffect needed - data is fetched on mount via the hook
   const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
 
-  // Fetch subscription status
   useEffect(() => {
     const fetchSubscription = async () => {
       if (!user) return;
@@ -53,14 +49,12 @@ export default function PropertiesScreen() {
     fetchSubscription();
   }, [user]);
 
-  // Refetch properties when screen gains focus (e.g., after adding a new property)
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch])
   );
 
-  // Optimistic updates - UI updates instantly, rollback on server error
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [optimisticProperties, addOptimistic] = useOptimistic(
     properties,
@@ -68,64 +62,67 @@ export default function PropertiesScreen() {
       currentProperties.filter((p) => p.id !== deletedId)
   );
 
-  // Handle pull-to-refresh
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refetch();
     setIsRefreshing(false);
   };
 
-  // Render individual property card
-  // Note: No useCallback wrapper needed - React 19 compiler handles memoization
   const renderProperty = ({ item }: { item: Property }) => (
     <TouchableOpacity
       style={styles.propertyCard}
+      activeOpacity={0.7}
       onPress={() => router.push(`/property/${item.id}` as Href)}
     >
+      <View style={styles.propertyAvatar}>
+        <Ionicons name="home" size={20} color={semantic.primary} />
+      </View>
       <View style={styles.propertyInfo}>
-        <Text style={styles.propertyAddress}>{item.address}</Text>
+        <Text style={styles.propertyAddress} numberOfLines={1}>
+          {item.address}
+        </Text>
         <View style={styles.propertyMeta}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{t(`property.new.types.${item.property_type}`)}</Text>
           </View>
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#999" />
+      <Ionicons name="chevron-forward" size={20} color={semantic.fgSubtle} />
     </TouchableOpacity>
   );
 
-  // Empty state component
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Ionicons name="home-outline" size={64} color="#ccc" />
+      <View style={styles.emptyIcon}>
+        <Ionicons name="home-outline" size={40} color={semantic.primary} />
+      </View>
       <Text style={styles.emptyTitle}>{t('properties.empty.title')}</Text>
-      <Text style={styles.emptyText}>
-        {t('properties.empty.subtitle')}
-      </Text>
+      <Text style={styles.emptyText}>{t('properties.empty.subtitle')}</Text>
       <TouchableOpacity
         style={styles.addButton}
+        activeOpacity={0.85}
         onPress={() => router.push('/property/new' as Href)}
       >
-        <Ionicons name="add" size={20} color="#fff" />
+        <Ionicons name="add" size={20} color={semantic.primaryContrast} />
         <Text style={styles.addButtonText}>{t('properties.empty.addButton')}</Text>
       </TouchableOpacity>
     </View>
   );
 
-  // Loading state
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={semantic.primary} />
       </View>
     );
   }
 
-  // Error state
   if (error) {
     return (
       <View style={styles.centered}>
-        <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
+        <View style={styles.errorIcon}>
+          <Ionicons name="alert-circle-outline" size={40} color={semantic.danger} />
+        </View>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={refetch}>
           <Text style={styles.retryText}>{t('errors.tryAgain')}</Text>
@@ -134,10 +131,8 @@ export default function PropertiesScreen() {
     );
   }
 
-  // Check if at property limit (premium users have no limit)
   const isAtLimit = !isPremium && optimisticProperties.length >= FREE_TIER_LIMITS.maxProperties;
 
-  // Handle add property with limit check
   const handleAddProperty = () => {
     if (isAtLimit) {
       setShowUpgradeModal(true);
@@ -152,19 +147,24 @@ export default function PropertiesScreen() {
         renderEmptyState()
       ) : (
         <>
-          {/* Only show limit banner for free users */}
           {!isPremium && (
             <TouchableOpacity
               style={[styles.limitBanner, isAtLimit && styles.limitBannerWarning]}
+              activeOpacity={isAtLimit ? 0.7 : 1}
               onPress={isAtLimit ? () => setShowUpgradeModal(true) : undefined}
             >
+              <Ionicons
+                name={isAtLimit ? 'star' : 'information-circle-outline'}
+                size={15}
+                color={isAtLimit ? colors.amber[700] : semantic.fgMuted}
+              />
               <Text style={[styles.limitText, isAtLimit && styles.limitTextWarning]}>
-                {t('properties.limitBanner.text', { current: optimisticProperties.length, max: FREE_TIER_LIMITS.maxProperties })}
+                {t('properties.limitBanner.text', {
+                  current: optimisticProperties.length,
+                  max: FREE_TIER_LIMITS.maxProperties,
+                })}
                 {isAtLimit && t('properties.limitBanner.tapToUpgrade')}
               </Text>
-              {isAtLimit && (
-                <Ionicons name="star" size={14} color="#f59e0b" style={{ marginLeft: 4 }} />
-              )}
             </TouchableOpacity>
           )}
           <FlatList
@@ -172,24 +172,25 @@ export default function PropertiesScreen() {
             renderItem={renderProperty}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
                 refreshing={isRefreshing}
                 onRefresh={handleRefresh}
-                tintColor="#2563eb"
+                tintColor={semantic.primary}
               />
             }
           />
           <TouchableOpacity
             style={[styles.fab, isAtLimit && styles.fabWarning]}
+            activeOpacity={0.85}
             onPress={handleAddProperty}
           >
-            <Ionicons name={isAtLimit ? 'star' : 'add'} size={28} color="#fff" />
+            <Ionicons name={isAtLimit ? 'star' : 'add'} size={26} color={semantic.primaryContrast} />
           </TouchableOpacity>
         </>
       )}
 
-      {/* Upgrade Modal */}
       <UpgradeModal
         visible={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
@@ -202,51 +203,61 @@ export default function PropertiesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: semantic.canvas,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#f5f5f5',
+    padding: spacing.lg,
+    backgroundColor: semantic.canvas,
   },
   list: {
-    padding: 16,
-    paddingBottom: 100,
+    padding: spacing.md,
+    paddingBottom: 120,
   },
   limitBanner: {
-    backgroundColor: '#fef3c7',
-    padding: 8,
-    alignItems: 'center',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: 10,
+    paddingHorizontal: spacing.md,
+    backgroundColor: semantic.cardMuted,
+    borderBottomWidth: 1,
+    borderBottomColor: semantic.line,
   },
   limitBannerWarning: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: colors.amber[50],
+    borderBottomColor: colors.amber[100],
   },
   limitText: {
-    fontSize: 12,
-    color: '#92400e',
+    fontSize: 13,
+    color: semantic.fgMuted,
   },
   limitTextWarning: {
+    color: colors.amber[700],
     fontWeight: '600',
   },
-  fabWarning: {
-    backgroundColor: '#f59e0b',
-  },
   propertyCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    gap: spacing.md,
+    backgroundColor: semantic.card,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: semantic.line,
+    padding: spacing.md,
+    marginBottom: spacing.sm + 4,
+    ...shadows.sm,
+  },
+  propertyAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    backgroundColor: colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   propertyInfo: {
     flex: 1,
@@ -254,87 +265,108 @@ const styles = StyleSheet.create({
   propertyAddress: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 4,
+    color: semantic.fg,
+    marginBottom: 5,
   },
   propertyMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   badge: {
-    backgroundColor: '#e0e7ff',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    backgroundColor: semantic.cardMuted,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: radius.sm,
   },
   badgeText: {
     fontSize: 12,
-    color: '#3730a3',
+    fontWeight: '600',
+    color: semantic.fgMuted,
     textTransform: 'capitalize',
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: spacing.lg,
+  },
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: radius.xl,
+    backgroundColor: colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginTop: 16,
-    marginBottom: 8,
+    fontWeight: '700',
+    color: semantic.fg,
+    marginBottom: spacing.sm,
   },
   emptyText: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 15,
+    color: semantic.fgMuted,
     textAlign: 'center',
-    marginBottom: 24,
+    lineHeight: 21,
+    marginBottom: spacing.lg,
+    maxWidth: 280,
   },
   addButton: {
-    backgroundColor: '#2563eb',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    gap: 8,
+    gap: spacing.sm,
+    backgroundColor: semantic.primary,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.md,
+    ...shadows.primary,
   },
   addButtonText: {
-    color: '#fff',
+    color: semantic.primaryContrast,
     fontSize: 16,
     fontWeight: '600',
   },
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 20,
-    backgroundColor: '#2563eb',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    right: spacing.lg,
+    bottom: spacing.lg,
+    backgroundColor: semantic.primary,
+    width: 58,
+    height: 58,
+    borderRadius: radius.full,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    ...shadows.primary,
+  },
+  fabWarning: {
+    backgroundColor: semantic.warning,
+    shadowColor: semantic.warning,
+  },
+  errorIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.xl,
+    backgroundColor: colors.red[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
   },
   errorText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 12,
-    marginBottom: 16,
+    fontSize: 15,
+    color: semantic.fgMuted,
+    textAlign: 'center',
+    marginBottom: spacing.md,
   },
   retryButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   retryText: {
-    color: '#2563eb',
+    color: semantic.primary,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

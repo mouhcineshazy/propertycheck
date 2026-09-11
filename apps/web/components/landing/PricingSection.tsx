@@ -8,12 +8,19 @@ import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { FREE_TIER_LIMITS, PRICING } from '@propertycheck/shared';
 
+const easeOut = [0.25, 0.1, 0.25, 1] as const;
+
+function Check({ className }: { className?: string }) {
+  return (
+    <svg className={cn('h-5 w-5 flex-shrink-0', className)} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
 export function PricingSection() {
   const t = useTranslations('landing.pricing');
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
+  const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const [isAnnual, setIsAnnual] = useState(true);
 
   const plans = [
@@ -59,354 +66,198 @@ export function PricingSection() {
     },
   ];
 
+  const addons = [
+    {
+      nameKey: 'addons.reportUnlock.name',
+      periodKey: 'addons.reportUnlock.period',
+      descKey: 'addons.reportUnlock.description',
+      priceKey: 'addons.reportUnlock.price',
+      ctaKey: 'addons.reportUnlock.cta',
+      featureKeys: ['feature1', 'feature2', 'feature3'] as const,
+      prefix: 'addons.reportUnlock',
+      primary: false,
+    },
+    {
+      nameKey: 'addons.bundle.name',
+      periodKey: 'addons.bundle.period',
+      descKey: 'addons.bundle.description',
+      priceKey: 'addons.bundle.price',
+      ctaKey: 'addons.bundle.cta',
+      featureKeys: ['feature1', 'feature2', 'feature3', 'feature4'] as const,
+      prefix: 'addons.bundle',
+      primary: true,
+    },
+  ];
+
   return (
-    <section id="pricing" ref={ref} className="py-24 bg-gradient-to-b from-white to-gray-50">
-      <div className="container mx-auto px-6">
-        {/* Section header */}
+    <section id="pricing" ref={ref} className="bg-card-muted py-24 sm:py-28">
+      <div className="container-page">
+        {/* Header */}
         <motion.div
-          className="text-center mb-12"
-          initial={{ opacity: 0, y: 30 }}
+          className="mx-auto max-w-2xl text-center"
+          initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.6, ease: easeOut }}
         >
-          <span className="inline-block text-primary-600 font-semibold text-sm uppercase tracking-wider mb-4">
-            {t('badge')}
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <span className="eyebrow">{t('badge')}</span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-fg sm:text-4xl lg:text-display-sm">
             {t('title')}{' '}
-            <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-primary-600 to-primary-800 bg-clip-text text-transparent">
               {t('titleHighlight')}
             </span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {t('subtitle')}
-          </p>
+          <p className="mt-4 text-lg text-fg-muted">{t('subtitle')}</p>
         </motion.div>
 
         {/* Billing toggle */}
-        <motion.div
-          className="flex justify-center items-center gap-4 mb-12"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <span
-            className={cn(
-              'text-sm font-medium transition-colors',
-              !isAnnual ? 'text-gray-900' : 'text-gray-500'
-            )}
-          >
-            {t('monthly')}
-          </span>
-          <button
-            onClick={() => setIsAnnual(!isAnnual)}
-            className="bg-gray-200 p-1 rounded-lg flex"
-          >
-            <span
-              className={cn(
-                'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                !isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
-              )}
-            >
-              {t('monthly')}
-            </span>
-            <span
-              className={cn(
-                'px-3 py-1.5 rounded-md text-sm font-medium transition-all',
-                isAnnual ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
-              )}
-            >
-              {t('annual')}
-            </span>
-          </button>
-          {isAnnual && (
-            <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-1 rounded-full">
-              {PRICING.annual.savings}
-            </span>
-          )}
-        </motion.div>
-
-        {/* Pricing cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {plans.map((plan, i) => (
-            <motion.div
-              key={i}
-              className={cn(
-                'relative bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl',
-                plan.popular && 'ring-2 ring-primary-600 shadow-xl'
-              )}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-            >
-              {/* Popular badge */}
-              {plan.popular && (
-                <div className="absolute top-0 right-0 bg-primary-600 text-white text-xs font-semibold px-4 py-1 rounded-bl-lg">
-                  {t('mostPopular')}
-                </div>
-              )}
-
-              <div className="p-8">
-                {/* Plan name & description */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  {t(plan.nameKey)}
-                </h3>
-                <p className="text-gray-500 mb-6">{t(plan.descriptionKey)}</p>
-
-                {/* Price */}
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-gray-900">
-                      ${isAnnual ? plan.price.annual : plan.price.monthly}
-                    </span>
-                    {plan.price.monthly > 0 && (
-                      <span className="text-gray-500">/{t('perMonth')}</span>
-                    )}
-                  </div>
-                  {isAnnual && plan.price.monthly > 0 && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      {t('billedAnnually', { total: PRICING.annual.annualTotal })}
-                    </p>
-                  )}
-                </div>
-
-                {/* CTA Button */}
-                <Link
-                  href={plan.price.monthly === 0 ? '/signup' : '/signup?plan=premium'}
+        <div className="mt-10 flex items-center justify-center gap-4">
+          <div className="inline-flex items-center rounded-xl border border-line bg-card p-1 shadow-xs">
+            {(['monthly', 'annual'] as const).map((cycle) => {
+              const active = (cycle === 'annual') === isAnnual;
+              return (
+                <button
+                  key={cycle}
+                  onClick={() => setIsAnnual(cycle === 'annual')}
                   className={cn(
-                    'block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all',
-                    plan.popular
-                      ? 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-600/30'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    'rounded-lg px-4 py-2 text-sm font-semibold transition-all',
+                    active ? 'bg-ink-950 text-white shadow-sm' : 'text-fg-muted hover:text-fg'
                   )}
                 >
-                  {t(plan.ctaKey)}
-                </Link>
+                  {t(cycle)}
+                </button>
+              );
+            })}
+          </div>
+          {isAnnual && <span className="badge-verified">{PRICING.annual.savings}</span>}
+        </div>
 
-                {/* Features */}
-                <div className="mt-8 space-y-4">
-                  <p className="text-sm font-semibold text-gray-900 uppercase tracking-wider">
-                    {t('whatsIncluded')}
-                  </p>
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, j) => (
-                      <li key={j} className="flex items-start gap-3">
-                        <svg
-                          className={cn(
-                            'w-5 h-5 flex-shrink-0 mt-0.5',
-                            plan.popular && j === 0 ? 'text-primary-600' : 'text-green-500'
-                          )}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <span className={cn(
-                          'text-gray-700',
-                          plan.popular && j === 0 && 'font-semibold text-gray-900'
-                        )}>
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                    {plan.limitations.map((limitation, j) => (
-                      <li
-                        key={`limit-${j}`}
-                        className="flex items-start gap-3 opacity-50"
-                      >
-                        <svg
-                          className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                        <span className="text-gray-500">{limitation}</span>
-                      </li>
-                    ))}
-                  </ul>
+        {/* Plan cards */}
+        <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
+          {plans.map((plan, i) => (
+            <motion.div
+              key={plan.nameKey}
+              className={cn(
+                'relative flex flex-col overflow-hidden rounded-3xl bg-card p-8',
+                plan.popular
+                  ? 'shadow-lg ring-2 ring-primary-600'
+                  : 'border border-line shadow-sm'
+              )}
+              initial={{ opacity: 0, y: 28 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: easeOut }}
+            >
+              {plan.popular && (
+                <div className="absolute right-5 top-5">
+                  <span className="badge-primary">{t('mostPopular')}</span>
                 </div>
+              )}
+
+              <h3 className="text-xl font-bold text-fg">{t(plan.nameKey)}</h3>
+              <p className="mt-1.5 text-sm text-fg-muted">{t(plan.descriptionKey)}</p>
+
+              <div className="mt-6">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-5xl font-bold tracking-tight text-fg tabular-nums">
+                    ${isAnnual ? plan.price.annual : plan.price.monthly}
+                  </span>
+                  {plan.price.monthly > 0 && (
+                    <span className="text-sm font-medium text-fg-muted">/{t('perMonth')}</span>
+                  )}
+                </div>
+                {isAnnual && plan.price.monthly > 0 && (
+                  <p className="mt-1 text-sm text-fg-subtle">
+                    {t('billedAnnually', { total: PRICING.annual.annualTotal })}
+                  </p>
+                )}
+              </div>
+
+              <Link
+                href={plan.price.monthly === 0 ? '/signup' : '/signup?plan=premium'}
+                className={cn('mt-7', plan.popular ? 'btn-primary py-3' : 'btn-secondary py-3')}
+              >
+                {t(plan.ctaKey)}
+              </Link>
+
+              <div className="mt-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-fg-subtle">
+                  {t('whatsIncluded')}
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {plan.features.map((feature, j) => (
+                    <li key={j} className="flex items-start gap-3">
+                      <Check className={cn('mt-0.5', plan.popular ? 'text-primary-600' : 'text-verified-500')} />
+                      <span className="text-sm text-fg-muted">{feature}</span>
+                    </li>
+                  ))}
+                  {plan.limitations.map((limitation, j) => (
+                    <li key={`limit-${j}`} className="flex items-start gap-3">
+                      <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-ink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      <span className="text-sm text-fg-subtle line-through decoration-ink-200">{limitation}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* Money-back guarantee */}
+        {/* Guarantee */}
         <motion.div
-          className="text-center mt-12"
+          className="mt-10 flex items-center justify-center gap-2 text-sm text-fg-muted"
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <div className="inline-flex items-center gap-2 text-gray-600">
-            <svg
-              className="w-5 h-5 text-green-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-            <span>{t('guarantee')}</span>
-          </div>
+          <Check className="text-verified-500" />
+          <span>{t('guarantee')}</span>
         </motion.div>
 
-        {/* Pay-as-you-go add-ons */}
-        <motion.div
-          className="flex items-center gap-4 max-w-4xl mx-auto mt-16 mb-8"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
-        >
-          <div className="flex-1 h-px bg-gray-200" />
+        {/* Add-ons */}
+        <div className="mx-auto mt-16 flex max-w-4xl items-center gap-4">
+          <div className="h-px flex-1 bg-line" />
           <div className="text-center">
-            <p className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-              {t('addons.title')}
-            </p>
-            <p className="text-xs text-gray-500 mt-0.5">{t('addons.subtitle')}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-fg">{t('addons.title')}</p>
+            <p className="mt-0.5 text-xs text-fg-subtle">{t('addons.subtitle')}</p>
           </div>
-          <div className="flex-1 h-px bg-gray-200" />
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {/* Report Unlock */}
-          <motion.div
-            className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-primary-200 hover:shadow-md transition-all duration-300"
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.55 }}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-bold text-gray-900">
-                  {t('addons.reportUnlock.name')}
-                </h3>
-                <span className="bg-amber-50 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                  {t('addons.reportUnlock.period')}
-                </span>
-              </div>
-              <p className="text-gray-500 text-sm mb-4">
-                {t('addons.reportUnlock.description')}
-              </p>
-              <div className="flex items-baseline gap-1.5 mb-5">
-                <span className="text-3xl font-bold text-gray-900">
-                  {t('addons.reportUnlock.price')}
-                </span>
-                <span className="text-gray-400 text-sm">
-                  {t('addons.reportUnlock.period')}
-                </span>
-              </div>
-              <Link
-                href="#download"
-                className="block w-full py-2.5 px-5 rounded-xl font-semibold text-center text-sm bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors"
-              >
-                {t('addons.reportUnlock.cta')}
-              </Link>
-              <ul className="mt-5 space-y-2.5">
-                {(['feature1', 'feature2', 'feature3'] as const).map((key) => (
-                  <li key={key} className="flex items-center gap-2.5 text-sm text-gray-600">
-                    <svg
-                      className="w-4 h-4 text-green-500 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    {t(`addons.reportUnlock.${key}`)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </motion.div>
-
-          {/* Moving Bundle */}
-          <motion.div
-            className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-primary-200 hover:shadow-md transition-all duration-300"
-            initial={{ opacity: 0, y: 20 }}
-            animate={inView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.6 }}
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-bold text-gray-900">
-                  {t('addons.bundle.name')}
-                </h3>
-                <span className="bg-amber-50 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                  {t('addons.bundle.period')}
-                </span>
-              </div>
-              <p className="text-gray-500 text-sm mb-4">
-                {t('addons.bundle.description')}
-              </p>
-              <div className="flex items-baseline gap-1.5 mb-5">
-                <span className="text-3xl font-bold text-gray-900">
-                  {t('addons.bundle.price')}
-                </span>
-                <span className="text-gray-400 text-sm">
-                  {t('addons.bundle.period')}
-                </span>
-              </div>
-              <Link
-                href="#download"
-                className="block w-full py-2.5 px-5 rounded-xl font-semibold text-center text-sm bg-primary-600 text-white hover:bg-primary-700 transition-colors"
-              >
-                {t('addons.bundle.cta')}
-              </Link>
-              <ul className="mt-5 space-y-2.5">
-                {(['feature1', 'feature2', 'feature3', 'feature4'] as const).map((key) => (
-                  <li key={key} className="flex items-center gap-2.5 text-sm text-gray-600">
-                    <svg
-                      className="w-4 h-4 text-green-500 flex-shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    {t(`addons.bundle.${key}`)}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </motion.div>
+          <div className="h-px flex-1 bg-line" />
         </div>
 
-        <motion.p
-          className="text-center text-xs text-gray-400 mt-4"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.5, delay: 0.65 }}
-        >
-          {t('addons.appNote')}
-        </motion.p>
+        <div className="mx-auto mt-8 grid max-w-4xl gap-6 md:grid-cols-2">
+          {addons.map((addon, i) => (
+            <motion.div
+              key={addon.prefix}
+              className="card-interactive p-6 hover:border-primary-200"
+              initial={{ opacity: 0, y: 20 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.5 + i * 0.05, ease: easeOut }}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-fg">{t(addon.nameKey)}</h3>
+                <span className="badge-warning">{t(addon.periodKey)}</span>
+              </div>
+              <p className="mb-4 text-sm text-fg-muted">{t(addon.descKey)}</p>
+              <div className="mb-5 flex items-baseline gap-1.5">
+                <span className="text-3xl font-bold text-fg tabular-nums">{t(addon.priceKey)}</span>
+                <span className="text-sm text-fg-subtle">{t(addon.periodKey)}</span>
+              </div>
+              <Link href="#download" className={cn('w-full', addon.primary ? 'btn-primary py-2.5' : 'btn-secondary py-2.5')}>
+                {t(addon.ctaKey)}
+              </Link>
+              <ul className="mt-5 space-y-2.5">
+                {addon.featureKeys.map((key) => (
+                  <li key={key} className="flex items-center gap-2.5 text-sm text-fg-muted">
+                    <Check className="h-4 w-4 text-verified-500" />
+                    {t(`${addon.prefix}.${key}`)}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
+
+        <p className="mt-4 text-center text-xs text-fg-subtle">{t('addons.appNote')}</p>
       </div>
     </section>
   );
