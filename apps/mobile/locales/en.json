@@ -18,7 +18,6 @@
     "noNameSet": "No name set",
     "notSet": "Not set"
   },
-
   "auth": {
     "login": {
       "title": "Welcome back",
@@ -83,12 +82,10 @@
       }
     }
   },
-
   "tabs": {
     "properties": "Properties",
     "settings": "Settings"
   },
-
   "properties": {
     "title": "Properties",
     "empty": {
@@ -112,7 +109,6 @@
       "lastInspection": "Last: {{date}}"
     }
   },
-
   "property": {
     "new": {
       "title": "New Property",
@@ -162,7 +158,6 @@
       "bundlePurchaseFailed": "Could not open checkout. Please try again."
     }
   },
-
   "inspection": {
     "status": {
       "completed": "Completed",
@@ -249,7 +244,6 @@
       "noInspections": "You need at least two inspections to compare."
     }
   },
-
   "settings": {
     "title": "Settings",
     "sections": {
@@ -257,7 +251,8 @@
       "subscription": "Subscription",
       "about": "About",
       "legal": "Legal",
-      "language": "Language"
+      "language": "Language",
+      "appearance": "Appearance"
     },
     "account": {
       "province": "Province",
@@ -295,9 +290,13 @@
       "button": "Sign Out",
       "confirmTitle": "Sign Out",
       "confirmMessage": "Are you sure you want to sign out?"
+    },
+    "appearance": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
     }
   },
-
   "upgrade": {
     "title": "Upgrade to Premium",
     "subtitle": "Unlock unlimited properties and advanced features",
@@ -324,7 +323,6 @@
     "startTrial": "Start Free Trial",
     "maybeLater": "Maybe Later"
   },
-
   "errors": {
     "generic": "Something went wrong",
     "networkError": "Network error. Please check your connection.",
@@ -332,7 +330,6 @@
     "notFound": "Not found",
     "tryAgain": "Try Again"
   },
-
   "alerts": {
     "success": "Success",
     "error": "Error",

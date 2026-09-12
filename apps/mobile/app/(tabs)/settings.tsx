@@ -27,7 +27,7 @@ import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 import { useI18n, type Locale } from '../../contexts';
-import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
+import { useTheme, useThemedStyles, useThemePreference, type AppTheme, type ThemePreference } from '../../lib/theme';
 
 // Get province options for dropdown
 const PROVINCE_OPTIONS = getProvinceOptions();
@@ -39,6 +39,7 @@ export default function SettingsScreen() {
   const { t, locale, setLocale, locales, localeNames } = useI18n();
   const th = useTheme();
   const styles = useThemedStyles(makeStyles);
+  const { preference, setPreference } = useThemePreference();
 
   // User profile and subscription state
   const [user, setUser] = useState<User | null>(null);
@@ -420,6 +421,36 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/* Appearance Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.sections.appearance')}</Text>
+        <View style={styles.card}>
+          <View style={styles.segmented}>
+            {(['system', 'light', 'dark'] as ThemePreference[]).map((opt) => {
+              const active = preference === opt;
+              const icon = opt === 'system' ? 'phone-portrait-outline' : opt === 'light' ? 'sunny-outline' : 'moon-outline';
+              return (
+                <TouchableOpacity
+                  key={opt}
+                  style={[styles.segmentedOption, active && styles.segmentedOptionActive]}
+                  onPress={() => setPreference(opt)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons
+                    name={icon}
+                    size={18}
+                    color={active ? th.semantic.primaryContrast : th.semantic.fgMuted}
+                  />
+                  <Text style={[styles.segmentedText, active && styles.segmentedTextActive]}>
+                    {t(`settings.appearance.${opt}`)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </View>
+
       {/* Language Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('settings.sections.language')}</Text>
@@ -535,6 +566,33 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     backgroundColor: th.semantic.card,
     borderRadius: 12,
     padding: 16,
+  },
+  segmented: {
+    flexDirection: 'row',
+    backgroundColor: th.semantic.cardMuted,
+    borderRadius: 10,
+    padding: 4,
+    gap: 4,
+  },
+  segmentedOption: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  segmentedOptionActive: {
+    backgroundColor: th.semantic.primary,
+  },
+  segmentedText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: th.semantic.fgMuted,
+  },
+  segmentedTextActive: {
+    color: th.semantic.primaryContrast,
   },
   profileRow: {
     flexDirection: 'row',

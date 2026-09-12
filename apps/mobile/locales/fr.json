@@ -18,7 +18,6 @@
     "noNameSet": "Nom non défini",
     "notSet": "Non défini"
   },
-
   "auth": {
     "login": {
       "title": "Bon retour",
@@ -83,12 +82,10 @@
       }
     }
   },
-
   "tabs": {
     "properties": "Propriétés",
     "settings": "Paramètres"
   },
-
   "properties": {
     "title": "Propriétés",
     "empty": {
@@ -112,7 +109,6 @@
       "lastInspection": "Dernière: {{date}}"
     }
   },
-
   "property": {
     "new": {
       "title": "Nouvelle propriété",
@@ -162,7 +158,6 @@
       "bundlePurchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer."
     }
   },
-
   "inspection": {
     "status": {
       "completed": "Terminée",
@@ -249,7 +244,6 @@
       "noInspections": "Vous avez besoin d'au moins deux inspections pour comparer."
     }
   },
-
   "settings": {
     "title": "Paramètres",
     "sections": {
@@ -257,7 +251,8 @@
       "subscription": "Abonnement",
       "about": "À propos",
       "legal": "Légal",
-      "language": "Langue"
+      "language": "Langue",
+      "appearance": "Apparence"
     },
     "account": {
       "province": "Province",
@@ -295,9 +290,13 @@
       "button": "Se déconnecter",
       "confirmTitle": "Se déconnecter",
       "confirmMessage": "Êtes-vous sûr de vouloir vous déconnecter?"
+    },
+    "appearance": {
+      "system": "Système",
+      "light": "Clair",
+      "dark": "Sombre"
     }
   },
-
   "upgrade": {
     "title": "Passer à Premium",
     "subtitle": "Débloquez des propriétés illimitées et des fonctionnalités avancées",
@@ -324,7 +323,6 @@
     "startTrial": "Commencer l'essai gratuit",
     "maybeLater": "Peut-être plus tard"
   },
-
   "errors": {
     "generic": "Une erreur s'est produite",
     "networkError": "Erreur réseau. Veuillez vérifier votre connexion.",
@@ -332,7 +330,6 @@
     "notFound": "Non trouvé",
     "tryAgain": "Réessayer"
   },
-
   "alerts": {
     "success": "Succès",
     "error": "Erreur",

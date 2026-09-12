@@ -55,7 +55,16 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={inter.variable}>
+    <html lang={locale} className={inter.variable} suppressHydrationWarning>
+      <head>
+        {/* Apply saved theme before paint to avoid a flash of the wrong theme.
+            Default (no saved value) falls through to prefers-color-scheme. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}

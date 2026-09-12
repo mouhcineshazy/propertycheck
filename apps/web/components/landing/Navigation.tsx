@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
-import { Logo, LanguageSwitcher } from '@/components/ui';
+import { Logo, LanguageSwitcher, ThemeToggle } from '@/components/ui';
 
 interface NavigationProps {
   /** 'light' pins the solid (scrolled) styling for pages without a hero. */
@@ -64,6 +64,7 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
         )}
 
         <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
           <LanguageSwitcher />
           <Link href="/#download" className="btn-primary">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,8 +112,9 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
                     {t(link.key)}
                   </a>
                 ))}
-              <div className="px-3 py-2">
+              <div className="flex items-center justify-between px-3 py-2">
                 <LanguageSwitcher variant="inline" />
+                <ThemeToggle />
               </div>
               <div className="h-px bg-line my-2" />
               <Link
