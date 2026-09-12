@@ -163,7 +163,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
         <View style={styles.container}>
           {/* Close button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Ionicons name="close" size={24} color="#666" />
+            <Ionicons name="close" size={24} color="#45566E" />
           </TouchableOpacity>
 
           <ScrollView
@@ -244,7 +244,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
                     <Ionicons
                       name={index === 0 ? 'checkmark-circle' : 'checkmark-circle-outline'}
                       size={20}
-                      color={index === 0 ? '#2563eb' : '#22c55e'}
+                      color={index === 0 ? '#2563eb' : '#15966E'}
                     />
                     <Text style={[styles.featureText, index === 0 && styles.featureTextHighlight]}>
                       {feature.text}
@@ -289,7 +289,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(11, 21, 36, 0.5)',
     justifyContent: 'flex-end',
   },
   container: {
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
@@ -332,12 +332,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#0B1524',
     textAlign: 'center',
   },
   description: {
     fontSize: 15,
-    color: '#666',
+    color: '#45566E',
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 21,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: 'row',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#F2F4F8',
     borderRadius: 10,
     padding: 4,
     width: SCREEN_WIDTH - 96,
@@ -382,15 +382,15 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#63748D',
     fontWeight: '500',
   },
   toggleTextActive: {
-    color: '#1a1a1a',
+    color: '#0B1524',
     fontWeight: '600',
   },
   savingsBadge: {
-    backgroundColor: '#dcfce7',
+    backgroundColor: '#E9F7F1',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -398,17 +398,17 @@ const styles = StyleSheet.create({
   },
   savingsText: {
     fontSize: 12,
-    color: '#166534',
+    color: '#0C5F46',
     fontWeight: '600',
   },
   pricingCard: {
     width: '100%',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F7F8FA',
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#E6E9EF',
   },
   priceRow: {
     flexDirection: 'row',
@@ -419,16 +419,16 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 40,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   priceInterval: {
     fontSize: 16,
-    color: '#6b7280',
+    color: '#63748D',
     marginLeft: 4,
   },
   annualNote: {
     fontSize: 13,
-    color: '#6b7280',
+    color: '#63748D',
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -443,10 +443,10 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
-    color: '#374151',
+    color: '#2C3B52',
   },
   featureTextHighlight: {
-    color: '#1a1a1a',
+    color: '#0B1524',
     fontWeight: '600',
   },
   upgradeButton: {
@@ -473,13 +473,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   laterButtonText: {
-    color: '#6b7280',
+    color: '#63748D',
     fontSize: 15,
     fontWeight: '500',
   },
   trialInfo: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#8695AB',
     marginTop: 4,
     textAlign: 'center',
   },

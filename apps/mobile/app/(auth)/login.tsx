@@ -1,11 +1,6 @@
 /**
  * Login Screen - React 19 Pattern
- *
- * Features:
- * - Email/password authentication
- * - Google SSO (OAuth)
- * - useActionState for form handling
- * - Forgot password link
+ * Trust Ink theme tokens (lib/theme.ts).
  */
 
 import { useState } from 'react';
@@ -28,42 +23,29 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import { loginSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { useTranslation } from '../../contexts';
+import { semantic, spacing, radius, shadows } from '../../lib/theme';
 
-// Required for Google OAuth
 WebBrowser.maybeCompleteAuthSession();
 
-// Type for action state
-type LoginState = {
-  errors: Record<string, string>;
-};
+type LoginState = { errors: Record<string, string> };
+const initialState: LoginState = { errors: {} };
 
-const initialState: LoginState = {
-  errors: {},
-};
-
-// Email/password login action
 async function loginAction(
   _prevState: LoginState,
   payload: { email: string; password: string; t: (key: string) => string }
 ): Promise<LoginState> {
   const result = loginSchema.safeParse(payload);
-
-  if (!result.success) {
-    return { errors: formatZodError(result.error) };
-  }
-
+  if (!result.success) return { errors: formatZodError(result.error) };
   try {
     const supabase = getMobileSupabaseClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: result.data.email,
       password: result.data.password,
     });
-
     if (error) {
       Alert.alert(payload.t('auth.login.errors.loginFailed'), error.message);
       return { errors: {} };
     }
-
     return { errors: {} };
   } catch {
     Alert.alert(payload.t('alerts.error'), payload.t('auth.login.errors.unexpectedError'));
@@ -78,50 +60,29 @@ export default function LoginScreen() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [state, dispatch, isPending] = useActionState(loginAction, initialState);
 
-  const handleSubmit = () => {
-    dispatch({ email, password, t });
-  };
+  const handleSubmit = () => dispatch({ email, password, t });
 
-  // Google OAuth Sign In
   const handleGoogleSignIn = async () => {
     try {
       setGoogleLoading(true);
       const supabase = getMobileSupabaseClient();
-
-      // Create redirect URI for Expo
       const redirectUri = Linking.createURL('auth/callback');
-
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: redirectUri,
-          skipBrowserRedirect: true,
-        },
+        options: { redirectTo: redirectUri, skipBrowserRedirect: true },
       });
-
       if (error) {
         Alert.alert(t('alerts.error'), error.message);
         return;
       }
-
       if (data.url) {
-        // Open browser for OAuth flow
-        const result = await WebBrowser.openAuthSessionAsync(
-          data.url,
-          redirectUri
-        );
-
+        const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUri);
         if (result.type === 'success' && result.url) {
-          // Extract tokens from URL and set session
           const url = new URL(result.url);
           const accessToken = url.searchParams.get('access_token');
           const refreshToken = url.searchParams.get('refresh_token');
-
           if (accessToken && refreshToken) {
-            await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken,
-            });
+            await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
           }
         }
       }
@@ -136,48 +97,46 @@ export default function LoginScreen() {
   const isLoading = isPending || googleLoading;
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <View style={styles.content}>
-        {/* Header */}
+        {/* Brand header */}
         <View style={styles.header}>
+          <View style={styles.brandMark}>
+            <Ionicons name="shield-checkmark" size={30} color={semantic.primaryContrast} />
+          </View>
           <Text style={styles.title}>{APP_CONFIG.name}</Text>
           <Text style={styles.subtitle}>{APP_CONFIG.tagline}</Text>
         </View>
 
-        {/* Google Sign In Button */}
         <TouchableOpacity
           style={[styles.googleButton, isLoading && styles.buttonDisabled]}
           onPress={handleGoogleSignIn}
           disabled={isLoading}
+          activeOpacity={0.8}
         >
           {googleLoading ? (
-            <ActivityIndicator color="#1a1a1a" />
+            <ActivityIndicator color={semantic.fg} />
           ) : (
             <>
-              <Ionicons name="logo-google" size={20} color="#1a1a1a" />
+              <Ionicons name="logo-google" size={20} color={semantic.fg} />
               <Text style={styles.googleButtonText}>{t('auth.login.continueWithGoogle')}</Text>
             </>
           )}
         </TouchableOpacity>
 
-        {/* Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>{t('common.or')}</Text>
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Email/Password Form */}
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>{t('auth.login.emailLabel')}</Text>
             <TextInput
               style={[styles.input, state.errors.email && styles.inputError]}
               placeholder={t('auth.login.emailPlaceholder')}
-              placeholderTextColor="#999"
+              placeholderTextColor={semantic.fgSubtle}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -185,16 +144,14 @@ export default function LoginScreen() {
               autoComplete="email"
               editable={!isLoading}
             />
-            {state.errors.email && (
-              <Text style={styles.errorText}>{state.errors.email}</Text>
-            )}
+            {state.errors.email && <Text style={styles.errorText}>{state.errors.email}</Text>}
           </View>
 
           <View style={styles.inputContainer}>
             <View style={styles.labelRow}>
               <Text style={styles.label}>{t('auth.login.passwordLabel')}</Text>
               <Link href={'/(auth)/forgot-password' as Href} asChild>
-                <TouchableOpacity>
+                <TouchableOpacity hitSlop={8}>
                   <Text style={styles.forgotLink}>{t('auth.login.forgotPassword')}</Text>
                 </TouchableOpacity>
               </Link>
@@ -202,36 +159,34 @@ export default function LoginScreen() {
             <TextInput
               style={[styles.input, state.errors.password && styles.inputError]}
               placeholder={t('auth.login.passwordPlaceholder')}
-              placeholderTextColor="#999"
+              placeholderTextColor={semantic.fgSubtle}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoComplete="password"
               editable={!isLoading}
             />
-            {state.errors.password && (
-              <Text style={styles.errorText}>{state.errors.password}</Text>
-            )}
+            {state.errors.password && <Text style={styles.errorText}>{state.errors.password}</Text>}
           </View>
 
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
             disabled={isLoading}
+            activeOpacity={0.85}
           >
             {isPending ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={semantic.primaryContrast} />
             ) : (
               <Text style={styles.buttonText}>{t('auth.login.signInButton')}</Text>
             )}
           </TouchableOpacity>
         </View>
 
-        {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>{t('auth.login.noAccount')}</Text>
+          <Text style={styles.footerText}>{t('auth.login.noAccount')} </Text>
           <Link href="/(auth)/register" asChild>
-            <TouchableOpacity>
+            <TouchableOpacity hitSlop={8}>
               <Text style={styles.link}>{t('auth.login.signUpLink')}</Text>
             </TouchableOpacity>
           </Link>
@@ -242,125 +197,65 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  header: {
+  container: { flex: 1, backgroundColor: semantic.canvas },
+  content: { flex: 1, padding: spacing.lg, justifyContent: 'center' },
+  header: { alignItems: 'center', marginBottom: spacing.xl },
+  brandMark: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.xl,
+    backgroundColor: semantic.primary,
     alignItems: 'center',
-    marginBottom: 32,
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    ...shadows.primary,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
+  title: { fontSize: 30, fontWeight: '700', color: semantic.fg, letterSpacing: -0.5, marginBottom: 6 },
+  subtitle: { fontSize: 15, color: semantic.fgMuted },
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: semantic.card,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: semantic.lineStrong,
+    borderRadius: radius.md,
     padding: 14,
-    gap: 12,
+    gap: spacing.sm + 4,
+    ...shadows.xs,
   },
-  googleButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1a1a1a',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e5e5e5',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#999',
-    fontSize: 14,
-  },
-  form: {
-    gap: 16,
-  },
-  inputContainer: {
-    gap: 4,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  forgotLink: {
-    fontSize: 14,
-    color: '#2563eb',
-  },
+  googleButtonText: { fontSize: 16, fontWeight: '600', color: semantic.fg },
+  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.lg },
+  dividerLine: { flex: 1, height: 1, backgroundColor: semantic.line },
+  dividerText: { marginHorizontal: spacing.md, color: semantic.fgSubtle, fontSize: 14 },
+  form: { gap: spacing.md },
+  inputContainer: { gap: spacing.xs },
+  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs },
+  label: { fontSize: 14, fontWeight: '600', color: semantic.fg },
+  forgotLink: { fontSize: 14, fontWeight: '600', color: semantic.primary },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: semantic.lineStrong,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     fontSize: 16,
-    backgroundColor: '#fafafa',
-    color: '#1a1a1a',
+    backgroundColor: semantic.card,
+    color: semantic.fg,
   },
-  inputError: {
-    borderColor: '#ef4444',
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#ef4444',
-    marginTop: 4,
-  },
+  inputError: { borderColor: semantic.danger },
+  errorText: { fontSize: 12, color: semantic.danger, marginTop: spacing.xs },
   button: {
-    backgroundColor: '#2563eb',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: semantic.primary,
+    padding: spacing.md,
+    borderRadius: radius.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: spacing.xs,
+    ...shadows.primary,
   },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  link: {
-    color: '#2563eb',
-    fontSize: 14,
-    fontWeight: '500',
-  },
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: { color: semantic.primaryContrast, fontSize: 16, fontWeight: '600' },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.lg },
+  footerText: { color: semantic.fgMuted, fontSize: 14 },
+  link: { color: semantic.primary, fontSize: 14, fontWeight: '600' },
 });

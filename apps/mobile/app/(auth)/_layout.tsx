@@ -5,17 +5,20 @@
  */
 
 import { Stack } from 'expo-router';
+import { semantic } from '../../lib/theme';
 
 export default function AuthLayout() {
   return (
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: semantic.card,
         },
-        headerTintColor: '#1a1a1a',
+        headerTintColor: semantic.fg,
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: semantic.canvas },
         headerTitleStyle: {
-          fontWeight: '600',
+          fontWeight: '700',
         },
       }}
     >

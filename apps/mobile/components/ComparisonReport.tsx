@@ -66,7 +66,7 @@ function ComparisonPhoto({
     return (
       <View style={styles.photoContainer}>
         <View style={styles.emptyPhoto}>
-          <Ionicons name="image-outline" size={32} color="#ccc" />
+          <Ionicons name="image-outline" size={32} color="#AEB9C9" />
           <Text style={styles.emptyText}>No photo</Text>
         </View>
         <View style={styles.photoLabel}>
@@ -179,7 +179,7 @@ function RoomSection({
             }
           />
           <View style={styles.arrow}>
-            <Ionicons name="arrow-forward" size={16} color="#999" />
+            <Ionicons name="arrow-forward" size={16} color="#8695AB" />
           </View>
           <ComparisonPhoto
             photo={moveOutPhotos[index] || null}
@@ -272,7 +272,7 @@ export function ComparisonReport({
         <View style={styles.header}>
           <Text style={styles.title}>Comparison Report</Text>
           <View style={styles.addressContainer}>
-            <Ionicons name="location-outline" size={16} color="#666" />
+            <Ionicons name="location-outline" size={16} color="#45566E" />
             <Text style={styles.address}>{propertyAddress}</Text>
           </View>
         </View>
@@ -280,7 +280,7 @@ export function ComparisonReport({
         {/* Summary */}
         <View style={styles.summary}>
           <View style={styles.summaryItem}>
-            <View style={[styles.summaryDot, { backgroundColor: '#10b981' }]} />
+            <View style={[styles.summaryDot, { backgroundColor: '#15966E' }]} />
             <View>
               <Text style={styles.summaryLabel}>Move-in</Text>
               <Text style={styles.summaryDate}>{formattedMoveIn}</Text>
@@ -313,7 +313,7 @@ export function ComparisonReport({
 
         {sortedRooms.length === 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="images-outline" size={48} color="#ccc" />
+            <Ionicons name="images-outline" size={48} color="#AEB9C9" />
             <Text style={styles.emptyStateText}>No photos to compare</Text>
           </View>
         )}
@@ -357,7 +357,7 @@ export function ComparisonReport({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
   },
   scrollView: {
     flex: 1,
@@ -366,12 +366,12 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#E6E9EF',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#0B1524',
     marginBottom: 8,
   },
   addressContainer: {
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   address: {
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
     flex: 1,
   },
   summary: {
@@ -403,20 +403,20 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   summaryDate: {
     fontSize: 12,
-    color: '#666',
+    color: '#45566E',
   },
   summaryCount: {
     marginLeft: 'auto',
     fontSize: 13,
-    color: '#666',
+    color: '#45566E',
   },
   summaryDivider: {
     height: 1,
-    backgroundColor: '#e5e5e5',
+    backgroundColor: '#E6E9EF',
     marginVertical: 12,
   },
   roomSection: {
@@ -431,25 +431,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#E6E9EF',
     gap: 8,
   },
   roomTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
     flex: 1,
   },
   photoCount: {
     fontSize: 12,
-    color: '#666',
+    color: '#45566E',
   },
   comparisonRow: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#E6E9EF',
   },
   photoContainer: {
     width: PHOTO_WIDTH,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: PHOTO_WIDTH,
     borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#E6E9EF',
   },
   hiddenPhoto: {
     opacity: 0,
@@ -468,16 +468,16 @@ const styles = StyleSheet.create({
     width: '100%',
     height: PHOTO_WIDTH,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: '#E6E9EF',
     borderStyle: 'dashed',
   },
   emptyText: {
     fontSize: 11,
-    color: '#999',
+    color: '#8695AB',
     marginTop: 4,
   },
   loadingOverlay: {
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: PHOTO_WIDTH,
     borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#E6E9EF',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
@@ -519,15 +519,15 @@ const styles = StyleSheet.create({
   photoLabelText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   photoDate: {
     fontSize: 10,
-    color: '#999',
+    color: '#8695AB',
   },
   caption: {
     fontSize: 11,
-    color: '#666',
+    color: '#45566E',
     marginTop: 2,
     paddingHorizontal: 2,
   },
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
     marginTop: 12,
   },
   bottomPadding: {
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   },
   modalCaption: {
     fontSize: 14,
-    color: '#ccc',
+    color: '#AEB9C9',
     marginTop: 4,
     textAlign: 'center',
   },

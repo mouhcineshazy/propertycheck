@@ -70,7 +70,7 @@ function PhotoThumbnail({
       )}
       {hasError && (
         <View style={styles.photoPlaceholder}>
-          <Ionicons name="image-outline" size={24} color="#999" />
+          <Ionicons name="image-outline" size={24} color="#8695AB" />
           <Text style={styles.photoErrorText}>{errorText}</Text>
         </View>
       )}
@@ -427,7 +427,7 @@ export default function InspectionDetailScreen() {
               <Ionicons
                 name="chevron-back"
                 size={28}
-                color={selectedPhotoIndex === 0 ? '#666' : '#fff'}
+                color={selectedPhotoIndex === 0 ? '#45566E' : '#fff'}
               />
             </TouchableOpacity>
 
@@ -446,7 +446,7 @@ export default function InspectionDetailScreen() {
               <Ionicons
                 name="chevron-forward"
                 size={28}
-                color={selectedPhotoIndex === photoCount - 1 ? '#666' : '#fff'}
+                color={selectedPhotoIndex === photoCount - 1 ? '#45566E' : '#fff'}
               />
             </TouchableOpacity>
           </View>
@@ -460,7 +460,7 @@ export default function InspectionDetailScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+          <Ionicons name="arrow-back" size={24} color="#0B1524" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('inspection.detail.title')}</Text>
         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
@@ -504,7 +504,7 @@ export default function InspectionDetailScreen() {
 
           {inspection.property && (
             <View style={styles.propertyInfo}>
-              <Ionicons name="location-outline" size={16} color="#666" />
+              <Ionicons name="location-outline" size={16} color="#45566E" />
               <Text style={styles.propertyAddress}>{inspection.property.address}</Text>
             </View>
           )}
@@ -523,7 +523,7 @@ export default function InspectionDetailScreen() {
 
           {photoCount === 0 ? (
             <View style={styles.emptyPhotos}>
-              <Ionicons name="images-outline" size={48} color="#ccc" />
+              <Ionicons name="images-outline" size={48} color="#AEB9C9" />
               <Text style={styles.emptyText}>{t('inspection.detail.noPhotos')}</Text>
             </View>
           ) : (
@@ -548,7 +548,7 @@ export default function InspectionDetailScreen() {
             {inspection.report_unlocked ? (
               <>
                 <View style={styles.unlockIconRow}>
-                  <Ionicons name="checkmark-circle" size={20} color="#16a34a" />
+                  <Ionicons name="checkmark-circle" size={20} color="#0F7757" />
                   <Text style={styles.unlockTitleGreen}>{t('inspection.detail.reportUnlocked')}</Text>
                 </View>
                 <Text style={styles.unlockDesc}>{t('inspection.detail.reportUnlockedDesc')}</Text>
@@ -588,10 +588,10 @@ export default function InspectionDetailScreen() {
             disabled={isCompleting}
           >
             {isCompleting ? (
-              <ActivityIndicator color="#166534" size="small" />
+              <ActivityIndicator color="#0C5F46" size="small" />
             ) : (
               <>
-                <Ionicons name="checkmark-circle-outline" size={18} color="#166534" />
+                <Ionicons name="checkmark-circle-outline" size={18} color="#0C5F46" />
                 <Text style={styles.completeButtonText}>{t('inspection.detail.completeButton')}</Text>
               </>
             )}
@@ -647,7 +647,7 @@ export default function InspectionDetailScreen() {
             <TextInput
               style={[styles.emailInput, emailFieldError ? styles.emailInputError : null]}
               placeholder={t('inspection.detail.landlordEmailPlaceholder')}
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#8695AB"
               value={recipientEmail}
               onChangeText={(text) => {
                 setRecipientEmail(text);
@@ -687,13 +687,13 @@ export default function InspectionDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
   },
   header: {
     flexDirection: 'row',
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#E6E9EF',
   },
   backButton: {
     width: 40,
@@ -715,7 +715,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   deleteButton: {
     width: 40,
@@ -741,11 +741,11 @@ const styles = StyleSheet.create({
   inspectionDate: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   inspectionTime: {
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
     marginTop: 2,
   },
   statusBadge: {
@@ -755,15 +755,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusBadgeCompleted: {
-    backgroundColor: '#dcfce7',
+    backgroundColor: '#E9F7F1',
   },
   statusBadgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#92400e',
+    color: '#B45309',
   },
   statusBadgeTextCompleted: {
-    color: '#166534',
+    color: '#0C5F46',
   },
   propertyInfo: {
     flexDirection: 'row',
@@ -771,29 +771,29 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#E6E9EF',
     gap: 6,
   },
   propertyAddress: {
     flex: 1,
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
   },
   notesContainer: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#E6E9EF',
   },
   notesLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#45566E',
     marginBottom: 4,
   },
   notesText: {
     fontSize: 14,
-    color: '#1a1a1a',
+    color: '#0B1524',
     lineHeight: 20,
   },
   section: {
@@ -802,7 +802,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
     marginBottom: 12,
   },
   emptyPhotos: {
@@ -813,7 +813,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
     marginTop: 8,
   },
   photoGrid: {
@@ -837,13 +837,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#E6E9EF',
     justifyContent: 'center',
     alignItems: 'center',
   },
   photoErrorText: {
     fontSize: 10,
-    color: '#999',
+    color: '#8695AB',
     marginTop: 4,
   },
   thumbnailBadge: {
@@ -862,7 +862,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#666',
+    color: '#45566E',
     marginTop: 12,
   },
   bottomPadding: {
@@ -890,11 +890,11 @@ const styles = StyleSheet.create({
   unlockTitleGreen: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#15803d',
+    color: '#0F7757',
   },
   unlockDesc: {
     fontSize: 13,
-    color: '#4b5563',
+    color: '#45566E',
     marginBottom: 12,
   },
   unlockButton: {
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
     borderTopWidth: 1,
-    borderTopColor: '#e5e5e5',
+    borderTopColor: '#E6E9EF',
     flexDirection: 'row',
     gap: 12,
   },
@@ -928,11 +928,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#dcfce7',
+    backgroundColor: '#E9F7F1',
     gap: 8,
   },
   completeButtonText: {
-    color: '#166534',
+    color: '#0C5F46',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -958,7 +958,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#059669',
+    backgroundColor: '#0F7757',
     gap: 8,
   },
   emailButtonText: {
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   },
   modalCaption: {
     fontSize: 14,
-    color: '#ccc',
+    color: '#AEB9C9',
     marginTop: 4,
     textAlign: 'center',
   },
@@ -1047,23 +1047,23 @@ const styles = StyleSheet.create({
   emailModalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#0B1524',
     marginBottom: 8,
   },
   emailModalSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
     marginBottom: 20,
     lineHeight: 20,
   },
   emailInput: {
     borderWidth: 1.5,
-    borderColor: '#e5e5e5',
+    borderColor: '#E6E9EF',
     borderRadius: 10,
     padding: 14,
     fontSize: 15,
-    color: '#1a1a1a',
-    backgroundColor: '#fafafa',
+    color: '#0B1524',
+    backgroundColor: '#F7F8FA',
   },
   emailInputError: {
     borderColor: '#ef4444',
@@ -1082,20 +1082,20 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
     alignItems: 'center',
   },
   emailModalCancelText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#666',
+    color: '#45566E',
   },
   emailModalSend: {
     flex: 2,
     flexDirection: 'row',
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#059669',
+    backgroundColor: '#0F7757',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

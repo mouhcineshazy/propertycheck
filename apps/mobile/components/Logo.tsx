@@ -7,14 +7,14 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-// Brand colors
+// Brand colors — Trust Ink
 const BRAND = {
-  primary: '#2563eb',      // Royal blue
-  primaryLight: '#3b82f6', // Blue 500
-  primaryDark: '#1d4ed8',  // Blue 700
-  dark: '#0f172a',         // Slate 900
-  gray: '#64748b',         // Slate 500
-  lightGray: '#94a3b8',    // Slate 400
+  primary: '#2563eb',      // brand blue (primary-600)
+  primaryLight: '#3b82f6', // primary-500
+  primaryDark: '#1d4ed8',  // primary-700
+  dark: '#0B1524',         // ink-950
+  gray: '#45566E',         // ink-600
+  lightGray: '#8695AB',    // ink-400
   white: '#ffffff',
 };
 

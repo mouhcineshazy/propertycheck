@@ -244,7 +244,7 @@ export default function SettingsScreen() {
             {isSavingProvince ? (
               <ActivityIndicator size="small" color="#2563eb" />
             ) : (
-              <Ionicons name="chevron-forward" size={20} color="#999" />
+              <Ionicons name="chevron-forward" size={20} color="#8695AB" />
             )}
           </TouchableOpacity>
         </View>
@@ -266,7 +266,7 @@ export default function SettingsScreen() {
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>{t('settings.account.selectProvince')}</Text>
               <TouchableOpacity onPress={() => setShowProvincePicker(false)}>
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color="#45566E" />
               </TouchableOpacity>
             </View>
             <Text style={styles.pickerSubtitle}>
@@ -387,10 +387,10 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/terms`)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="document-text-outline" size={20} color="#666" />
+              <Ionicons name="document-text-outline" size={20} color="#45566E" />
               <Text style={styles.legalRowText}>{t('settings.legal.termsOfService')}</Text>
             </View>
-            <Ionicons name="open-outline" size={18} color="#999" />
+            <Ionicons name="open-outline" size={18} color="#8695AB" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity
@@ -398,10 +398,10 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/privacy`)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#666" />
+              <Ionicons name="shield-checkmark-outline" size={20} color="#45566E" />
               <Text style={styles.legalRowText}>{t('settings.legal.privacyPolicy')}</Text>
             </View>
-            <Ionicons name="open-outline" size={18} color="#999" />
+            <Ionicons name="open-outline" size={18} color="#8695AB" />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity
@@ -409,10 +409,10 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/cookies`)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="finger-print-outline" size={20} color="#666" />
+              <Ionicons name="finger-print-outline" size={20} color="#45566E" />
               <Text style={styles.legalRowText}>{t('settings.legal.cookiePolicy')}</Text>
             </View>
-            <Ionicons name="open-outline" size={18} color="#999" />
+            <Ionicons name="open-outline" size={18} color="#8695AB" />
           </TouchableOpacity>
         </View>
       </View>
@@ -426,13 +426,13 @@ export default function SettingsScreen() {
             onPress={() => setShowLanguagePicker(true)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="language-outline" size={20} color="#666" />
+              <Ionicons name="language-outline" size={20} color="#45566E" />
               <View>
                 <Text style={styles.legalRowText}>{t('settings.language.title')}</Text>
                 <Text style={styles.infoLabel}>{localeNames[locale]}</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#999" />
+            <Ionicons name="chevron-forward" size={20} color="#8695AB" />
           </TouchableOpacity>
         </View>
       </View>
@@ -453,7 +453,7 @@ export default function SettingsScreen() {
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>{t('settings.language.selectLanguage')}</Text>
               <TouchableOpacity onPress={() => setShowLanguagePicker(false)}>
-                <Ionicons name="close" size={24} color="#666" />
+                <Ionicons name="close" size={24} color="#45566E" />
               </TouchableOpacity>
             </View>
             {locales.map((loc) => (
@@ -509,7 +509,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
   },
   centered: {
     flex: 1,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#666',
+    color: '#45566E',
     textTransform: 'uppercase',
     marginBottom: 8,
     marginLeft: 4,
@@ -557,11 +557,11 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   profileEmail: {
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
     marginTop: 2,
   },
   subscriptionRow: {
@@ -572,29 +572,29 @@ const styles = StyleSheet.create({
   planName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   planDescription: {
     fontSize: 13,
-    color: '#666',
+    color: '#45566E',
     marginTop: 2,
   },
   statusBadge: {
-    backgroundColor: '#e5e5e5',
+    backgroundColor: '#E6E9EF',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   statusBadgePremium: {
-    backgroundColor: '#dcfce7',
+    backgroundColor: '#E9F7F1',
   },
   statusBadgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#666',
+    color: '#45566E',
   },
   statusBadgeTextPremium: {
-    color: '#166534',
+    color: '#0C5F46',
   },
   upgradeButton: {
     backgroundColor: '#2563eb',
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   },
   renewalInfo: {
     fontSize: 13,
-    color: '#666',
+    color: '#45566E',
     textAlign: 'center',
     marginTop: 12,
   },
@@ -640,15 +640,15 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 15,
-    color: '#666',
+    color: '#45566E',
   },
   infoValue: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   divider: {
     height: 1,
-    backgroundColor: '#e5e5e5',
+    backgroundColor: '#E6E9EF',
     marginVertical: 8,
   },
   logoutButton: {
@@ -698,11 +698,11 @@ const styles = StyleSheet.create({
   pickerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   pickerSubtitle: {
     fontSize: 13,
-    color: '#666',
+    color: '#45566E',
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
@@ -712,14 +712,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#E6E9EF',
   },
   pickerOptionSelected: {
     backgroundColor: '#eff6ff',
   },
   pickerOptionText: {
     fontSize: 16,
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   pickerOptionTextSelected: {
     color: '#2563eb',
@@ -738,7 +738,7 @@ const styles = StyleSheet.create({
   },
   legalRowText: {
     fontSize: 15,
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   languageOption: {
     flexDirection: 'row',

@@ -142,7 +142,7 @@ export default function OnboardingScreen() {
               {selectedProvinceData.inspectionRequirements}
             </Text>
             <View style={styles.infoBadge}>
-              <Ionicons name="shield-checkmark-outline" size={14} color="#166534" />
+              <Ionicons name="shield-checkmark-outline" size={14} color="#0C5F46" />
               <Text style={styles.infoBadgeText}>
                 Disputes resolved via {selectedProvinceData.disputeBody}
               </Text>
@@ -210,13 +210,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#0B1524',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#666',
+    color: '#45566E',
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 16,
@@ -228,9 +228,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#F7F8FA',
     borderWidth: 2,
-    borderColor: '#e5e7eb',
+    borderColor: '#E6E9EF',
     borderRadius: 12,
     padding: 16,
   },
@@ -241,14 +241,14 @@ const styles = StyleSheet.create({
   provinceText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#374151',
+    color: '#2C3B52',
   },
   provinceTextSelected: {
-    color: '#1a1a1a',
+    color: '#0B1524',
     fontWeight: '600',
   },
   infoCard: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#E9F7F1',
     borderRadius: 12,
     padding: 16,
     marginTop: 24,
@@ -256,12 +256,12 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#166534',
+    color: '#0C5F46',
     marginBottom: 6,
   },
   infoText: {
     fontSize: 14,
-    color: '#166534',
+    color: '#0C5F46',
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   },
   infoBadgeText: {
     fontSize: 12,
-    color: '#166534',
+    color: '#0C5F46',
     fontWeight: '500',
   },
   spacer: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   skipButtonText: {
-    color: '#6b7280',
+    color: '#63748D',
     fontSize: 15,
     fontWeight: '500',
   },

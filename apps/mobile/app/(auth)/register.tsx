@@ -30,6 +30,7 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import { registerSchema, formatZodError, APP_CONFIG, getProvinceOptions } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { useTranslation } from '../../contexts';
+import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
 
 // Get province options for the dropdown
 const PROVINCE_OPTIONS = getProvinceOptions();
@@ -202,6 +203,9 @@ export default function RegisterScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
+          <View style={styles.brandMark}>
+            <Ionicons name="shield-checkmark" size={26} color={semantic.primaryContrast} />
+          </View>
           <Text style={styles.title}>{t('auth.register.title')}</Text>
           <Text style={styles.subtitle}>{t('auth.register.subtitle', { appName: APP_CONFIG.name })}</Text>
         </View>
@@ -211,12 +215,13 @@ export default function RegisterScreen() {
           style={[styles.googleButton, isLoading && styles.buttonDisabled]}
           onPress={handleGoogleSignUp}
           disabled={isLoading}
+          activeOpacity={0.8}
         >
           {googleLoading ? (
-            <ActivityIndicator color="#1a1a1a" />
+            <ActivityIndicator color={semantic.fg} />
           ) : (
             <>
-              <Ionicons name="logo-google" size={20} color="#1a1a1a" />
+              <Ionicons name="logo-google" size={20} color={semantic.fg} />
               <Text style={styles.googleButtonText}>{t('auth.register.continueWithGoogle')}</Text>
             </>
           )}
@@ -305,7 +310,7 @@ export default function RegisterScreen() {
               <Text style={[styles.selectText, !province && styles.selectPlaceholder]}>
                 {selectedProvinceLabel}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
+              <Ionicons name="chevron-down" size={20} color={semantic.fgMuted} />
             </TouchableOpacity>
             {state.errors.province && (
               <Text style={styles.errorText}>{state.errors.province}</Text>
@@ -327,8 +332,8 @@ export default function RegisterScreen() {
               <View style={styles.pickerContainer}>
                 <View style={styles.pickerHeader}>
                   <Text style={styles.pickerTitle}>{t('auth.register.selectProvince')}</Text>
-                  <TouchableOpacity onPress={() => setShowProvincePicker(false)}>
-                    <Ionicons name="close" size={24} color="#666" />
+                  <TouchableOpacity onPress={() => setShowProvincePicker(false)} hitSlop={8}>
+                    <Ionicons name="close" size={24} color={semantic.fgMuted} />
                   </TouchableOpacity>
                 </View>
                 {PROVINCE_OPTIONS.map((option) => (
@@ -352,7 +357,7 @@ export default function RegisterScreen() {
                       {option.label}
                     </Text>
                     {province === option.value && (
-                      <Ionicons name="checkmark" size={20} color="#2563eb" />
+                      <Ionicons name="checkmark" size={20} color={semantic.primary} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -364,9 +369,10 @@ export default function RegisterScreen() {
             style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleSubmit}
             disabled={isLoading}
+            activeOpacity={0.85}
           >
             {isPending ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={semantic.primaryContrast} />
             ) : (
               <Text style={styles.buttonText}>{t('auth.register.createAccountButton')}</Text>
             )}
@@ -392,180 +398,102 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  content: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  header: {
+  container: { flex: 1, backgroundColor: semantic.canvas },
+  content: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center' },
+  header: { alignItems: 'center', marginBottom: spacing.lg },
+  brandMark: {
+    width: 56,
+    height: 56,
+    borderRadius: radius.lg,
+    backgroundColor: semantic.primary,
     alignItems: 'center',
-    marginBottom: 24,
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    ...shadows.primary,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
+  title: { fontSize: 28, fontWeight: '700', color: semantic.fg, letterSpacing: -0.4, marginBottom: 6 },
+  subtitle: { fontSize: 15, color: semantic.fgMuted, textAlign: 'center' },
   googleButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: semantic.card,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: semantic.lineStrong,
+    borderRadius: radius.md,
     padding: 14,
-    gap: 12,
+    gap: spacing.sm + 4,
+    ...shadows.xs,
   },
-  googleButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1a1a1a',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e5e5e5',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    color: '#999',
-    fontSize: 14,
-  },
-  form: {
-    gap: 16,
-  },
-  inputContainer: {
-    gap: 4,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 4,
-  },
+  googleButtonText: { fontSize: 16, fontWeight: '600', color: semantic.fg },
+  divider: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.lg },
+  dividerLine: { flex: 1, height: 1, backgroundColor: semantic.line },
+  dividerText: { marginHorizontal: spacing.md, color: semantic.fgSubtle, fontSize: 14 },
+  form: { gap: spacing.md },
+  inputContainer: { gap: spacing.xs },
+  label: { fontSize: 14, fontWeight: '600', color: semantic.fg, marginBottom: spacing.xs },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: semantic.lineStrong,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
     fontSize: 16,
-    backgroundColor: '#fafafa',
-    color: '#1a1a1a',
+    backgroundColor: semantic.card,
+    color: semantic.fg,
   },
-  inputError: {
-    borderColor: '#ef4444',
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#ef4444',
-    marginTop: 4,
-  },
+  inputError: { borderColor: semantic.danger },
+  errorText: { fontSize: 12, color: semantic.danger, marginTop: spacing.xs },
   button: {
-    backgroundColor: '#2563eb',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: semantic.primary,
+    padding: spacing.md,
+    borderRadius: radius.md,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: spacing.xs,
+    ...shadows.primary,
   },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  terms: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 16,
-    lineHeight: 18,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 24,
-  },
-  footerText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  link: {
-    color: '#2563eb',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  selectInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  selectText: {
-    fontSize: 16,
-    color: '#1a1a1a',
-  },
-  selectPlaceholder: {
-    color: '#999',
-  },
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: { color: semantic.primaryContrast, fontSize: 16, fontWeight: '600' },
+  terms: { fontSize: 12, color: semantic.fgMuted, textAlign: 'center', marginTop: spacing.md, lineHeight: 18 },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.lg },
+  footerText: { color: semantic.fgMuted, fontSize: 14 },
+  link: { color: semantic.primary, fontSize: 14, fontWeight: '600' },
+  selectInput: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  selectText: { fontSize: 16, color: semantic.fg },
+  selectPlaceholder: { color: semantic.fgSubtle },
   pickerOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(11, 21, 36, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: spacing.lg,
   },
   pickerContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    width: '90%',
-    maxWidth: 340,
+    backgroundColor: semantic.card,
+    borderRadius: radius.xl,
+    width: '100%',
+    maxWidth: 360,
     overflow: 'hidden',
+    ...shadows.md,
   },
   pickerHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: semantic.line,
   },
-  pickerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
+  pickerTitle: { fontSize: 18, fontWeight: '700', color: semantic.fg },
   pickerOption: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: semantic.line,
   },
-  pickerOptionSelected: {
-    backgroundColor: '#eff6ff',
-  },
-  pickerOptionText: {
-    fontSize: 16,
-    color: '#1a1a1a',
-  },
-  pickerOptionTextSelected: {
-    color: '#2563eb',
-    fontWeight: '500',
-  },
+  pickerOptionSelected: { backgroundColor: colors.primary[50] },
+  pickerOptionText: { fontSize: 16, color: semantic.fg },
+  pickerOptionTextSelected: { color: semantic.primary, fontWeight: '600' },
 });

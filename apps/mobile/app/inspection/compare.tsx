@@ -185,7 +185,7 @@ export default function ComparisonScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+          <Ionicons name="arrow-back" size={24} color="#0B1524" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('inspection.compare.title')}</Text>
         <View style={styles.headerActions}>
@@ -230,12 +230,12 @@ const BRAND_COLORS = {
   primary: '#2563eb',      // Blue (Check)
   primaryDark: '#1d4ed8',
   primaryLight: '#3b82f6',
-  dark: '#0f172a',         // Dark (Property)
-  gray: '#64748b',
-  lightGray: '#94a3b8',
-  background: '#f8fafc',
+  dark: '#0B1524',         // Dark (Property)
+  gray: '#45566E',
+  lightGray: '#8695AB',
+  background: '#F7F8FA',
   white: '#ffffff',
-  success: '#22c55e',
+  success: '#15966E',
   warning: '#f59e0b',
 };
 
@@ -275,16 +275,16 @@ function generateComparisonHtml(
 
   // Free tier uses grayscale colors for a clean B&W look
   const FREE_COLORS = {
-    primary: '#4a5568',
-    primaryDark: '#2d3748',
-    primaryLight: '#718096',
-    dark: '#1a202c',
-    gray: '#718096',
-    lightGray: '#a0aec0',
-    background: '#f7fafc',
+    primary: '#2C3B52',
+    primaryDark: '#1C2A3E',
+    primaryLight: '#63748D',
+    dark: '#0B1524',
+    gray: '#63748D',
+    lightGray: '#8695AB',
+    background: '#F7F8FA',
     white: '#ffffff',
-    success: '#4a5568',
-    warning: '#718096',
+    success: '#2C3B52',
+    warning: '#63748D',
   };
 
   // Select color scheme based on tier
@@ -600,7 +600,7 @@ function generateComparisonHtml(
           gap: 10px;
           margin-bottom: 12px;
           padding: 10px 14px;
-          background: ${isPremium ? `linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)` : '#f0f9ff'};
+          background: ${isPremium ? `linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)` : '#EFF6FF'};
           border-radius: 8px;
           ${isPremium ? `border-left: 3px solid ${colors.primary};` : ''}
         }
@@ -834,24 +834,24 @@ function generateComparisonHtml(
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F4F8',
     padding: 24,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
   },
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
+    color: '#45566E',
   },
   retryButton: {
     marginTop: 20,
@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#E6E9EF',
   },
   backButton: {
     width: 40,
@@ -885,7 +885,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   headerActions: {
     flexDirection: 'row',

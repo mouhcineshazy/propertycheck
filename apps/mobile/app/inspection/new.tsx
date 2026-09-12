@@ -241,7 +241,7 @@ export default function NewInspectionScreen() {
             onPress={() => setSelectedPhotoIndex(null)}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
+            <Ionicons name="arrow-back" size={24} color="#0B1524" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Photo</Text>
           <TouchableOpacity
@@ -287,7 +287,7 @@ export default function NewInspectionScreen() {
             <TextInput
               style={styles.input}
               placeholder="Add a caption for this photo..."
-              placeholderTextColor="#999"
+              placeholderTextColor="#8695AB"
               value={photo.caption}
               onChangeText={(text) =>
                 updatePhoto(selectedPhotoIndex, { caption: text })
@@ -311,7 +311,7 @@ export default function NewInspectionScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="close" size={24} color="#1a1a1a" />
+          <Ionicons name="close" size={24} color="#0B1524" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>New Inspection</Text>
         <View style={styles.headerRight} />
@@ -365,7 +365,7 @@ export default function NewInspectionScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Add any general notes about this inspection..."
-            placeholderTextColor="#999"
+            placeholderTextColor="#8695AB"
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#666',
+    color: '#45566E',
   },
   header: {
     flexDirection: 'row',
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: '#E6E9EF',
   },
   backButton: {
     width: 40,
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
   },
   headerRight: {
     width: 40,
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#0B1524',
     marginBottom: 12,
   },
   photoList: {
@@ -512,17 +512,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#2C3B52',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#D3DAE4',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fafafa',
-    color: '#1a1a1a',
+    backgroundColor: '#F7F8FA',
+    color: '#0B1524',
   },
   textArea: {
     height: 100,
@@ -538,8 +538,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#fafafa',
+    borderColor: '#D3DAE4',
+    backgroundColor: '#F7F8FA',
   },
   typeButtonActive: {
     backgroundColor: '#2563eb',
@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
   typeButtonText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#666',
+    color: '#45566E',
   },
   typeButtonTextActive: {
     color: '#fff',
