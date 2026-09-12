@@ -1,0 +1,325 @@
+<!--
+============================================================================
+ DEMAND-VALIDATION KIT — reusable landing (waitlist + pre-sell smoke test)
+============================================================================
+ Purpose: test whether an idea has REAL demand BEFORE you build it.
+ Two signals, weakest → strongest:
+   1. Waitlist email  = mild interest ("I'd maybe use this").
+   2. Pre-sell click/pay = real intent ("I'll give you money").  ← the one that matters.
+
+ HOW TO REUSE (per idea, ~15 min):
+   1. Copy this file to a new folder, e.g. idea-name/index.html
+   2. Edit the CONFIG block in the <script> at the bottom (copy, links, price).
+   3. Wire two free services:
+      • FORM_ENDPOINT  → a form backend (Formspree / Tally / Google Forms /
+        Buttondown). It receives the email POST. No backend to run.
+      • PRESELL_URL    → a Stripe Payment Link (dashboard → Payment Links). Use a
+        small "founder price" or a fully-refundable deposit. Charging money is the
+        only honest demand test.
+      • ANALYTICS      → optional Plausible/Umami/GA snippet in <head>.
+   4. Deploy free: drag the folder to app.netlify.com/drop, or Vercel, or GitHub Pages.
+   5. Send 100–300 targeted people to it (a subreddit, a DM list, a TikTok, an ad
+      with a $20 test budget). READ THE RESULT.
+
+ HOW TO READ RESULTS (rules of thumb — calibrate to your traffic):
+   • Landing → email  < 8%  : weak hook. Rewrite the headline/problem, retest.
+   • Email → pre-sell click < 15% : interest without intent. Price or promise is off.
+   • Pre-sell VISITORS → PAY:
+        0 of ~100 targeted visitors buy → KILL the idea (or the positioning).
+        ≥ 1–3% pay a real price          → BUILD. You found willingness-to-pay.
+   • Refund everyone who pre-paid if you decide not to build — keep it honest.
+
+ No tracking libraries, no build step, no dependencies. Edit CONFIG and ship.
+============================================================================
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Validate</title>
+  <!-- OPTIONAL: paste your analytics snippet here (Plausible/Umami/GA). -->
+  <style>
+    :root {
+      --accent: #2563eb;          /* one knob to recolor per idea */
+      --accent-ink: #ffffff;
+      --canvas: #f7f8fa;
+      --card: #ffffff;
+      --fg: #0b1524;
+      --fg-muted: #45566e;
+      --fg-subtle: #8695ab;
+      --line: #e6e9ef;
+      --verified: #15966e;
+      --radius: 16px;
+      --maxw: 640px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --canvas: #0b1524; --card: #0f1b2d; --fg: #f2f4f8;
+        --fg-muted: #aeb9c9; --fg-subtle: #63748d; --line: #1e2b3e;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+      background: var(--canvas); color: var(--fg); line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+    .nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; }
+    .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 18px; }
+    .brand span { color: var(--accent); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
+      color: var(--fg-muted); background: var(--card); border: 1px solid var(--line);
+      border-radius: 999px; padding: 6px 12px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--verified); }
+    section { padding: 28px 0; }
+    .hero { padding-top: 40px; text-align: left; }
+    h1 { font-size: clamp(30px, 7vw, 44px); line-height: 1.08; letter-spacing: -0.03em; font-weight: 800; text-wrap: balance; }
+    h1 .hl { color: var(--accent); }
+    .sub { margin-top: 16px; font-size: clamp(16px, 4.5vw, 19px); color: var(--fg-muted); text-wrap: pretty; }
+    .form { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .form input[type=email] {
+      flex: 1 1 240px; min-width: 0; font-size: 16px; padding: 14px 16px; color: var(--fg);
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px; outline: none;
+    }
+    .form input[type=email]:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+      font-size: 16px; font-weight: 700; padding: 14px 20px; border-radius: 12px; border: 1px solid transparent;
+      transition: transform .12s ease, background .15s ease, opacity .15s ease; white-space: nowrap;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-primary { background: var(--accent); color: var(--accent-ink); }
+    .btn-primary:hover { opacity: .92; }
+    .btn-ghost { background: var(--card); color: var(--fg); border-color: var(--line); }
+    .microcopy { margin-top: 10px; font-size: 13px; color: var(--fg-subtle); }
+    .grid { display: grid; gap: 14px; grid-template-columns: 1fr; margin-top: 8px; }
+    @media (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px;
+    }
+    .card h3 { font-size: 15px; }
+    .card p { font-size: 14px; color: var(--fg-muted); margin-top: 6px; }
+    .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+    .list { list-style: none; margin-top: 12px; display: grid; gap: 10px; }
+    .list li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: var(--fg-muted); }
+    .check { flex: 0 0 auto; margin-top: 3px; color: var(--verified); }
+    .presell {
+      background: var(--card); border: 2px solid var(--accent); border-radius: 20px; padding: 22px; margin-top: 10px;
+    }
+    .price { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; }
+    .price small { font-size: 15px; font-weight: 600; color: var(--fg-subtle); }
+    .faq details { border-top: 1px solid var(--line); padding: 14px 0; }
+    .faq summary { cursor: pointer; font-weight: 600; list-style: none; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq p { margin-top: 8px; color: var(--fg-muted); font-size: 15px; }
+    footer { padding: 32px 0 48px; color: var(--fg-subtle); font-size: 13px; text-align: center; }
+    /* thank-you overlay */
+    .overlay {
+      position: fixed; inset: 0; background: color-mix(in srgb, var(--canvas) 88%, transparent);
+      backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+    }
+    .overlay.show { display: flex; }
+    .overlay .card { max-width: 420px; text-align: center; }
+    .ok { width: 56px; height: 56px; border-radius: 999px; background: color-mix(in srgb, var(--verified) 18%, transparent); color: var(--verified); display: grid; place-items: center; margin: 0 auto 14px; }
+    .hidden { display: none !important; }
+    .mt { margin-top: 22px; }
+    svg { display: block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <div class="brand" data-brand>Idea<span>Name</span></div>
+      <span class="badge"><span class="dot"></span><span data-badge>Validating demand</span></span>
+    </nav>
+
+    <!-- HERO + WAITLIST -->
+    <section class="hero">
+      <p class="eyebrow" data-eyebrow>Coming soon</p>
+      <h1 data-headline>The <span class="hl" data-headline-hl>one line</span> promise of your idea.</h1>
+      <p class="sub" data-sub>One sentence: who it's for and the outcome they get. Concrete, not clever.</p>
+
+      <form class="form" id="waitlist" novalidate>
+        <input type="email" name="email" placeholder="you@example.com" autocomplete="email" required aria-label="Email" />
+        <button class="btn btn-primary" type="submit" data-cta>Join the waitlist</button>
+      </form>
+      <p class="microcopy" data-microcopy>No spam. One email when it's ready. Unsubscribe anytime.</p>
+    </section>
+
+    <!-- PROBLEM -->
+    <section>
+      <p class="eyebrow">The problem</p>
+      <ul class="list" data-problems>
+        <li><span class="check">✓</span> Pain point #1 they feel today.</li>
+        <li><span class="check">✓</span> Pain point #2 — the expensive or annoying part.</li>
+        <li><span class="check">✓</span> Why the current workaround is worse.</li>
+      </ul>
+    </section>
+
+    <!-- WHAT YOU GET -->
+    <section>
+      <p class="eyebrow">What you get</p>
+      <div class="grid" data-features>
+        <div class="card"><h3>Benefit 1</h3><p>Outcome, not feature.</p></div>
+        <div class="card"><h3>Benefit 2</h3><p>Outcome, not feature.</p></div>
+        <div class="card"><h3>Benefit 3</h3><p>Outcome, not feature.</p></div>
+      </div>
+    </section>
+
+    <!-- PRE-SELL (the real demand test) -->
+    <section id="presell-section">
+      <p class="eyebrow" data-presell-eyebrow>Founder price</p>
+      <div class="presell">
+        <div class="price"><span data-price>$X</span> <small data-price-note>one-time · fully refundable</small></div>
+        <p class="sub" style="margin-top:10px" data-presell-copy>
+          Back it now to lock the founder price and get early access. If we don't ship, you're refunded — no questions.
+        </p>
+        <button class="btn btn-primary mt" id="presell" style="width:100%" data-presell-cta>Reserve my spot</button>
+        <p class="microcopy" data-presell-micro>Secure checkout via Stripe. Cancel/refund anytime before launch.</p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+      <p class="eyebrow">Questions</p>
+      <details><summary data-faq1-q>Is this a real product?</summary><p data-faq1-a>It's in the making. This page exists to gauge real interest before we build — so we build the right thing.</p></details>
+      <details><summary data-faq2-q>What if I pre-order and you don't ship?</summary><p data-faq2-a>You get a full refund. We only keep your money if we deliver.</p></details>
+      <details><summary data-faq3-q>When will it launch?</summary><p data-faq3-a>We'll email waitlist and backers first, with a date, the moment it's ready.</p></details>
+    </section>
+
+    <footer>
+      <span data-footer>© <span id="year"></span> IdeaName · Validating before building.</span>
+    </footer>
+  </div>
+
+  <!-- THANK YOU -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="card">
+      <div class="ok">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3 style="font-size:20px" data-thanks-title>You're on the list.</h3>
+      <p style="color:var(--fg-muted);margin-top:8px" data-thanks-body>We'll email you the moment it's ready. Want in early?</p>
+      <button class="btn btn-primary mt" id="overlay-presell" style="width:100%" data-thanks-cta>Reserve the founder price →</button>
+      <button class="btn btn-ghost mt" id="overlay-close" style="width:100%">No thanks</button>
+    </div>
+  </div>
+
+  <script>
+  // ========================= CONFIG (edit this per idea) =========================
+  const CONFIG = {
+    brand:        ['Idea', 'Name'],          // ['Property','Check'] — 2nd part accent-colored
+    accent:       '#2563eb',                 // recolor the whole page
+    eyebrow:      'Coming soon',
+    headline:     'The',                     // plain part of the H1
+    headlineHl:   'one line',                // accent-colored part
+    headlineTail: 'promise of your idea.',   // rest of the H1
+    sub:          "One sentence: who it's for and the outcome they get. Concrete, not clever.",
+    cta:          'Join the waitlist',
+    microcopy:    'No spam. One email when it’s ready. Unsubscribe anytime.',
+
+    problems: [
+      'Pain point #1 they feel today.',
+      'Pain point #2 — the expensive or annoying part.',
+      'Why the current workaround is worse.',
+    ],
+    features: [
+      ['Benefit 1', 'Outcome, not feature.'],
+      ['Benefit 2', 'Outcome, not feature.'],
+      ['Benefit 3', 'Outcome, not feature.'],
+    ],
+
+    // Pre-sell (the strong demand signal). Leave PRESELL_URL empty to hide the section.
+    presellEyebrow: 'Founder price',
+    price:          '$X',
+    priceNote:      'one-time · fully refundable',
+    presellCopy:    "Back it now to lock the founder price and get early access. If we don’t ship, you’re refunded — no questions.",
+    presellCta:     'Reserve my spot',
+    presellMicro:   'Secure checkout via Stripe. Cancel/refund anytime before launch.',
+
+    faq: [
+      ['Is this a real product?', "It’s in the making. This page exists to gauge real interest before we build — so we build the right thing."],
+      ['What if I pre-order and you don’t ship?', 'You get a full refund. We only keep your money if we deliver.'],
+      ['When will it launch?', "We’ll email waitlist and backers first, with a date, the moment it’s ready."],
+    ],
+
+    thanksTitle: "You’re on the list.",
+    thanksBody:  "We’ll email you the moment it’s ready. Want in early?",
+    thanksCta:   'Reserve the founder price →',
+
+    // ---- Wiring (two free services) ----
+    FORM_ENDPOINT: '',   // e.g. 'https://formspree.io/f/xxxx' — receives {email}. Empty = mailto fallback.
+    FALLBACK_EMAIL: 'you@example.com', // used only if FORM_ENDPOINT is empty
+    PRESELL_URL:   '',   // e.g. Stripe Payment Link 'https://buy.stripe.com/xxxx'. Empty = hide pre-sell.
+  };
+  // ==============================================================================
+
+  const $ = (s) => document.querySelector(s);
+  const set = (sel, val) => { const el = $(sel); if (el) el.textContent = val; };
+
+  // Apply config
+  document.documentElement.style.setProperty('--accent', CONFIG.accent);
+  document.title = CONFIG.brand.join('') + ' — validating';
+  const brandEl = $('[data-brand]'); brandEl.innerHTML = CONFIG.brand[0] + '<span>' + CONFIG.brand[1] + '</span>';
+  set('[data-eyebrow]', CONFIG.eyebrow);
+  $('[data-headline]').innerHTML = CONFIG.headline + ' <span class="hl">' + CONFIG.headlineHl + '</span> ' + CONFIG.headlineTail;
+  set('[data-sub]', CONFIG.sub);
+  set('[data-cta]', CONFIG.cta);
+  set('[data-microcopy]', CONFIG.microcopy);
+  $('[data-problems]').innerHTML = CONFIG.problems.map(p => '<li><span class="check">✓</span> ' + p + '</li>').join('');
+  $('[data-features]').innerHTML = CONFIG.features.map(([h,p]) => '<div class="card"><h3>' + h + '</h3><p>' + p + '</p></div>').join('');
+  set('[data-presell-eyebrow]', CONFIG.presellEyebrow);
+  set('[data-price]', CONFIG.price);
+  set('[data-price-note]', CONFIG.priceNote);
+  set('[data-presell-copy]', CONFIG.presellCopy);
+  set('[data-presell-cta]', CONFIG.presellCta);
+  set('[data-presell-micro]', CONFIG.presellMicro);
+  const faqEls = [['[data-faq1-q]','[data-faq1-a]'],['[data-faq2-q]','[data-faq2-a]'],['[data-faq3-q]','[data-faq3-a]']];
+  CONFIG.faq.forEach(([q,a], i) => { if (faqEls[i]) { set(faqEls[i][0], q); set(faqEls[i][1], a); } });
+  set('[data-thanks-title]', CONFIG.thanksTitle);
+  set('[data-thanks-body]', CONFIG.thanksBody);
+  set('[data-thanks-cta]', CONFIG.thanksCta);
+  $('#year').textContent = new Date().getFullYear();
+
+  // Pre-sell wiring (hide if no URL)
+  const presellSection = $('#presell-section');
+  function goPresell() { if (CONFIG.PRESELL_URL) window.location.href = CONFIG.PRESELL_URL; }
+  if (CONFIG.PRESELL_URL) {
+    $('#presell').addEventListener('click', goPresell);
+    $('#overlay-presell').addEventListener('click', goPresell);
+  } else {
+    presellSection.classList.add('hidden');
+    $('#overlay-presell').classList.add('hidden');
+  }
+
+  // Waitlist submit
+  const overlay = $('#overlay');
+  $('#overlay-close').addEventListener('click', () => overlay.classList.remove('show'));
+  $('#waitlist').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = new FormData(e.target).get('email');
+    if (!email || !/.+@.+\..+/.test(email)) return;
+    const btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = '…';
+    try {
+      if (CONFIG.FORM_ENDPOINT) {
+        await fetch(CONFIG.FORM_ENDPOINT, {
+          method: 'POST', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, source: location.href }),
+        });
+      } else {
+        window.location.href = 'mailto:' + CONFIG.FALLBACK_EMAIL + '?subject=Waitlist&body=' + encodeURIComponent(email);
+      }
+    } catch (_) { /* still show thanks — signal captured client-side if you add analytics */ }
+    btn.disabled = false; btn.textContent = CONFIG.cta;
+    e.target.reset();
+    overlay.classList.add('show');
+  });
+  </script>
+</body>
+</html>
