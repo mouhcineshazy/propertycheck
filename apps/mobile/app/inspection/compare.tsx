@@ -26,6 +26,7 @@ import { ComparisonReport, UpgradeModal } from '../../components';
 import { fetchComparisonData, getPhotoUrl, checkBundleAccess } from '../../lib';
 import type { InspectionWithPhotos } from '../../lib';
 import { useTranslation } from '../../contexts';
+import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
 
 /**
  * Generate PDF filename from address: {streetNumber}-{streetName}-report.pdf
@@ -58,6 +59,8 @@ function generatePdfFilename(address: string): string {
 export default function ComparisonScreen() {
   const router = useRouter();
   const { t, locale } = useTranslation();
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -162,7 +165,7 @@ export default function ComparisonScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={th.semantic.primary} />
         <Text style={styles.loadingText}>{t('common.loading')}</Text>
       </View>
     );
@@ -171,7 +174,7 @@ export default function ComparisonScreen() {
   if (!comparisonData) {
     return (
       <View style={styles.centered}>
-        <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
+        <Ionicons name="alert-circle-outline" size={48} color={th.semantic.danger} />
         <Text style={styles.errorText}>{t('errors.generic')}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={() => router.back()}>
           <Text style={styles.retryText}>{t('common.back')}</Text>
@@ -185,7 +188,7 @@ export default function ComparisonScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#0B1524" />
+          <Ionicons name="arrow-back" size={24} color={th.semantic.fg} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('inspection.compare.title')}</Text>
         <View style={styles.headerActions}>
@@ -195,9 +198,9 @@ export default function ComparisonScreen() {
             disabled={isGeneratingPdf}
           >
             {isGeneratingPdf ? (
-              <ActivityIndicator size="small" color="#2563eb" />
+              <ActivityIndicator size="small" color={th.semantic.primary} />
             ) : (
-              <Ionicons name="download-outline" size={22} color="#2563eb" />
+              <Ionicons name="download-outline" size={22} color={th.semantic.primary} />
             )}
           </TouchableOpacity>
         </View>
@@ -831,33 +834,33 @@ function generateComparisonHtml(
   `;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (th: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
     padding: 24,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   errorText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   retryButton: {
     marginTop: 20,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     borderRadius: 8,
   },
   retryText: {
@@ -872,9 +875,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6E9EF',
+    borderBottomColor: th.semantic.line,
   },
   backButton: {
     width: 40,
@@ -885,7 +888,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   headerActions: {
     flexDirection: 'row',

@@ -26,7 +26,7 @@ import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { createProperty } from '../../lib';
 import { useTranslation } from '../../contexts';
-import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
+import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
 const PROPERTY_TYPES = [
   { value: 'apartment', icon: 'business-outline' },
@@ -82,6 +82,8 @@ export default function NewPropertyScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { semantic } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [address, setAddress] = useState('');
   const [propertyType, setPropertyType] = useState<string>('apartment');
   const [notes, setNotes] = useState('');
@@ -197,7 +199,8 @@ export default function NewPropertyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ semantic, shadows }: AppTheme) =>
+  StyleSheet.create({
   container: { flex: 1, backgroundColor: semantic.canvas },
   header: {
     flexDirection: 'row',
@@ -249,7 +252,7 @@ const styles = StyleSheet.create({
     backgroundColor: semantic.card,
   },
   typeButtonActive: {
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     borderColor: semantic.primary,
   },
   typeButtonText: { fontSize: 13, fontWeight: '600', color: semantic.fgMuted },

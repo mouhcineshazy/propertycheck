@@ -23,7 +23,7 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import { loginSchema, formatZodError, APP_CONFIG } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { useTranslation } from '../../contexts';
-import { semantic, spacing, radius, shadows } from '../../lib/theme';
+import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -55,6 +55,8 @@ async function loginAction(
 
 export default function LoginScreen() {
   const { t } = useTranslation();
+  const { semantic } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -196,7 +198,8 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ semantic, shadows }: AppTheme) =>
+  StyleSheet.create({
   container: { flex: 1, backgroundColor: semantic.canvas },
   content: { flex: 1, padding: spacing.lg, justifyContent: 'center' },
   header: { alignItems: 'center', marginBottom: spacing.xl },

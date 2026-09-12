@@ -23,7 +23,7 @@ import { z } from 'zod';
 import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { useTranslation } from '../../contexts';
-import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
+import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -63,6 +63,8 @@ export default function ForgotPasswordScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { semantic } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [email, setEmail] = useState('');
   const [state, dispatch, isPending] = useActionState(forgotPasswordAction, initialState);
 
@@ -127,7 +129,8 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ semantic, shadows }: AppTheme) =>
+  StyleSheet.create({
   container: { flex: 1, backgroundColor: semantic.canvas },
   content: { flex: 1, padding: spacing.lg },
   backButton: { marginBottom: spacing.lg, width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: radius.xl,
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,

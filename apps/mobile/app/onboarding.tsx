@@ -20,12 +20,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { getMobileSupabaseClient } from '../lib/supabase';
 import { getProvinceOptions, getProvince, APP_CONFIG } from '@propertycheck/shared';
 import { useAuth } from '../hooks';
+import { useTheme, useThemedStyles, type AppTheme } from '../lib/theme';
 
 const provinces = getProvinceOptions();
 
 export default function OnboardingScreen() {
   const router = useRouter();
   const { user } = useAuth();
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -97,7 +100,7 @@ export default function OnboardingScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Ionicons name="location-outline" size={32} color="#2563eb" />
+            <Ionicons name="location-outline" size={32} color={th.semantic.primary} />
           </View>
           <Text style={styles.title}>Where are you renting?</Text>
           <Text style={styles.subtitle}>
@@ -126,7 +129,7 @@ export default function OnboardingScreen() {
                 {province.label}
               </Text>
               {selectedProvince === province.value && (
-                <Ionicons name="checkmark-circle" size={20} color="#2563eb" />
+                <Ionicons name="checkmark-circle" size={20} color={th.semantic.primary} />
               )}
             </TouchableOpacity>
           ))}
@@ -142,7 +145,7 @@ export default function OnboardingScreen() {
               {selectedProvinceData.inspectionRequirements}
             </Text>
             <View style={styles.infoBadge}>
-              <Ionicons name="shield-checkmark-outline" size={14} color="#0C5F46" />
+              <Ionicons name="shield-checkmark-outline" size={14} color={th.semantic.verified} />
               <Text style={styles.infoBadgeText}>
                 Disputes resolved via {selectedProvinceData.disputeBody}
               </Text>
@@ -163,11 +166,11 @@ export default function OnboardingScreen() {
           disabled={!selectedProvince || isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
             <>
               <Text style={styles.continueButtonText}>Continue</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
+              <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
             </>
           )}
         </TouchableOpacity>
@@ -184,10 +187,10 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (th: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
   },
   content: {
     flex: 1,
@@ -202,7 +205,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#eff6ff',
+    backgroundColor: th.semantic.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -210,13 +213,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#0B1524',
+    color: th.semantic.fg,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 16,
@@ -228,27 +231,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F7F8FA',
+    backgroundColor: th.semantic.cardMuted,
     borderWidth: 2,
-    borderColor: '#E6E9EF',
+    borderColor: th.semantic.line,
     borderRadius: 12,
     padding: 16,
   },
   provinceCardSelected: {
-    backgroundColor: '#eff6ff',
-    borderColor: '#2563eb',
+    backgroundColor: th.semantic.primarySoft,
+    borderColor: th.semantic.primary,
   },
   provinceText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#2C3B52',
+    color: th.semantic.fg,
   },
   provinceTextSelected: {
-    color: '#0B1524',
+    color: th.semantic.fg,
     fontWeight: '600',
   },
   infoCard: {
-    backgroundColor: '#E9F7F1',
+    backgroundColor: th.semantic.verifiedSoft,
     borderRadius: 12,
     padding: 16,
     marginTop: 24,
@@ -256,12 +259,12 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#0C5F46',
+    color: th.semantic.verified,
     marginBottom: 6,
   },
   infoText: {
     fontSize: 14,
-    color: '#0C5F46',
+    color: th.semantic.verified,
     lineHeight: 20,
     marginBottom: 12,
   },
@@ -272,14 +275,14 @@ const styles = StyleSheet.create({
   },
   infoBadgeText: {
     fontSize: 12,
-    color: '#0C5F46',
+    color: th.semantic.verified,
     fontWeight: '500',
   },
   spacer: {
     flex: 1,
   },
   continueButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -301,7 +304,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   skipButtonText: {
-    color: '#63748D',
+    color: th.semantic.fgSubtle,
     fontSize: 15,
     fontWeight: '500',
   },

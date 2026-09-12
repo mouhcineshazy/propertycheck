@@ -27,6 +27,7 @@ import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 import { useI18n, type Locale } from '../../contexts';
+import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
 
 // Get province options for dropdown
 const PROVINCE_OPTIONS = getProvinceOptions();
@@ -36,6 +37,8 @@ export default function SettingsScreen() {
   const { user: authUser, signOut } = useAuth();
   // i18n hook for translations and language switching
   const { t, locale, setLocale, locales, localeNames } = useI18n();
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
 
   // User profile and subscription state
   const [user, setUser] = useState<User | null>(null);
@@ -194,7 +197,7 @@ export default function SettingsScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={th.semantic.primary} />
       </View>
     );
   }
@@ -242,9 +245,9 @@ export default function SettingsScreen() {
               </Text>
             </View>
             {isSavingProvince ? (
-              <ActivityIndicator size="small" color="#2563eb" />
+              <ActivityIndicator size="small" color={th.semantic.primary} />
             ) : (
-              <Ionicons name="chevron-forward" size={20} color="#8695AB" />
+              <Ionicons name="chevron-forward" size={20} color={th.semantic.fgSubtle} />
             )}
           </TouchableOpacity>
         </View>
@@ -266,7 +269,7 @@ export default function SettingsScreen() {
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>{t('settings.account.selectProvince')}</Text>
               <TouchableOpacity onPress={() => setShowProvincePicker(false)}>
-                <Ionicons name="close" size={24} color="#45566E" />
+                <Ionicons name="close" size={24} color={th.semantic.fgMuted} />
               </TouchableOpacity>
             </View>
             <Text style={styles.pickerSubtitle}>
@@ -290,7 +293,7 @@ export default function SettingsScreen() {
                   {option.label}
                 </Text>
                 {user?.province === option.value && (
-                  <Ionicons name="checkmark" size={20} color="#2563eb" />
+                  <Ionicons name="checkmark" size={20} color={th.semantic.primary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -329,7 +332,7 @@ export default function SettingsScreen() {
 
           {!isPremium ? (
             <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade}>
-              <Ionicons name="star" size={18} color="#fff" />
+              <Ionicons name="star" size={18} color="#FFFFFF" />
               <Text style={styles.upgradeButtonText}>
                 {t('settings.subscription.upgradeButton')}
               </Text>
@@ -341,10 +344,10 @@ export default function SettingsScreen() {
               disabled={isManagingSubscription}
             >
               {isManagingSubscription ? (
-                <ActivityIndicator size="small" color="#2563eb" />
+                <ActivityIndicator size="small" color={th.semantic.primary} />
               ) : (
                 <>
-                  <Ionicons name="settings-outline" size={18} color="#2563eb" />
+                  <Ionicons name="settings-outline" size={18} color={th.semantic.primary} />
                   <Text style={styles.manageButtonText}>{t('settings.subscription.manageButton')}</Text>
                 </>
               )}
@@ -387,10 +390,10 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/terms`)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="document-text-outline" size={20} color="#45566E" />
+              <Ionicons name="document-text-outline" size={20} color={th.semantic.fgMuted} />
               <Text style={styles.legalRowText}>{t('settings.legal.termsOfService')}</Text>
             </View>
-            <Ionicons name="open-outline" size={18} color="#8695AB" />
+            <Ionicons name="open-outline" size={18} color={th.semantic.fgSubtle} />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity
@@ -398,10 +401,10 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/privacy`)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#45566E" />
+              <Ionicons name="shield-checkmark-outline" size={20} color={th.semantic.fgMuted} />
               <Text style={styles.legalRowText}>{t('settings.legal.privacyPolicy')}</Text>
             </View>
-            <Ionicons name="open-outline" size={18} color="#8695AB" />
+            <Ionicons name="open-outline" size={18} color={th.semantic.fgSubtle} />
           </TouchableOpacity>
           <View style={styles.divider} />
           <TouchableOpacity
@@ -409,10 +412,10 @@ export default function SettingsScreen() {
             onPress={() => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}/${locale}/cookies`)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="finger-print-outline" size={20} color="#45566E" />
+              <Ionicons name="finger-print-outline" size={20} color={th.semantic.fgMuted} />
               <Text style={styles.legalRowText}>{t('settings.legal.cookiePolicy')}</Text>
             </View>
-            <Ionicons name="open-outline" size={18} color="#8695AB" />
+            <Ionicons name="open-outline" size={18} color={th.semantic.fgSubtle} />
           </TouchableOpacity>
         </View>
       </View>
@@ -426,13 +429,13 @@ export default function SettingsScreen() {
             onPress={() => setShowLanguagePicker(true)}
           >
             <View style={styles.legalRowContent}>
-              <Ionicons name="language-outline" size={20} color="#45566E" />
+              <Ionicons name="language-outline" size={20} color={th.semantic.fgMuted} />
               <View>
                 <Text style={styles.legalRowText}>{t('settings.language.title')}</Text>
                 <Text style={styles.infoLabel}>{localeNames[locale]}</Text>
               </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8695AB" />
+            <Ionicons name="chevron-forward" size={20} color={th.semantic.fgSubtle} />
           </TouchableOpacity>
         </View>
       </View>
@@ -453,7 +456,7 @@ export default function SettingsScreen() {
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>{t('settings.language.selectLanguage')}</Text>
               <TouchableOpacity onPress={() => setShowLanguagePicker(false)}>
-                <Ionicons name="close" size={24} color="#45566E" />
+                <Ionicons name="close" size={24} color={th.semantic.fgMuted} />
               </TouchableOpacity>
             </View>
             {locales.map((loc) => (
@@ -479,7 +482,7 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 {locale === loc && (
-                  <Ionicons name="checkmark" size={20} color="#2563eb" />
+                  <Ionicons name="checkmark" size={20} color={th.semantic.primary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -489,7 +492,7 @@ export default function SettingsScreen() {
 
       {/* Logout Button */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={20} color="#ef4444" />
+        <Ionicons name="log-out-outline" size={20} color={th.semantic.danger} />
         <Text style={styles.logoutText}>{t('settings.signOut.button')}</Text>
       </TouchableOpacity>
 
@@ -506,10 +509,10 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (th: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
   },
   centered: {
     flex: 1,
@@ -523,13 +526,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     textTransform: 'uppercase',
     marginBottom: 8,
     marginLeft: 4,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderRadius: 12,
     padding: 16,
   },
@@ -541,7 +544,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -557,11 +560,11 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   profileEmail: {
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginTop: 2,
   },
   subscriptionRow: {
@@ -572,32 +575,32 @@ const styles = StyleSheet.create({
   planName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   planDescription: {
     fontSize: 13,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginTop: 2,
   },
   statusBadge: {
-    backgroundColor: '#E6E9EF',
+    backgroundColor: th.semantic.line,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   statusBadgePremium: {
-    backgroundColor: '#E9F7F1',
+    backgroundColor: th.semantic.verifiedSoft,
   },
   statusBadgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   statusBadgeTextPremium: {
-    color: '#0C5F46',
+    color: th.semantic.verified,
   },
   upgradeButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -612,7 +615,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   manageButton: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: th.semantic.primarySoft,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -622,13 +625,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   manageButtonText: {
-    color: '#2563eb',
+    color: th.semantic.primary,
     fontSize: 15,
     fontWeight: '600',
   },
   renewalInfo: {
     fontSize: 13,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     textAlign: 'center',
     marginTop: 12,
   },
@@ -640,15 +643,15 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 15,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   infoValue: {
     fontSize: 15,
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   divider: {
     height: 1,
-    backgroundColor: '#E6E9EF',
+    backgroundColor: th.semantic.line,
     marginVertical: 8,
   },
   logoutButton: {
@@ -657,14 +660,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 16,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderRadius: 12,
     gap: 8,
   },
   logoutText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#ef4444',
+    color: th.semantic.danger,
   },
   bottomPadding: {
     height: 40,
@@ -682,7 +685,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pickerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderRadius: 16,
     width: '90%',
     maxWidth: 340,
@@ -698,11 +701,11 @@ const styles = StyleSheet.create({
   pickerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   pickerSubtitle: {
     fontSize: 13,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
@@ -712,17 +715,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#E6E9EF',
+    borderTopColor: th.semantic.line,
   },
   pickerOptionSelected: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: th.semantic.primarySoft,
   },
   pickerOptionText: {
     fontSize: 16,
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   pickerOptionTextSelected: {
-    color: '#2563eb',
+    color: th.semantic.primary,
     fontWeight: '500',
   },
   legalRow: {
@@ -738,7 +741,7 @@ const styles = StyleSheet.create({
   },
   legalRowText: {
     fontSize: 15,
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   languageOption: {
     flexDirection: 'row',

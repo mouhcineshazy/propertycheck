@@ -30,7 +30,7 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import { registerSchema, formatZodError, APP_CONFIG, getProvinceOptions } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
 import { useTranslation } from '../../contexts';
-import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
+import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
 // Get province options for the dropdown
 const PROVINCE_OPTIONS = getProvinceOptions();
@@ -114,6 +114,8 @@ async function registerAction(
 export default function RegisterScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { semantic } = useTheme();
+  const styles = useThemedStyles(makeStyles);
 
   // Form state
   const [fullName, setFullName] = useState('');
@@ -397,7 +399,8 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ semantic, shadows }: AppTheme) =>
+  StyleSheet.create({
   container: { flex: 1, backgroundColor: semantic.canvas },
   content: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center' },
   header: { alignItems: 'center', marginBottom: spacing.lg },
@@ -493,7 +496,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: semantic.line,
   },
-  pickerOptionSelected: { backgroundColor: colors.primary[50] },
+  pickerOptionSelected: { backgroundColor: semantic.primarySoft },
   pickerOptionText: { fontSize: 16, color: semantic.fg },
   pickerOptionTextSelected: { color: semantic.primary, fontWeight: '600' },
 });

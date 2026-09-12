@@ -5,9 +5,10 @@
  */
 
 import { Stack } from 'expo-router';
-import { semantic } from '../../lib/theme';
+import { useTheme } from '../../lib/theme';
 
 export default function AuthLayout() {
+  const { semantic } = useTheme();
   return (
     <Stack
       screenOptions={{

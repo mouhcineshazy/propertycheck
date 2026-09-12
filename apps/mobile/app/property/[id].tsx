@@ -38,12 +38,14 @@ import {
 import type { PropertyWithInspections } from '../../lib';
 import { UpgradeModal } from '../../components';
 import { useTranslation } from '../../contexts';
-import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
+import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
 export default function PropertyDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { t, locale } = useTranslation();
+  const { semantic } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [property, setProperty] = useState<PropertyWithInspections | null>(null);
@@ -356,7 +358,8 @@ export default function PropertyDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ semantic, shadows }: AppTheme) =>
+  StyleSheet.create({
   container: { flex: 1, backgroundColor: semantic.canvas },
   centered: {
     flex: 1,
@@ -408,7 +411,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: radius.md,
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -493,11 +496,11 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: radius.sm,
   },
-  statusBadgeCompleted: { backgroundColor: colors.verified[50] },
-  statusBadgeProgress: { backgroundColor: colors.amber[50] },
+  statusBadgeCompleted: { backgroundColor: semantic.verifiedSoft },
+  statusBadgeProgress: { backgroundColor: semantic.warningSoft },
   statusBadgeText: { fontSize: 11, fontWeight: '600' },
-  statusTextCompleted: { color: colors.verified[600] },
-  statusTextProgress: { color: colors.amber[700] },
+  statusTextCompleted: { color: semantic.verified },
+  statusTextProgress: { color: semantic.warning },
   emptyInspections: {
     backgroundColor: semantic.card,
     borderRadius: radius.lg,
@@ -510,7 +513,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: radius.lg,
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
@@ -526,24 +529,24 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: radius.xl,
-    backgroundColor: colors.red[50],
+    backgroundColor: semantic.dangerSoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
   errorText: { fontSize: 15, color: semantic.fgMuted, marginTop: 4 },
   bundleUpsellCard: {
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     borderWidth: 1,
-    borderColor: colors.primary[100],
+    borderColor: semantic.line,
     borderRadius: radius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
   },
   bundleActiveCard: {
-    backgroundColor: colors.verified[50],
+    backgroundColor: semantic.verifiedSoft,
     borderWidth: 1,
-    borderColor: colors.verified[100],
+    borderColor: semantic.line,
     borderRadius: radius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -554,8 +557,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginBottom: 6,
   },
-  bundleTitle: { fontSize: 15, fontWeight: '700', color: colors.primary[800] },
-  bundleTitleGreen: { fontSize: 15, fontWeight: '700', color: colors.verified[600] },
+  bundleTitle: { fontSize: 15, fontWeight: '700', color: semantic.primary },
+  bundleTitleGreen: { fontSize: 15, fontWeight: '700', color: semantic.verified },
   bundleDesc: {
     fontSize: 13,
     color: semantic.fgMuted,
@@ -596,7 +599,7 @@ const styles = StyleSheet.create({
   startButtonText: { color: semantic.primaryContrast, fontSize: 16, fontWeight: '600' },
   startButtonWarning: { backgroundColor: semantic.warning },
   compareButton: {
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

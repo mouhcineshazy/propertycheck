@@ -1,13 +1,18 @@
 /**
  * PropertyCheck — "Trust Ink" theme (mobile).
  *
- * Single source of truth for colors, spacing, radius, typography, and shadows.
- * Kept in sync with the web Tailwind config (apps/web/tailwind.config.ts).
- * Never hardcode a hex value in a screen — reference these tokens.
+ * Single source of truth for colors, spacing, radius, typography, shadows, and
+ * the light/dark semantic palettes. Dark mode follows the system appearance by
+ * default via `useColorScheme()` (see ThemeProvider / useTheme in theme.tsx).
+ *
+ * Never hardcode a hex value in a screen — reference the theme from
+ * `useTheme()` / `useThemedStyles()` so it adapts to light and dark.
  */
 
+import { createContext, createElement, useContext, useMemo, type ReactNode } from 'react';
+import { useColorScheme } from 'react-native';
+
 export const colors = {
-  // Ink — cool navy-tinted neutral ramp
   ink: {
     50: '#F2F4F8',
     100: '#E6E9EF',
@@ -21,7 +26,6 @@ export const colors = {
     900: '#0F1B2D',
     950: '#0B1524',
   },
-  // Primary — brand blue (trust, security)
   primary: {
     50: '#EFF6FF',
     100: '#DBEAFE',
@@ -34,7 +38,6 @@ export const colors = {
     800: '#1E40AF',
     900: '#1E3A8A',
   },
-  // Verified — "documented / protected" success signal
   verified: {
     50: '#E9F7F1',
     100: '#C9EFDF',
@@ -60,25 +63,71 @@ export const colors = {
   black: '#000000',
 } as const;
 
-/**
- * Semantic aliases — use these in screens. If a dark theme is added later,
- * only this object needs to switch.
- */
-export const semantic = {
-  canvas: '#F2F4F8', // page background
-  card: '#FFFFFF', // card surface
-  cardMuted: '#F7F8FA', // recessed surface
-  fg: colors.ink[950], // primary text
-  fgMuted: colors.ink[600], // secondary text
-  fgSubtle: colors.ink[400], // tertiary text / placeholder
-  line: colors.ink[100], // hairline border
-  lineStrong: colors.ink[200], // stronger border
+export type Semantic = {
+  canvas: string;
+  card: string;
+  cardMuted: string;
+  fg: string;
+  fgMuted: string;
+  fgSubtle: string;
+  line: string;
+  lineStrong: string;
+  primary: string;
+  primaryContrast: string;
+  primarySoft: string; // tinted primary surface (chips, icon backgrounds)
+  verified: string;
+  verifiedSoft: string;
+  danger: string;
+  dangerSoft: string;
+  warning: string;
+  warningSoft: string;
+  overlay: string; // modal scrim
+};
+
+export const lightSemantic: Semantic = {
+  canvas: '#F2F4F8',
+  card: '#FFFFFF',
+  cardMuted: '#F7F8FA',
+  fg: colors.ink[950],
+  fgMuted: colors.ink[600],
+  fgSubtle: colors.ink[400],
+  line: colors.ink[100],
+  lineStrong: colors.ink[200],
   primary: colors.primary[600],
   primaryContrast: '#FFFFFF',
+  primarySoft: colors.primary[50],
   verified: colors.verified[500],
+  verifiedSoft: colors.verified[50],
   danger: colors.red[600],
+  dangerSoft: colors.red[50],
   warning: colors.amber[500],
-} as const;
+  warningSoft: colors.amber[50],
+  overlay: 'rgba(11, 21, 36, 0.5)',
+};
+
+export const darkSemantic: Semantic = {
+  canvas: colors.ink[950],
+  card: colors.ink[900],
+  cardMuted: colors.ink[800],
+  fg: '#F2F4F8',
+  fgMuted: colors.ink[300],
+  fgSubtle: colors.ink[500],
+  line: '#1E2B3E',
+  lineStrong: colors.ink[700],
+  primary: colors.primary[500],
+  primaryContrast: '#FFFFFF',
+  primarySoft: 'rgba(59, 130, 246, 0.15)',
+  verified: '#2FB981',
+  verifiedSoft: 'rgba(47, 185, 129, 0.15)',
+  danger: colors.red[500],
+  dangerSoft: 'rgba(239, 68, 68, 0.15)',
+  warning: colors.amber[500],
+  warningSoft: 'rgba(245, 158, 11, 0.15)',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+};
+
+/** Back-compat default (light) — prefer useTheme()/useThemedStyles in screens. */
+export const semantic = lightSemantic;
 
 export const spacing = {
   xs: 4,
@@ -114,41 +163,102 @@ export const typography = {
   },
 } as const;
 
+const makeShadows = (shadowColor: string) =>
+  ({
+    xs: { shadowColor, shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
+    sm: { shadowColor, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 6, elevation: 2 },
+    md: { shadowColor, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 5 },
+    primary: {
+      shadowColor: colors.primary[600],
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.32,
+      shadowRadius: 14,
+      elevation: 8,
+    },
+  }) as const;
+
+export const lightShadows = makeShadows(colors.ink[950]);
+export const darkShadows = makeShadows('#000000');
+
+/** Back-compat default (light). */
+export const shadows = lightShadows;
+
+export type ThemeMode = 'light' | 'dark';
+
+export type AppTheme = {
+  mode: ThemeMode;
+  colors: typeof colors;
+  semantic: Semantic;
+  spacing: typeof spacing;
+  radius: typeof radius;
+  typography: typeof typography;
+  shadows: typeof lightShadows;
+};
+
+export const lightTheme: AppTheme = {
+  mode: 'light',
+  colors,
+  semantic: lightSemantic,
+  spacing,
+  radius,
+  typography,
+  shadows: lightShadows,
+};
+
+export const darkTheme: AppTheme = {
+  mode: 'dark',
+  colors,
+  semantic: darkSemantic,
+  spacing,
+  radius,
+  typography,
+  shadows: darkShadows,
+};
+
+export const theme = lightTheme;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme context — system-driven light/dark with a manual override option.
+// (No JSX so this stays a .ts module; screens import tokens + hooks from here.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type ThemeContextValue = AppTheme & { override: ThemeMode | null };
+
+const ThemeContext = createContext<ThemeContextValue>({ ...lightTheme, override: null });
+
 /**
- * Cross-platform elevation. Spread into a style object.
- * iOS reads shadow*, Android reads elevation.
+ * Provides the active theme. Follows the OS appearance by default; pass
+ * `override` to force a mode (e.g. from a future in-app setting).
  */
-export const shadows = {
-  xs: {
-    shadowColor: colors.ink[950],
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  sm: {
-    shadowColor: colors.ink[950],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: colors.ink[950],
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 5,
-  },
-  primary: {
-    shadowColor: colors.primary[600],
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.32,
-    shadowRadius: 14,
-    elevation: 8,
-  },
-} as const;
+export function ThemeProvider({
+  children,
+  override = null,
+}: {
+  children: ReactNode;
+  override?: ThemeMode | null;
+}) {
+  const scheme = useColorScheme();
+  const value = useMemo<ThemeContextValue>(() => {
+    const mode: ThemeMode = override ?? (scheme === 'dark' ? 'dark' : 'light');
+    const base = mode === 'dark' ? darkTheme : lightTheme;
+    return { ...base, override };
+  }, [scheme, override]);
 
-export const theme = { colors, semantic, spacing, radius, typography, shadows } as const;
+  return createElement(ThemeContext.Provider, { value }, children);
+}
 
-export type Theme = typeof theme;
+/** Access the active theme (mode, semantic palette, tokens). */
+export function useTheme(): AppTheme {
+  return useContext(ThemeContext);
+}
+
+/**
+ * Build a StyleSheet from the active theme, memoized per theme.
+ *
+ *   const makeStyles = (t: AppTheme) => StyleSheet.create({ ... t.semantic.fg ... });
+ *   const styles = useThemedStyles(makeStyles);
+ */
+export function useThemedStyles<T>(factory: (t: AppTheme) => T): T {
+  const t = useTheme();
+  return useMemo(() => factory(t), [t, factory]);
+}

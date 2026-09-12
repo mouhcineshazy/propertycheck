@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { RoomType, InspectionPhoto } from '@propertycheck/database';
 import { getPhotoUrl } from '../lib';
+import { useTheme, useThemedStyles, type AppTheme } from '../lib/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const PHOTO_WIDTH = (SCREEN_WIDTH - 48) / 2; // Account for padding and gap
@@ -59,6 +60,8 @@ function ComparisonPhoto({
   date: string;
   onPress?: () => void;
 }) {
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -66,7 +69,7 @@ function ComparisonPhoto({
     return (
       <View style={styles.photoContainer}>
         <View style={styles.emptyPhoto}>
-          <Ionicons name="image-outline" size={32} color="#AEB9C9" />
+          <Ionicons name="image-outline" size={32} color={th.semantic.fgSubtle} />
           <Text style={styles.emptyText}>No photo</Text>
         </View>
         <View style={styles.photoLabel}>
@@ -87,12 +90,12 @@ function ComparisonPhoto({
     >
       {isLoading && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="small" color="#2563eb" />
+          <ActivityIndicator size="small" color={th.semantic.primary} />
         </View>
       )}
       {hasError && (
         <View style={styles.errorOverlay}>
-          <Ionicons name="alert-circle-outline" size={24} color="#ef4444" />
+          <Ionicons name="alert-circle-outline" size={24} color={th.semantic.danger} />
           <Text style={styles.errorText}>Failed to load</Text>
         </View>
       )}
@@ -137,6 +140,8 @@ function RoomSection({
   moveOutDate: string;
   onPhotoPress: (photo: InspectionPhoto) => void;
 }) {
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
   // Get max count to ensure we show all photos
   const maxCount = Math.max(moveInPhotos.length, moveOutPhotos.length);
 
@@ -158,7 +163,7 @@ function RoomSection({
                     : 'grid-outline'
           }
           size={20}
-          color="#2563eb"
+          color={th.semantic.primary}
         />
         <Text style={styles.roomTitle}>{ROOM_TYPE_LABELS[roomType]}</Text>
         <Text style={styles.photoCount}>
@@ -179,7 +184,7 @@ function RoomSection({
             }
           />
           <View style={styles.arrow}>
-            <Ionicons name="arrow-forward" size={16} color="#8695AB" />
+            <Ionicons name="arrow-forward" size={16} color={th.semantic.fgSubtle} />
           </View>
           <ComparisonPhoto
             photo={moveOutPhotos[index] || null}
@@ -199,11 +204,12 @@ function RoomSection({
 
 // Watermark overlay component
 function WatermarkOverlay({ onUpgradePress }: { onUpgradePress?: () => void }) {
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.watermarkContainer} pointerEvents="box-none">
       <View style={styles.watermarkBanner}>
         <View style={styles.watermarkContent}>
-          <Ionicons name="lock-closed" size={20} color="#fff" />
+          <Ionicons name="lock-closed" size={20} color="#FFFFFF" />
           <View style={styles.watermarkText}>
             <Text style={styles.watermarkTitle}>Preview Mode</Text>
             <Text style={styles.watermarkSubtitle}>
@@ -235,6 +241,8 @@ export function ComparisonReport({
   showWatermark,
   onUpgradePress,
 }: ComparisonReportProps) {
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [selectedPhoto, setSelectedPhoto] = useState<InspectionPhoto | null>(null);
 
   // Group photos by room type
@@ -272,7 +280,7 @@ export function ComparisonReport({
         <View style={styles.header}>
           <Text style={styles.title}>Comparison Report</Text>
           <View style={styles.addressContainer}>
-            <Ionicons name="location-outline" size={16} color="#45566E" />
+            <Ionicons name="location-outline" size={16} color={th.semantic.fgMuted} />
             <Text style={styles.address}>{propertyAddress}</Text>
           </View>
         </View>
@@ -280,7 +288,7 @@ export function ComparisonReport({
         {/* Summary */}
         <View style={styles.summary}>
           <View style={styles.summaryItem}>
-            <View style={[styles.summaryDot, { backgroundColor: '#15966E' }]} />
+            <View style={[styles.summaryDot, { backgroundColor: th.semantic.verified }]} />
             <View>
               <Text style={styles.summaryLabel}>Move-in</Text>
               <Text style={styles.summaryDate}>{formattedMoveIn}</Text>
@@ -289,7 +297,7 @@ export function ComparisonReport({
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <View style={[styles.summaryDot, { backgroundColor: '#f59e0b' }]} />
+            <View style={[styles.summaryDot, { backgroundColor: th.semantic.warning }]} />
             <View>
               <Text style={styles.summaryLabel}>Move-out</Text>
               <Text style={styles.summaryDate}>{formattedMoveOut}</Text>
@@ -313,7 +321,7 @@ export function ComparisonReport({
 
         {sortedRooms.length === 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="images-outline" size={48} color="#AEB9C9" />
+            <Ionicons name="images-outline" size={48} color={th.semantic.fgSubtle} />
             <Text style={styles.emptyStateText}>No photos to compare</Text>
           </View>
         )}
@@ -332,7 +340,7 @@ export function ComparisonReport({
               style={styles.modalCloseButton}
               onPress={() => setSelectedPhoto(null)}
             >
-              <Ionicons name="close" size={28} color="#fff" />
+              <Ionicons name="close" size={28} color="#FFFFFF" />
             </TouchableOpacity>
             <Image
               source={{ uri: getPhotoUrl(selectedPhoto.storage_path) }}
@@ -354,24 +362,24 @@ export function ComparisonReport({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (th: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
   },
   scrollView: {
     flex: 1,
   },
   header: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6E9EF',
+    borderBottomColor: th.semantic.line,
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#0B1524',
+    color: th.semantic.fg,
     marginBottom: 8,
   },
   addressContainer: {
@@ -381,11 +389,11 @@ const styles = StyleSheet.create({
   },
   address: {
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     flex: 1,
   },
   summary: {
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     margin: 16,
     borderRadius: 12,
     padding: 16,
@@ -403,24 +411,24 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   summaryDate: {
     fontSize: 12,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   summaryCount: {
     marginLeft: 'auto',
     fontSize: 13,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   summaryDivider: {
     height: 1,
-    backgroundColor: '#E6E9EF',
+    backgroundColor: th.semantic.line,
     marginVertical: 12,
   },
   roomSection: {
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
@@ -431,25 +439,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6E9EF',
+    borderBottomColor: th.semantic.line,
     gap: 8,
   },
   roomTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
     flex: 1,
   },
   photoCount: {
     fontSize: 12,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   comparisonRow: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6E9EF',
+    borderBottomColor: th.semantic.line,
   },
   photoContainer: {
     width: PHOTO_WIDTH,
@@ -458,7 +466,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: PHOTO_WIDTH,
     borderRadius: 8,
-    backgroundColor: '#E6E9EF',
+    backgroundColor: th.semantic.line,
   },
   hiddenPhoto: {
     opacity: 0,
@@ -468,16 +476,16 @@ const styles = StyleSheet.create({
     width: '100%',
     height: PHOTO_WIDTH,
     borderRadius: 8,
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E6E9EF',
+    borderColor: th.semantic.line,
     borderStyle: 'dashed',
   },
   emptyText: {
     fontSize: 11,
-    color: '#8695AB',
+    color: th.semantic.fgSubtle,
     marginTop: 4,
   },
   loadingOverlay: {
@@ -487,7 +495,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: PHOTO_WIDTH,
     borderRadius: 8,
-    backgroundColor: '#E6E9EF',
+    backgroundColor: th.semantic.line,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
@@ -499,14 +507,14 @@ const styles = StyleSheet.create({
     right: 0,
     height: PHOTO_WIDTH,
     borderRadius: 8,
-    backgroundColor: '#fef2f2',
+    backgroundColor: th.semantic.dangerSoft,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
   },
   errorText: {
     fontSize: 11,
-    color: '#ef4444',
+    color: th.semantic.danger,
     marginTop: 4,
   },
   photoLabel: {
@@ -519,15 +527,15 @@ const styles = StyleSheet.create({
   photoLabelText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   photoDate: {
     fontSize: 10,
-    color: '#8695AB',
+    color: th.semantic.fgSubtle,
   },
   caption: {
     fontSize: 11,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginTop: 2,
     paddingHorizontal: 2,
   },
@@ -542,7 +550,7 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginTop: 12,
   },
   bottomPadding: {
@@ -589,7 +597,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   upgradeButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -647,7 +655,7 @@ const styles = StyleSheet.create({
   },
   modalCaption: {
     fontSize: 14,
-    color: '#AEB9C9',
+    color: th.semantic.fgSubtle,
     marginTop: 4,
     textAlign: 'center',
   },

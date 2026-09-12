@@ -30,6 +30,7 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import { createInspection, checkFreeTierLimits } from '../../lib';
 import type { LocalPhoto } from '../../lib';
 import { UpgradeModal } from '../../components';
+import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
 
 // Room types for photo categorization
 const ROOM_TYPES = [
@@ -42,6 +43,8 @@ const ROOM_TYPES = [
 
 export default function NewInspectionScreen() {
   const router = useRouter();
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { propertyId } = useLocalSearchParams<{ propertyId: string }>();
   const cameraRef = useRef<CameraView>(null);
 
@@ -187,7 +190,7 @@ export default function NewInspectionScreen() {
   if (isCheckingLimits) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={th.semantic.primary} />
         <Text style={styles.loadingText}>Checking limits...</Text>
       </View>
     );
@@ -217,7 +220,7 @@ export default function NewInspectionScreen() {
               style={styles.cameraCloseButton}
               onPress={() => setIsCameraActive(false)}
             >
-              <Ionicons name="close" size={28} color="#fff" />
+              <Ionicons name="close" size={28} color="#FFFFFF" />
             </TouchableOpacity>
 
             <View style={styles.cameraControls}>
@@ -241,14 +244,14 @@ export default function NewInspectionScreen() {
             onPress={() => setSelectedPhotoIndex(null)}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color="#0B1524" />
+            <Ionicons name="arrow-back" size={24} color={th.semantic.fg} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Photo</Text>
           <TouchableOpacity
             onPress={() => removePhoto(selectedPhotoIndex)}
             style={styles.deleteButton}
           >
-            <Ionicons name="trash-outline" size={22} color="#ef4444" />
+            <Ionicons name="trash-outline" size={22} color={th.semantic.danger} />
           </TouchableOpacity>
         </View>
 
@@ -287,7 +290,7 @@ export default function NewInspectionScreen() {
             <TextInput
               style={styles.input}
               placeholder="Add a caption for this photo..."
-              placeholderTextColor="#8695AB"
+              placeholderTextColor={th.semantic.fgSubtle}
               value={photo.caption}
               onChangeText={(text) =>
                 updatePhoto(selectedPhotoIndex, { caption: text })
@@ -311,7 +314,7 @@ export default function NewInspectionScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="close" size={24} color="#0B1524" />
+          <Ionicons name="close" size={24} color={th.semantic.fg} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>New Inspection</Text>
         <View style={styles.headerRight} />
@@ -348,12 +351,12 @@ export default function NewInspectionScreen() {
 
           <View style={styles.photoActions}>
             <TouchableOpacity style={styles.photoActionButton} onPress={handleOpenCamera}>
-              <Ionicons name="camera-outline" size={24} color="#2563eb" />
+              <Ionicons name="camera-outline" size={24} color={th.semantic.primary} />
               <Text style={styles.photoActionText}>Take Photo</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.photoActionButton} onPress={handlePickImage}>
-              <Ionicons name="images-outline" size={24} color="#2563eb" />
+              <Ionicons name="images-outline" size={24} color={th.semantic.primary} />
               <Text style={styles.photoActionText}>Choose from Library</Text>
             </TouchableOpacity>
           </View>
@@ -365,7 +368,7 @@ export default function NewInspectionScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="Add any general notes about this inspection..."
-            placeholderTextColor="#8695AB"
+            placeholderTextColor={th.semantic.fgSubtle}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -381,10 +384,10 @@ export default function NewInspectionScreen() {
           disabled={isSubmitting || photos.length === 0}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
             <>
-              <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+              <Ionicons name="checkmark-circle-outline" size={20} color="#FFFFFF" />
               <Text style={styles.submitButtonText}>
                 Create Inspection ({photos.length} photos)
               </Text>
@@ -398,21 +401,21 @@ export default function NewInspectionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (th: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   header: {
     flexDirection: 'row',
@@ -422,7 +425,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6E9EF',
+    borderBottomColor: th.semantic.line,
   },
   backButton: {
     width: 40,
@@ -433,7 +436,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   headerRight: {
     width: 40,
@@ -454,7 +457,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
     marginBottom: 12,
   },
   photoList: {
@@ -496,7 +499,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
     borderWidth: 1,
-    borderColor: '#2563eb',
+    borderColor: th.semantic.primary,
     borderRadius: 8,
     gap: 8,
     borderStyle: 'dashed',
@@ -504,7 +507,7 @@ const styles = StyleSheet.create({
   photoActionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#2563eb',
+    color: th.semantic.primary,
   },
   inputContainer: {
     marginBottom: 20,
@@ -512,17 +515,17 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#2C3B52',
+    color: th.semantic.fg,
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#D3DAE4',
+    borderColor: th.semantic.lineStrong,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#F7F8FA',
-    color: '#0B1524',
+    backgroundColor: th.semantic.cardMuted,
+    color: th.semantic.fg,
   },
   textArea: {
     height: 100,
@@ -538,17 +541,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#D3DAE4',
-    backgroundColor: '#F7F8FA',
+    borderColor: th.semantic.lineStrong,
+    backgroundColor: th.semantic.cardMuted,
   },
   typeButtonActive: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
+    borderColor: th.semantic.primary,
   },
   typeButtonText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   typeButtonTextActive: {
     color: '#fff',
@@ -560,7 +563,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   doneButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -572,7 +575,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   submitButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -630,6 +633,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
   },
 });

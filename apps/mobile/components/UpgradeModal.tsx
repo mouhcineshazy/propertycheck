@@ -27,6 +27,7 @@ import {
   getProvince,
   type ProvinceConfig,
 } from '@propertycheck/shared';
+import { useTheme, useThemedStyles, type AppTheme } from '../lib/theme';
 
 interface UpgradeModalProps {
   visible: boolean;
@@ -92,6 +93,8 @@ const PREMIUM_FEATURES = [
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export function UpgradeModal({ visible, onClose, reason = 'general', userProvince }: UpgradeModalProps) {
+  const t = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [isLoading, setIsLoading] = useState(false);
   const [province, setProvince] = useState<ProvinceConfig | undefined>();
@@ -163,7 +166,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
         <View style={styles.container}>
           {/* Close button */}
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Ionicons name="close" size={24} color="#45566E" />
+            <Ionicons name="close" size={24} color={t.semantic.fgMuted} />
           </TouchableOpacity>
 
           <ScrollView
@@ -173,7 +176,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.iconContainer}>
-                <Ionicons name={reasonData.icon} size={28} color="#2563eb" />
+                <Ionicons name={reasonData.icon} size={28} color={t.semantic.primary} />
               </View>
               <Text style={styles.title}>{reasonData.title}</Text>
               <Text style={styles.description}>{reasonData.description}</Text>
@@ -244,7 +247,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
                     <Ionicons
                       name={index === 0 ? 'checkmark-circle' : 'checkmark-circle-outline'}
                       size={20}
-                      color={index === 0 ? '#2563eb' : '#15966E'}
+                      color={index === 0 ? t.semantic.primary : t.semantic.verified}
                     />
                     <Text style={[styles.featureText, index === 0 && styles.featureTextHighlight]}>
                       {feature.text}
@@ -262,10 +265,10 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
               activeOpacity={0.8}
             >
               {isLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
                 <>
-                  <Ionicons name="flash" size={20} color="#fff" />
+                  <Ionicons name="flash" size={20} color="#FFFFFF" />
                   <Text style={styles.upgradeButtonText}>Start 7-Day Free Trial</Text>
                 </>
               )}
@@ -286,14 +289,14 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (t: AppTheme) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(11, 21, 36, 0.5)',
+    backgroundColor: t.semantic.overlay,
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: t.semantic.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',
@@ -311,7 +314,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#F2F4F8',
+    backgroundColor: t.semantic.canvas,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
@@ -324,7 +327,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#eff6ff',
+    backgroundColor: t.semantic.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -332,12 +335,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#0B1524',
+    color: t.semantic.fg,
     textAlign: 'center',
   },
   description: {
     fontSize: 15,
-    color: '#45566E',
+    color: t.semantic.fgMuted,
     textAlign: 'center',
     marginTop: 6,
     lineHeight: 21,
@@ -345,7 +348,7 @@ const styles = StyleSheet.create({
   },
   subtext: {
     fontSize: 13,
-    color: '#2563eb',
+    color: t.semantic.primary,
     textAlign: 'center',
     marginTop: 8,
     fontWeight: '500',
@@ -358,7 +361,7 @@ const styles = StyleSheet.create({
   },
   toggleContainer: {
     flexDirection: 'row',
-    backgroundColor: '#F2F4F8',
+    backgroundColor: t.semantic.canvas,
     borderRadius: 10,
     padding: 4,
     width: SCREEN_WIDTH - 96,
@@ -373,7 +376,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toggleOptionActive: {
-    backgroundColor: '#fff',
+    backgroundColor: t.semantic.card,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -382,15 +385,15 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 14,
-    color: '#63748D',
+    color: t.semantic.fgSubtle,
     fontWeight: '500',
   },
   toggleTextActive: {
-    color: '#0B1524',
+    color: t.semantic.fg,
     fontWeight: '600',
   },
   savingsBadge: {
-    backgroundColor: '#E9F7F1',
+    backgroundColor: t.semantic.verifiedSoft,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -398,17 +401,17 @@ const styles = StyleSheet.create({
   },
   savingsText: {
     fontSize: 12,
-    color: '#0C5F46',
+    color: t.semantic.verified,
     fontWeight: '600',
   },
   pricingCard: {
     width: '100%',
-    backgroundColor: '#F7F8FA',
+    backgroundColor: t.semantic.cardMuted,
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#E6E9EF',
+    borderColor: t.semantic.line,
   },
   priceRow: {
     flexDirection: 'row',
@@ -419,16 +422,16 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 40,
     fontWeight: '700',
-    color: '#0B1524',
+    color: t.semantic.fg,
   },
   priceInterval: {
     fontSize: 16,
-    color: '#63748D',
+    color: t.semantic.fgSubtle,
     marginLeft: 4,
   },
   annualNote: {
     fontSize: 13,
-    color: '#63748D',
+    color: t.semantic.fgSubtle,
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -443,17 +446,17 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
-    color: '#2C3B52',
+    color: t.semantic.fg,
   },
   featureTextHighlight: {
-    color: '#0B1524',
+    color: t.semantic.fg,
     fontWeight: '600',
   },
   upgradeButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2563eb',
+    backgroundColor: t.semantic.primary,
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 12,
@@ -473,13 +476,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   laterButtonText: {
-    color: '#63748D',
+    color: t.semantic.fgSubtle,
     fontSize: 15,
     fontWeight: '500',
   },
   trialInfo: {
     fontSize: 12,
-    color: '#8695AB',
+    color: t.semantic.fgSubtle,
     marginTop: 4,
     textAlign: 'center',
   },

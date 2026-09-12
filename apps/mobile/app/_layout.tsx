@@ -12,8 +12,18 @@ import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../hooks';
 import { SplashScreen } from '../components/SplashScreen';
 import { I18nProvider } from '../contexts';
+import { ThemeProvider, useTheme } from '../lib/theme';
 
 export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <RootLayoutInner />
+    </ThemeProvider>
+  );
+}
+
+function RootLayoutInner() {
+  const theme = useTheme();
   const { isAuthenticated, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -63,7 +73,7 @@ export default function RootLayout() {
   if (showSplash) {
     return (
       <>
-        <StatusBar style="light" />
+        <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
         <SplashScreen
           onAnimationComplete={() => {
             setAnimationComplete(true);
@@ -76,7 +86,12 @@ export default function RootLayout() {
   return (
     <I18nProvider>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: theme.semantic.canvas },
+        }}
+      >
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="property/[id]" options={{ headerShown: false }} />

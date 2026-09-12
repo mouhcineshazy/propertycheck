@@ -24,12 +24,14 @@ import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { useProperties, useOptimistic, useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 import { useTranslation } from '../../contexts';
-import { colors, semantic, spacing, radius, shadows } from '../../lib/theme';
+import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
 export default function PropertiesScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { semantic, colors } = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -200,7 +202,8 @@ export default function PropertiesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ semantic, colors, shadows }: AppTheme) =>
+  StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: semantic.canvas,
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: radius.md,
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -295,7 +298,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: radius.xl,
-    backgroundColor: colors.primary[50],
+    backgroundColor: semantic.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
@@ -349,7 +352,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: radius.xl,
-    backgroundColor: colors.red[50],
+    backgroundColor: semantic.dangerSoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,

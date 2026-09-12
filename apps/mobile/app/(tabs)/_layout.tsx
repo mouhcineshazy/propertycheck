@@ -9,10 +9,11 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Platform } from 'react-native';
 import { useI18n } from '../../contexts';
-import { semantic, colors } from '../../lib/theme';
+import { useTheme } from '../../lib/theme';
 
 export default function TabsLayout() {
   const { t } = useI18n();
+  const { semantic, colors } = useTheme();
 
   return (
     <Tabs

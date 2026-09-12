@@ -42,6 +42,7 @@ import {
 } from '../../lib';
 import type { InspectionWithPhotos, PDFOptions } from '../../lib';
 import { useI18n } from '../../contexts';
+import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
 
 // Photo thumbnail with loading/error states
 function PhotoThumbnail({
@@ -60,17 +61,19 @@ function PhotoThumbnail({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const photoUrl = getPhotoUrl(storagePath);
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
 
   return (
     <TouchableOpacity style={styles.photoThumbnail} onPress={onPress}>
       {isLoading && (
         <View style={styles.photoPlaceholder}>
-          <ActivityIndicator size="small" color="#2563eb" />
+          <ActivityIndicator size="small" color={th.semantic.primary} />
         </View>
       )}
       {hasError && (
         <View style={styles.photoPlaceholder}>
-          <Ionicons name="image-outline" size={24} color="#8695AB" />
+          <Ionicons name="image-outline" size={24} color={th.semantic.fgSubtle} />
           <Text style={styles.photoErrorText}>{errorText}</Text>
         </View>
       )}
@@ -99,6 +102,8 @@ function PhotoThumbnail({
 export default function InspectionDetailScreen() {
   const router = useRouter();
   const { t, locale } = useI18n();
+  const th = useTheme();
+  const styles = useThemedStyles(makeStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
 
   // Room type labels with translations
@@ -370,7 +375,7 @@ export default function InspectionDetailScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
+        <ActivityIndicator size="large" color={th.semantic.primary} />
       </View>
     );
   }
@@ -378,7 +383,7 @@ export default function InspectionDetailScreen() {
   if (!inspection) {
     return (
       <View style={styles.centered}>
-        <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
+        <Ionicons name="alert-circle-outline" size={48} color={th.semantic.danger} />
         <Text style={styles.errorText}>{t('errors.notFound')}</Text>
       </View>
     );
@@ -397,7 +402,7 @@ export default function InspectionDetailScreen() {
             style={styles.modalCloseButton}
             onPress={() => setSelectedPhotoIndex(null)}
           >
-            <Ionicons name="close" size={28} color="#fff" />
+            <Ionicons name="close" size={28} color="#FFFFFF" />
           </TouchableOpacity>
 
           <Image
@@ -427,7 +432,7 @@ export default function InspectionDetailScreen() {
               <Ionicons
                 name="chevron-back"
                 size={28}
-                color={selectedPhotoIndex === 0 ? '#45566E' : '#fff'}
+                color={selectedPhotoIndex === 0 ? 'rgba(255,255,255,0.4)' : '#FFFFFF'}
               />
             </TouchableOpacity>
 
@@ -446,7 +451,7 @@ export default function InspectionDetailScreen() {
               <Ionicons
                 name="chevron-forward"
                 size={28}
-                color={selectedPhotoIndex === photoCount - 1 ? '#45566E' : '#fff'}
+                color={selectedPhotoIndex === photoCount - 1 ? 'rgba(255,255,255,0.4)' : '#FFFFFF'}
               />
             </TouchableOpacity>
           </View>
@@ -460,14 +465,14 @@ export default function InspectionDetailScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#0B1524" />
+          <Ionicons name="arrow-back" size={24} color={th.semantic.fg} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('inspection.detail.title')}</Text>
         <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
           {isDeleting ? (
-            <ActivityIndicator size="small" color="#ef4444" />
+            <ActivityIndicator size="small" color={th.semantic.danger} />
           ) : (
-            <Ionicons name="trash-outline" size={22} color="#ef4444" />
+            <Ionicons name="trash-outline" size={22} color={th.semantic.danger} />
           )}
         </TouchableOpacity>
       </View>
@@ -504,7 +509,7 @@ export default function InspectionDetailScreen() {
 
           {inspection.property && (
             <View style={styles.propertyInfo}>
-              <Ionicons name="location-outline" size={16} color="#45566E" />
+              <Ionicons name="location-outline" size={16} color={th.semantic.fgMuted} />
               <Text style={styles.propertyAddress}>{inspection.property.address}</Text>
             </View>
           )}
@@ -523,7 +528,7 @@ export default function InspectionDetailScreen() {
 
           {photoCount === 0 ? (
             <View style={styles.emptyPhotos}>
-              <Ionicons name="images-outline" size={48} color="#AEB9C9" />
+              <Ionicons name="images-outline" size={48} color={th.semantic.fgSubtle} />
               <Text style={styles.emptyText}>{t('inspection.detail.noPhotos')}</Text>
             </View>
           ) : (
@@ -548,7 +553,7 @@ export default function InspectionDetailScreen() {
             {inspection.report_unlocked ? (
               <>
                 <View style={styles.unlockIconRow}>
-                  <Ionicons name="checkmark-circle" size={20} color="#0F7757" />
+                  <Ionicons name="checkmark-circle" size={20} color={th.semantic.verified} />
                   <Text style={styles.unlockTitleGreen}>{t('inspection.detail.reportUnlocked')}</Text>
                 </View>
                 <Text style={styles.unlockDesc}>{t('inspection.detail.reportUnlockedDesc')}</Text>
@@ -556,7 +561,7 @@ export default function InspectionDetailScreen() {
             ) : (
               <>
                 <View style={styles.unlockIconRow}>
-                  <Ionicons name="lock-closed-outline" size={20} color="#2563eb" />
+                  <Ionicons name="lock-closed-outline" size={20} color={th.semantic.primary} />
                   <Text style={styles.unlockTitle}>{t('inspection.detail.unlockReport')}</Text>
                 </View>
                 <Text style={styles.unlockDesc}>{t('inspection.detail.unlockReportDesc')}</Text>
@@ -566,7 +571,7 @@ export default function InspectionDetailScreen() {
                   disabled={isPurchasingReport}
                 >
                   {isPurchasingReport ? (
-                    <ActivityIndicator color="#fff" size="small" />
+                    <ActivityIndicator color="#FFFFFF" size="small" />
                   ) : (
                     <Text style={styles.unlockButtonText}>{t('inspection.detail.unlockReportButton')}</Text>
                   )}
@@ -588,10 +593,10 @@ export default function InspectionDetailScreen() {
             disabled={isCompleting}
           >
             {isCompleting ? (
-              <ActivityIndicator color="#0C5F46" size="small" />
+              <ActivityIndicator color={th.semantic.verified} size="small" />
             ) : (
               <>
-                <Ionicons name="checkmark-circle-outline" size={18} color="#0C5F46" />
+                <Ionicons name="checkmark-circle-outline" size={18} color={th.semantic.verified} />
                 <Text style={styles.completeButtonText}>{t('inspection.detail.completeButton')}</Text>
               </>
             )}
@@ -604,10 +609,10 @@ export default function InspectionDetailScreen() {
           disabled={isGeneratingPdf}
         >
           {isGeneratingPdf ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <>
-              <Ionicons name="document-text-outline" size={18} color="#fff" />
+              <Ionicons name="document-text-outline" size={18} color="#FFFFFF" />
               <Text style={styles.pdfButtonText}>PDF</Text>
             </>
           )}
@@ -619,10 +624,10 @@ export default function InspectionDetailScreen() {
           disabled={isSendingEmail}
         >
           {isSendingEmail ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <>
-              <Ionicons name="mail-outline" size={18} color="#fff" />
+              <Ionicons name="mail-outline" size={18} color="#FFFFFF" />
               <Text style={styles.emailButtonText}>Email</Text>
             </>
           )}
@@ -647,7 +652,7 @@ export default function InspectionDetailScreen() {
             <TextInput
               style={[styles.emailInput, emailFieldError ? styles.emailInputError : null]}
               placeholder={t('inspection.detail.landlordEmailPlaceholder')}
-              placeholderTextColor="#8695AB"
+              placeholderTextColor={th.semantic.fgSubtle}
               value={recipientEmail}
               onChangeText={(text) => {
                 setRecipientEmail(text);
@@ -673,7 +678,7 @@ export default function InspectionDetailScreen() {
                 style={styles.emailModalSend}
                 onPress={handleSendEmail}
               >
-                <Ionicons name="send" size={16} color="#fff" />
+                <Ionicons name="send" size={16} color="#FFFFFF" />
                 <Text style={styles.emailModalSendText}>{t('inspection.detail.sendButton')}</Text>
               </TouchableOpacity>
             </View>
@@ -684,16 +689,16 @@ export default function InspectionDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (th: AppTheme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
   },
   header: {
     flexDirection: 'row',
@@ -702,9 +707,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 60,
     paddingBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#E6E9EF',
+    borderBottomColor: th.semantic.line,
   },
   backButton: {
     width: 40,
@@ -715,7 +720,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   deleteButton: {
     width: 40,
@@ -728,7 +733,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -741,29 +746,29 @@ const styles = StyleSheet.create({
   inspectionDate: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
   },
   inspectionTime: {
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginTop: 2,
   },
   statusBadge: {
-    backgroundColor: '#fef3c7',
+    backgroundColor: th.semantic.warningSoft,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   statusBadgeCompleted: {
-    backgroundColor: '#E9F7F1',
+    backgroundColor: th.semantic.verifiedSoft,
   },
   statusBadgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#B45309',
+    color: th.semantic.warning,
   },
   statusBadgeTextCompleted: {
-    color: '#0C5F46',
+    color: th.semantic.verified,
   },
   propertyInfo: {
     flexDirection: 'row',
@@ -771,29 +776,29 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E6E9EF',
+    borderTopColor: th.semantic.line,
     gap: 6,
   },
   propertyAddress: {
     flex: 1,
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   notesContainer: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#E6E9EF',
+    borderTopColor: th.semantic.line,
   },
   notesLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginBottom: 4,
   },
   notesText: {
     fontSize: 14,
-    color: '#0B1524',
+    color: th.semantic.fg,
     lineHeight: 20,
   },
   section: {
@@ -802,18 +807,18 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#0B1524',
+    color: th.semantic.fg,
     marginBottom: 12,
   },
   emptyPhotos: {
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
   },
   emptyText: {
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginTop: 8,
   },
   photoGrid: {
@@ -837,13 +842,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#E6E9EF',
+    backgroundColor: th.semantic.line,
     justifyContent: 'center',
     alignItems: 'center',
   },
   photoErrorText: {
     fontSize: 10,
-    color: '#8695AB',
+    color: th.semantic.fgSubtle,
     marginTop: 4,
   },
   thumbnailBadge: {
@@ -862,16 +867,16 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginTop: 12,
   },
   bottomPadding: {
     height: 40,
   },
   unlockCard: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: th.semantic.primarySoft,
     borderWidth: 1,
-    borderColor: '#bfdbfe',
+    borderColor: th.semantic.line,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -885,20 +890,20 @@ const styles = StyleSheet.create({
   unlockTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#1e40af',
+    color: th.semantic.primary,
   },
   unlockTitleGreen: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#0F7757',
+    color: th.semantic.verified,
   },
   unlockDesc: {
     fontSize: 13,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginBottom: 12,
   },
   unlockButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
@@ -913,11 +918,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     padding: 16,
     paddingBottom: 32,
     borderTopWidth: 1,
-    borderTopColor: '#E6E9EF',
+    borderTopColor: th.semantic.line,
     flexDirection: 'row',
     gap: 12,
   },
@@ -928,11 +933,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#E9F7F1',
+    backgroundColor: th.semantic.verifiedSoft,
     gap: 8,
   },
   completeButtonText: {
-    color: '#0C5F46',
+    color: th.semantic.verified,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -943,7 +948,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#2563eb',
+    backgroundColor: th.semantic.primary,
     gap: 8,
   },
   pdfButtonText: {
@@ -958,7 +963,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#0F7757',
+    backgroundColor: th.semantic.verified,
     gap: 8,
   },
   emailButtonText: {
@@ -1003,7 +1008,7 @@ const styles = StyleSheet.create({
   },
   modalCaption: {
     fontSize: 14,
-    color: '#AEB9C9',
+    color: th.semantic.fgSubtle,
     marginTop: 4,
     textAlign: 'center',
   },
@@ -1038,7 +1043,7 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   emailModal: {
-    backgroundColor: '#fff',
+    backgroundColor: th.semantic.card,
     borderRadius: 16,
     padding: 24,
     width: '100%',
@@ -1047,30 +1052,30 @@ const styles = StyleSheet.create({
   emailModalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0B1524',
+    color: th.semantic.fg,
     marginBottom: 8,
   },
   emailModalSubtitle: {
     fontSize: 14,
-    color: '#45566E',
+    color: th.semantic.fgMuted,
     marginBottom: 20,
     lineHeight: 20,
   },
   emailInput: {
     borderWidth: 1.5,
-    borderColor: '#E6E9EF',
+    borderColor: th.semantic.line,
     borderRadius: 10,
     padding: 14,
     fontSize: 15,
-    color: '#0B1524',
-    backgroundColor: '#F7F8FA',
+    color: th.semantic.fg,
+    backgroundColor: th.semantic.cardMuted,
   },
   emailInputError: {
-    borderColor: '#ef4444',
+    borderColor: th.semantic.danger,
   },
   emailInputErrorText: {
     fontSize: 13,
-    color: '#ef4444',
+    color: th.semantic.danger,
     marginTop: 6,
   },
   emailModalActions: {
@@ -1082,20 +1087,20 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#F2F4F8',
+    backgroundColor: th.semantic.canvas,
     alignItems: 'center',
   },
   emailModalCancelText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#45566E',
+    color: th.semantic.fgMuted,
   },
   emailModalSend: {
     flex: 2,
     flexDirection: 'row',
     padding: 14,
     borderRadius: 10,
-    backgroundColor: '#0F7757',
+    backgroundColor: th.semantic.verified,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

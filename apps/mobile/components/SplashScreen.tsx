@@ -13,13 +13,14 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { BRAND } from './Logo';
+import { useThemedStyles, type AppTheme } from '../lib/theme';
 
 interface SplashScreenProps {
   onAnimationComplete?: () => void;
 }
 
 export function SplashScreen({ onAnimationComplete }: SplashScreenProps) {
+  const styles = useThemedStyles(makeStyles);
   // Animation values
   const logoScale = useRef(new Animated.Value(0.8)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
@@ -134,57 +135,51 @@ export function SplashScreen({ onAnimationComplete }: SplashScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
-
-  // Main content
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-    paddingBottom: 60,
-  },
-
-  logoContainer: {
-    marginBottom: 16,
-  },
-
-  // Logo text styles
-  logoText: {
-    fontSize: 42,
-    fontWeight: '700',
-    color: BRAND.dark,
-    letterSpacing: -1,
-  },
-  logoAccent: {
-    fontWeight: '800',
-    color: BRAND.primary,
-  },
-  tagline: {
-    fontSize: 16,
-    color: BRAND.gray,
-    fontWeight: '500',
-  },
-
-  // Bottom branding
-  bottomBranding: {
-    position: 'absolute',
-    bottom: 50,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  bottomText: {
-    fontSize: 12,
-    color: BRAND.lightGray,
-    fontWeight: '600',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-});
+const makeStyles = (t: AppTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: t.semantic.canvas,
+    },
+    content: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+      paddingBottom: 60,
+    },
+    logoContainer: {
+      marginBottom: 16,
+    },
+    logoText: {
+      fontSize: 42,
+      fontWeight: '700',
+      color: t.semantic.fg,
+      letterSpacing: -1,
+    },
+    logoAccent: {
+      fontWeight: '800',
+      color: t.colors.primary[500],
+    },
+    tagline: {
+      fontSize: 16,
+      color: t.semantic.fgMuted,
+      fontWeight: '500',
+    },
+    bottomBranding: {
+      position: 'absolute',
+      bottom: 50,
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+    },
+    bottomText: {
+      fontSize: 12,
+      color: t.semantic.fgSubtle,
+      fontWeight: '600',
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+    },
+  });
 
 export default SplashScreen;
