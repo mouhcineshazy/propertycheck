@@ -48,50 +48,34 @@ function CheckoutSuccessContent() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50 flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-canvas p-4">
       <div
-        className={`max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center transform transition-all duration-500 ${
-          showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        className={`card w-full max-w-md p-8 text-center transition-all duration-500 ${
+          showContent ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}
       >
-        {/* Success Icon */}
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-          <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-verified-50 text-verified-500">
+          <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Premium!</h1>
-        <p className="text-gray-600 mb-8">
-          Your subscription is now active. You have access to all premium features.
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight text-fg">Welcome to Premium!</h1>
+        <p className="mt-2 text-fg-muted">Your subscription is now active. You have access to all premium features.</p>
 
-        {/* Premium Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-100 to-blue-100 rounded-full mb-8">
-          <svg className="w-5 h-5 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+        <div className="mb-8 mt-6 inline-flex items-center gap-2 rounded-full bg-primary-50 px-4 py-2">
+          <svg className="h-5 w-5 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
           <span className="font-semibold text-primary-700">Premium Member</span>
         </div>
 
-        {/* What's Included */}
-        <div className="text-left bg-gray-50 rounded-xl p-5 mb-8">
-          <h2 className="font-semibold text-gray-900 mb-3">What&apos;s included:</h2>
+        <div className="mb-8 rounded-xl bg-card-muted p-5 text-left">
+          <h2 className="mb-3 font-semibold text-fg">What&apos;s included:</h2>
           <ul className="space-y-2">
-            {[
-              'Unlimited properties',
-              'Unlimited inspections',
-              'Professional PDF reports',
-              'Comparison reports',
-              'Priority support',
-            ].map((feature) => (
-              <li key={feature} className="flex items-center gap-2 text-sm text-gray-700">
-                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {['Unlimited properties', 'Unlimited inspections', 'Professional PDF reports', 'Comparison reports', 'Priority support'].map((feature) => (
+              <li key={feature} className="flex items-center gap-2 text-sm text-fg-muted">
+                <svg className="h-4 w-4 text-verified-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 {feature}
@@ -100,19 +84,11 @@ function CheckoutSuccessContent() {
           </ul>
         </div>
 
-        {/* CTA */}
-        <Link
-          href="/dashboard"
-          className="block w-full bg-primary-600 text-white px-4 py-3.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
-        >
-          Go to Dashboard
-        </Link>
+        <Link href="/dashboard" className="btn-primary w-full py-3.5">Go to Dashboard</Link>
 
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-fg-subtle">
           Need help getting started?{' '}
-          <Link href="/docs" className="text-primary-600 hover:text-primary-700">
-            View documentation
-          </Link>
+          <Link href="/faq" className="text-primary-600 hover:text-primary-700">View FAQ</Link>
         </p>
       </div>
     </div>
@@ -121,8 +97,8 @@ function CheckoutSuccessContent() {
 
 function CheckoutSuccessFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-blue-50 flex items-center justify-center p-4">
-      <div className="w-8 h-8 border-2 border-primary-600/30 border-t-primary-600 rounded-full animate-spin" />
+    <div className="flex min-h-screen items-center justify-center bg-canvas p-4">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary-600/30 border-t-primary-600" />
     </div>
   );
 }

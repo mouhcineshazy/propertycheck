@@ -129,27 +129,22 @@ export default async function SharePage({ params }: PageProps) {
 
   if (result.status === 'expired') {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <header className="bg-[#0f172a] py-5 px-6">
-          <div className="max-w-3xl mx-auto">
+      <div className="flex min-h-screen flex-col bg-canvas">
+        <header className="bg-ink-950 px-6 py-5">
+          <div className="mx-auto max-w-3xl">
             <Logo size="md" variant="light" />
           </div>
         </header>
-        <main className="flex-1 flex items-center justify-center px-4 py-16">
-          <div className="text-center max-w-sm">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <main className="flex flex-1 items-center justify-center px-4 py-16">
+          <div className="max-w-sm text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-card-muted text-fg-subtle">
+              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-gray-900 mb-3">{t('expired.title')}</h1>
-            <p className="text-gray-500 text-sm leading-relaxed mb-8">{t('expired.description')}</p>
-            <Link
-              href="/"
-              className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors"
-            >
-              {t('expired.button')}
-            </Link>
+            <h1 className="mb-3 text-xl font-bold text-fg">{t('expired.title')}</h1>
+            <p className="mb-8 text-sm leading-relaxed text-fg-muted">{t('expired.description')}</p>
+            <Link href="/" className="btn-primary px-6 py-3">{t('expired.button')}</Link>
           </div>
         </main>
       </div>
@@ -174,75 +169,62 @@ export default async function SharePage({ params }: PageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-canvas">
       {/* Header */}
-      <header className="bg-[#0f172a] py-5 px-6">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+      <header className="bg-ink-950 px-6 py-5">
+        <div className="mx-auto flex max-w-3xl items-center justify-between">
           <Logo size="md" variant="light" />
-          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-            {t('inspectionReport')}
-          </span>
+          <span className="text-xs font-medium uppercase tracking-wider text-ink-400">{t('inspectionReport')}</span>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-        {/* Inspection summary card */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-5">
-            <p className="text-primary-100 text-sm font-medium mb-1">
+      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+        {/* Summary */}
+        <div className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
+          <div className="bg-ink-950 px-6 py-5">
+            <p className="mb-1 flex items-center gap-2 text-sm font-medium text-ink-300">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-verified-500 text-white">
+                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
               {t('sharedBy')} {result.senderName}
             </p>
-            <h1 className="text-white text-xl font-bold leading-tight">
-              {result.address || '—'}
-            </h1>
+            <h1 className="text-xl font-bold leading-tight text-white">{result.address || '—'}</h1>
           </div>
-          <div className="px-6 py-5 flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-8 px-6 py-5">
             <div>
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
-                {t('inspectionDate')}
-              </p>
-              <p className="text-gray-900 font-semibold">{formattedDate}</p>
+              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-fg-subtle">{t('inspectionDate')}</p>
+              <p className="font-semibold text-fg">{formattedDate}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
-                Photos
-              </p>
-              <p className="text-gray-900 font-semibold">
-                {t('photoCount', { count: result.photos.length })}
-              </p>
+              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-fg-subtle">Photos</p>
+              <p className="font-semibold text-fg tabular-nums">{t('photoCount', { count: result.photos.length })}</p>
             </div>
           </div>
         </div>
 
-        {/* Photos grouped by room */}
+        {/* Photos by room */}
         {Object.entries(photosByRoom).map(([room, photos]) => (
-          <section key={room} className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
-                {roomLabels[room] ?? room}
-              </h2>
+          <section key={room} className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
+            <div className="border-b border-line px-6 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-fg-muted">{roomLabels[room] ?? room}</h2>
             </div>
-            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
               {photos.map((photo) => (
                 <div key={photo.id}>
-                  <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                  <div className="relative aspect-square overflow-hidden rounded-xl bg-card-muted">
                     <Image
                       src={getPhotoUrl(photo.storage_path)}
                       alt={photo.caption ?? `${roomLabels[room] ?? room} photo`}
                       fill
-                      className="object-cover hover:scale-105 transition-transform duration-200"
+                      className="object-cover transition-transform duration-200 hover:scale-105"
                       sizes="(max-width: 640px) 50vw, 33vw"
                     />
                   </div>
                   <div className="mt-1.5 space-y-0.5">
-                    {photo.caption && (
-                      <p className="text-xs text-gray-700 font-medium leading-tight line-clamp-2">
-                        {photo.caption}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-400">
-                      {format(new Date(photo.created_at), 'MMM d, h:mm a', { locale: dateLocale })}
-                    </p>
+                    {photo.caption && <p className="line-clamp-2 text-xs font-medium leading-tight text-fg-muted">{photo.caption}</p>}
+                    <p className="text-xs text-fg-subtle">{format(new Date(photo.created_at), 'MMM d, h:mm a', { locale: dateLocale })}</p>
                   </div>
                 </div>
               ))}
@@ -252,39 +234,30 @@ export default async function SharePage({ params }: PageProps) {
 
         {/* Notes */}
         {result.notes && (
-          <section className="bg-white rounded-2xl border border-gray-200 shadow-sm px-6 py-5">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">
-              {t('notes')}
-            </h2>
-            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{result.notes}</p>
+          <section className="rounded-2xl border border-line bg-card px-6 py-5 shadow-sm">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-fg-muted">{t('notes')}</h2>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-fg-muted">{result.notes}</p>
           </section>
         )}
 
-        {/* Legal disclaimer */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4">
-          <p className="text-xs text-amber-800 leading-relaxed">{t('disclaimer')}</p>
+        {/* Disclaimer */}
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <p className="text-xs leading-relaxed text-amber-800">{t('disclaimer')}</p>
         </div>
 
         {/* Acquisition CTA */}
-        <div className="bg-gradient-to-br from-[#0f172a] to-[#1e293b] rounded-2xl px-6 py-8 text-center">
-          <div className="flex justify-center mb-4">
+        <div className="overflow-hidden rounded-2xl bg-ink-950 px-6 py-8 text-center">
+          <div className="mb-4 flex justify-center">
             <Logo size="md" variant="light" />
           </div>
-          <h2 className="text-white font-bold text-xl mb-2">{t('cta.title')}</h2>
-          <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">{t('cta.subtitle')}</p>
-          <Link
-            href="/"
-            className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-colors"
-          >
-            {t('cta.button')}
-          </Link>
+          <h2 className="mb-2 text-xl font-bold text-white">{t('cta.title')}</h2>
+          <p className="mx-auto mb-6 max-w-xs text-sm text-ink-300">{t('cta.subtitle')}</p>
+          <Link href="/" className="btn-primary px-6 py-3">{t('cta.button')}</Link>
         </div>
 
-        <p className="text-center text-xs text-gray-400 pb-4">
+        <p className="pb-4 text-center text-xs text-fg-subtle">
           {t('poweredBy')} ·{' '}
-          <a href={appUrl} className="hover:text-gray-600 transition-colors">
-            propertycheck.app
-          </a>
+          <a href={appUrl} className="transition-colors hover:text-fg-muted">propertycheck.app</a>
         </p>
       </main>
     </div>

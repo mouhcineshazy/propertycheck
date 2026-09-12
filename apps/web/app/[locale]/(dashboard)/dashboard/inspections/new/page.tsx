@@ -9,26 +9,17 @@ import type { InspectionStatus, Inspection } from '@propertycheck/database';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
-
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] },
-  },
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } },
 };
 
 interface Property {
   id: string;
   address: string;
 }
-
 interface UploadedPhoto {
   id: string;
   file: File;
@@ -41,12 +32,9 @@ interface UploadedPhoto {
 
 function NewInspectionFallback() {
   return (
-    <div className="animate-pulse max-w-2xl">
-      <div className="h-8 w-48 bg-gray-200 rounded-lg mb-8" />
-      <div className="bg-white rounded-2xl border border-gray-200 p-6">
-        <div className="h-6 w-32 bg-gray-200 rounded mb-4" />
-        <div className="h-12 w-full bg-gray-100 rounded-xl" />
-      </div>
+    <div className="max-w-2xl">
+      <div className="skeleton mb-8 h-8 w-48" />
+      <div className="skeleton h-48 w-full" />
     </div>
   );
 }
@@ -55,14 +43,11 @@ function NewInspectionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const preselectedPropertyId = searchParams.get('property');
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState(preselectedPropertyId || '');
-  const [inspectionDate, setInspectionDate] = useState(
-    new Date().toISOString().split('T')[0]
-  );
+  const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,11 +58,7 @@ function NewInspectionContent() {
     const loadProperties = async () => {
       try {
         const supabase = createClient();
-        const { data, error } = await supabase
-          .from('properties')
-          .select('id, address')
-          .order('address');
-
+        const { data, error } = await supabase.from('properties').select('id, address').order('address');
         if (error) throw error;
         setProperties(data || []);
       } catch (err) {
@@ -86,14 +67,12 @@ function NewInspectionContent() {
         setIsLoading(false);
       }
     };
-
     loadProperties();
   }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-
     const newPhotos: UploadedPhoto[] = Array.from(files).map((file) => ({
       id: crypto.randomUUID(),
       file,
@@ -102,29 +81,20 @@ function NewInspectionContent() {
       uploading: false,
       uploaded: false,
     }));
-
     setPhotos((prev) => [...prev, ...newPhotos]);
-
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRemovePhoto = (id: string) => {
     setPhotos((prev) => {
       const photo = prev.find((p) => p.id === id);
-      if (photo) {
-        URL.revokeObjectURL(photo.preview);
-      }
+      if (photo) URL.revokeObjectURL(photo.preview);
       return prev.filter((p) => p.id !== id);
     });
   };
 
   const handleCaptionChange = (id: string, caption: string) => {
-    setPhotos((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, caption } : p))
-    );
+    setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, caption } : p)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,14 +103,10 @@ function NewInspectionContent() {
       setError('Please select a property');
       return;
     }
-
     setIsSubmitting(true);
     setError('');
-
     try {
       const supabase = createClient();
-
-      // Create inspection
       const { data: inspectionData, error: inspectionError } = await supabase
         .from('inspections')
         .insert({
@@ -151,65 +117,28 @@ function NewInspectionContent() {
         } as never)
         .select()
         .single();
-
       if (inspectionError) throw inspectionError;
-
       const inspection = inspectionData as unknown as Inspection;
 
-      // Upload photos
       if (photos.length > 0) {
         for (const photo of photos) {
-          // Update photo status
-          setPhotos((prev) =>
-            prev.map((p) =>
-              p.id === photo.id ? { ...p, uploading: true } : p
-            )
-          );
-
+          setPhotos((prev) => prev.map((p) => (p.id === photo.id ? { ...p, uploading: true } : p)));
           try {
-            // Upload to Supabase Storage
             const fileExt = photo.file.name.split('.').pop();
             const fileName = `${inspection.id}/${crypto.randomUUID()}.${fileExt}`;
-
-            const { error: uploadError } = await supabase.storage
-              .from('inspection-photos')
-              .upload(fileName, photo.file);
-
+            const { error: uploadError } = await supabase.storage.from('inspection-photos').upload(fileName, photo.file);
             if (uploadError) throw uploadError;
-
-            // Create photo record
             const { error: photoRecordError } = await supabase
               .from('inspection_photos')
-              .insert({
-                inspection_id: inspection.id,
-                storage_path: fileName,
-                caption: photo.caption || null,
-              } as never);
-
+              .insert({ inspection_id: inspection.id, storage_path: fileName, caption: photo.caption || null } as never);
             if (photoRecordError) throw photoRecordError;
-
-            // Update photo status
-            setPhotos((prev) =>
-              prev.map((p) =>
-                p.id === photo.id
-                  ? { ...p, uploading: false, uploaded: true }
-                  : p
-              )
-            );
+            setPhotos((prev) => prev.map((p) => (p.id === photo.id ? { ...p, uploading: false, uploaded: true } : p)));
           } catch (uploadErr) {
             console.error('Error uploading photo:', uploadErr);
-            setPhotos((prev) =>
-              prev.map((p) =>
-                p.id === photo.id
-                  ? { ...p, uploading: false, error: 'Failed to upload' }
-                  : p
-              )
-            );
+            setPhotos((prev) => prev.map((p) => (p.id === photo.id ? { ...p, uploading: false, error: 'Failed to upload' } : p)));
           }
         }
       }
-
-      // Redirect to inspection detail
       router.push(`/dashboard/inspections/${inspection.id}`);
     } catch (err) {
       console.error('Error creating inspection:', err);
@@ -218,195 +147,114 @@ function NewInspectionContent() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-8 w-48 bg-gray-200 rounded-lg mb-8" />
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
-          <div className="h-6 w-32 bg-gray-200 rounded mb-4" />
-          <div className="h-12 w-full bg-gray-100 rounded-xl" />
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <NewInspectionFallback />;
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="max-w-2xl"
-    >
-      {/* Header */}
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-2xl">
       <motion.div variants={itemVariants} className="mb-8">
-        <Link
-          href="/dashboard/inspections"
-          className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-4"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <Link href="/dashboard/inspections" className="mb-4 inline-flex items-center gap-2 text-sm text-fg-muted hover:text-fg">
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back to Inspections
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">New Inspection</h1>
-        <p className="text-gray-500 mt-1">Document the current state of a property</p>
+        <h1 className="text-2xl font-bold tracking-tight text-fg">New Inspection</h1>
+        <p className="mt-1 text-fg-muted">Document the current state of a property</p>
       </motion.div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit}>
-        <motion.div
-          variants={itemVariants}
-          className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6"
-        >
-          {/* Property Selection */}
+        <motion.div variants={itemVariants} className="card space-y-6 p-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Property *
-            </label>
+            <label className="label">Property *</label>
             {properties.length === 0 ? (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <p className="text-amber-800 text-sm">
-                  You need to add a property first before creating an inspection.
-                </p>
-                <Link
-                  href="/dashboard/properties/new"
-                  className="inline-flex items-center gap-1 text-amber-700 font-medium text-sm mt-2 hover:text-amber-800"
-                >
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm text-amber-800">You need to add a property first before creating an inspection.</p>
+                <Link href="/dashboard/properties/new" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-amber-700 hover:text-amber-800">
                   Add Property
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
               </div>
             ) : (
-              <select
-                value={selectedPropertyId}
-                onChange={(e) => setSelectedPropertyId(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 transition-colors"
-                required
-              >
+              <select value={selectedPropertyId} onChange={(e) => setSelectedPropertyId(e.target.value)} className="input cursor-pointer bg-card" required>
                 <option value="">Select a property</option>
                 {properties.map((property) => (
-                  <option key={property.id} value={property.id}>
-                    {property.address}
-                  </option>
+                  <option key={property.id} value={property.id}>{property.address}</option>
                 ))}
               </select>
             )}
           </div>
 
-          {/* Inspection Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Inspection Date *
-            </label>
-            <input
-              type="date"
-              value={inspectionDate}
-              onChange={(e) => setInspectionDate(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 transition-colors"
-              required
-            />
+            <label className="label">Inspection Date *</label>
+            <input type="date" value={inspectionDate} onChange={(e) => setInspectionDate(e.target.value)} className="input" required />
           </div>
 
-          {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Notes
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="General observations about the property condition..."
-              rows={3}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-0 transition-colors resize-none"
-            />
+            <label className="label">Notes</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="General observations about the property condition..." rows={3} className="input resize-none" />
           </div>
 
-          {/* Photo Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Photos
-            </label>
-
-            {/* Upload Area */}
+            <label className="label">Photos</label>
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-primary-400 hover:bg-primary-50/50 transition-colors"
+              className="cursor-pointer rounded-xl border-2 border-dashed border-line-strong p-8 text-center transition-colors hover:border-primary-400 hover:bg-primary-50/50"
             >
-              <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-card-muted text-fg-subtle">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-              </div>
-              <p className="text-gray-600 font-medium">Click to upload photos</p>
-              <p className="text-gray-400 text-sm mt-1">PNG, JPG up to 10MB each</p>
+              </span>
+              <p className="font-medium text-fg">Click to upload photos</p>
+              <p className="mt-1 text-sm text-fg-subtle">PNG, JPG up to 10MB each</p>
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileSelect}
-              className="hidden"
-            />
+            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" />
 
-            {/* Photo Previews */}
             {photos.length > 0 && (
               <div className="mt-4 space-y-3">
                 {photos.map((photo) => (
-                  <div
-                    key={photo.id}
-                    className="flex gap-4 p-3 bg-gray-50 rounded-xl"
-                  >
-                    <div className="relative w-20 h-20 flex-shrink-0">
-                      <img
-                        src={photo.preview}
-                        alt="Preview"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
+                  <div key={photo.id} className="flex gap-4 rounded-xl bg-card-muted p-3">
+                    <div className="relative h-20 w-20 flex-shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview, not a remote asset */}
+                      <img src={photo.preview} alt="Preview" className="h-full w-full rounded-lg object-cover" />
                       {photo.uploading && (
-                        <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center">
-                          <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-ink-950/50">
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                         </div>
                       )}
                       {photo.uploaded && (
-                        <div className="absolute inset-0 bg-green-500/50 rounded-lg flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-verified-500/60">
+                          <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
                       )}
                       {photo.error && (
-                        <div className="absolute inset-0 bg-red-500/50 rounded-lg flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-red-500/60">
+                          <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <input
                         type="text"
                         value={photo.caption}
                         onChange={(e) => handleCaptionChange(photo.id, e.target.value)}
                         placeholder="Add a caption (e.g., Kitchen - North Wall)"
-                        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-0"
+                        className="input px-3 py-2 text-sm"
                         disabled={photo.uploading || photo.uploaded}
                       />
-                      <p className="text-xs text-gray-400 mt-1 truncate">
-                        {photo.file.name}
-                      </p>
+                      <p className="mt-1 truncate text-xs text-fg-subtle">{photo.file.name}</p>
                     </div>
                     {!photo.uploading && !photo.uploaded && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePhoto(photo.id)}
-                        className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <button type="button" onClick={() => handleRemovePhoto(photo.id)} className="p-2 text-fg-subtle transition-colors hover:text-red-500" aria-label="Remove photo">
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                       </button>
                     )}
@@ -416,29 +264,18 @@ function NewInspectionContent() {
             )}
           </div>
 
-          {/* Error */}
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-              <p className="text-red-700 text-sm">{error}</p>
+            <div role="alert" className="rounded-xl border border-red-100 bg-red-50 p-4">
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex gap-3 pt-4">
-            <Link
-              href="/dashboard/inspections"
-              className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold text-gray-600 text-center hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={isSubmitting || properties.length === 0}
-              className="flex-1 bg-primary-600 text-white px-4 py-3 rounded-xl font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
+            <Link href="/dashboard/inspections" className="btn-secondary flex-1 py-3">Cancel</Link>
+            <button type="submit" disabled={isSubmitting || properties.length === 0} className="btn-primary flex-1 py-3">
               {isSubmitting ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Creating...
                 </>
               ) : (

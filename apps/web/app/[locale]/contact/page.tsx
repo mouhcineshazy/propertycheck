@@ -10,178 +10,111 @@ const SUPPORT_EMAIL = 'support@propertycheck.app';
 export default function ContactPage() {
   const t = useTranslations('pages.contact');
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // For now, open email client with pre-filled data
     const mailtoLink = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
       `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
     )}`;
-
     window.location.href = mailtoLink;
-
     setIsSubmitting(false);
     setSubmitted(true);
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-canvas">
       <Navigation variant="light" />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-12 bg-gradient-to-br from-primary-50 via-white to-blue-50">
-        <div className="container mx-auto px-6 max-w-4xl text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            {t('title')}
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            {t('subtitle')}
-          </p>
+      <section className="bg-card-muted pb-12 pt-32">
+        <div className="container-page max-w-4xl text-center">
+          <h1 className="text-4xl font-bold tracking-tight text-fg md:text-5xl">{t('title')}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-xl text-fg-muted">{t('subtitle')}</p>
         </div>
       </section>
 
-      {/* Contact Content */}
       <section className="py-16">
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Contact Info */}
+        <div className="container-page max-w-4xl">
+          <div className="grid gap-12 md:grid-cols-2">
+            {/* Info */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('getInTouch.title')}</h2>
-              <p className="text-gray-600 mb-8">
-                {t('getInTouch.description')}
-              </p>
+              <h2 className="mb-6 text-2xl font-bold text-fg">{t('getInTouch.title')}</h2>
+              <p className="mb-8 text-fg-muted">{t('getInTouch.description')}</p>
 
-              {/* Email Card */}
-              <div className="bg-gray-50 rounded-xl p-6 mb-6">
+              <div className="mb-6 rounded-xl bg-card-muted p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                  </div>
+                  </span>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">{t('getInTouch.emailSupport.title')}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{t('getInTouch.emailSupport.description')}</p>
-                    <a
-                      href={`mailto:${SUPPORT_EMAIL}`}
-                      className="text-primary-600 font-medium hover:text-primary-700 transition-colors"
-                    >
-                      {SUPPORT_EMAIL}
-                    </a>
+                    <h3 className="mb-1 font-semibold text-fg">{t('getInTouch.emailSupport.title')}</h3>
+                    <p className="mb-2 text-sm text-fg-muted">{t('getInTouch.emailSupport.description')}</p>
+                    <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-primary-600 hover:text-primary-700">{SUPPORT_EMAIL}</a>
                   </div>
                 </div>
               </div>
 
-              {/* FAQ Card */}
-              <div className="bg-gray-50 rounded-xl p-6">
+              <div className="rounded-xl bg-card-muted p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                  </div>
+                  </span>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">{t('getInTouch.checkFaq.title')}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{t('getInTouch.checkFaq.description')}</p>
-                    <Link
-                      href="/faq"
-                      className="text-primary-600 font-medium hover:text-primary-700 transition-colors"
-                    >
-                      View FAQ →
-                    </Link>
+                    <h3 className="mb-1 font-semibold text-fg">{t('getInTouch.checkFaq.title')}</h3>
+                    <p className="mb-2 text-sm text-fg-muted">{t('getInTouch.checkFaq.description')}</p>
+                    <Link href="/faq" className="font-medium text-primary-600 hover:text-primary-700">View FAQ →</Link>
                   </div>
                 </div>
               </div>
 
-              {/* Response Time */}
-              <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="mt-8 rounded-lg border border-verified-100 bg-verified-50 p-4">
                 <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg className="h-5 w-5 text-verified-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-sm text-green-800">
+                  <span className="text-sm text-verified-700">
                     <strong>Average response time:</strong> {t('getInTouch.responseTime')}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Contact Form */}
+            {/* Form */}
             <div>
-              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">{t('form.title')}</h2>
+              <div className="card p-6">
+                <h2 className="mb-6 text-xl font-bold text-fg">{t('form.title')}</h2>
 
                 {submitted ? (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="py-8 text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-verified-50 text-verified-500">
+                      <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('form.success.title')}</h3>
-                    <p className="text-gray-600 mb-4">
-                      {t('form.success.message')}
-                    </p>
-                    <button
-                      onClick={() => setSubmitted(false)}
-                      className="text-primary-600 font-medium hover:text-primary-700"
-                    >
-                      Send another message
-                    </button>
+                    <h3 className="mb-2 text-lg font-semibold text-fg">{t('form.success.title')}</h3>
+                    <p className="mb-4 text-fg-muted">{t('form.success.message')}</p>
+                    <button onClick={() => setSubmitted(false)} className="font-medium text-primary-600 hover:text-primary-700">Send another message</button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('form.nameLabel')}
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder={t('form.namePlaceholder')}
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
+                      <label htmlFor="name" className="label">{t('form.nameLabel')}</label>
+                      <input type="text" id="name" required autoComplete="name" className="input" placeholder={t('form.namePlaceholder')} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                     </div>
-
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('form.emailLabel')}
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        placeholder={t('form.emailPlaceholder')}
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
+                      <label htmlFor="email" className="label">{t('form.emailLabel')}</label>
+                      <input type="email" id="email" required autoComplete="email" className="input" placeholder={t('form.emailPlaceholder')} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
                     </div>
-
                     <div>
-                      <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('form.subjectLabel')}
-                      </label>
-                      <select
-                        id="subject"
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                        value={formData.subject}
-                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      >
+                      <label htmlFor="subject" className="label">{t('form.subjectLabel')}</label>
+                      <select id="subject" required className="input cursor-pointer bg-card" value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })}>
                         <option value="">{t('form.subjectPlaceholder')}</option>
                         <option value="General Question">{t('form.subjectOptions.generalQuestion')}</option>
                         <option value="Technical Support">{t('form.subjectOptions.technicalSupport')}</option>
@@ -191,39 +124,20 @@ export default function ContactPage() {
                         <option value="Other">{t('form.subjectOptions.other')}</option>
                       </select>
                     </div>
-
                     <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('form.messageLabel')}
-                      </label>
-                      <textarea
-                        id="message"
-                        required
-                        rows={5}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none"
-                        placeholder={t('form.messagePlaceholder')}
-                        value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      />
+                      <label htmlFor="message" className="label">{t('form.messageLabel')}</label>
+                      <textarea id="message" required rows={5} className="input resize-none" placeholder={t('form.messagePlaceholder')} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} />
                     </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
+                    <button type="submit" disabled={isSubmitting} className="btn-primary w-full py-3">
                       {isSubmitting ? (
                         <>
-                          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
+                          <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                           Opening email...
                         </>
                       ) : (
                         <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                           </svg>
                           {t('form.submitButton')}
                         </>
@@ -233,12 +147,9 @@ export default function ContactPage() {
                 )}
               </div>
 
-              <p className="text-sm text-gray-500 mt-4 text-center">
+              <p className="mt-4 text-center text-sm text-fg-subtle">
                 {t('form.privacyNote').split('Privacy Policy')[0]}
-                <Link href="/privacy" className="text-primary-600 hover:underline">
-                  Privacy Policy
-                </Link>
-                .
+                <Link href="/privacy" className="text-primary-600 hover:underline">Privacy Policy</Link>.
               </p>
             </div>
           </div>

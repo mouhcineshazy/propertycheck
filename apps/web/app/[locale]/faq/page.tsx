@@ -58,55 +58,27 @@ function FAQItem({
   }, [isOpen]);
 
   return (
-    <div
-      className={`group border-b border-gray-100 last:border-0 transition-colors ${
-        isOpen ? 'bg-primary-50/50' : 'hover:bg-gray-50/50'
-      }`}
-    >
-      <button
-        className="w-full px-6 py-5 flex items-start justify-between text-left gap-4"
-        onClick={onToggle}
-        aria-expanded={isOpen}
-      >
+    <div className={`group border-b border-line transition-colors last:border-0 ${isOpen ? 'bg-primary-50/50' : 'hover:bg-card-muted/50'}`}>
+      <button className="flex w-full items-start justify-between gap-4 px-6 py-5 text-left" onClick={onToggle} aria-expanded={isOpen}>
         <div className="flex items-start gap-4">
-          <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-            isOpen
-              ? 'bg-primary-600 text-white'
-              : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
+          <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+            isOpen ? 'bg-primary-600 text-white' : 'bg-card-muted text-fg-muted group-hover:bg-primary-100 group-hover:text-primary-600'
           }`}>
             {index + 1}
           </span>
-          <span className={`font-medium pt-1 transition-colors ${
-            isOpen ? 'text-primary-900' : 'text-gray-900'
-          }`}>
-            {question}
-          </span>
+          <span className={`pt-1 font-medium transition-colors ${isOpen ? 'text-primary-900' : 'text-fg'}`}>{question}</span>
         </div>
-        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-          isOpen
-            ? 'bg-primary-600 text-white rotate-180'
-            : 'bg-gray-100 text-gray-500 group-hover:bg-primary-100 group-hover:text-primary-600'
+        <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all ${
+          isOpen ? 'rotate-180 bg-primary-600 text-white' : 'bg-card-muted text-fg-muted group-hover:bg-primary-100 group-hover:text-primary-600'
         }`}>
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </button>
-      <div
-        className="overflow-hidden transition-all duration-300 ease-in-out"
-        style={{ height: `${height}px` }}
-      >
+      <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ height: `${height}px` }}>
         <div ref={contentRef} className="px-6 pb-6 pl-[4.5rem]">
-          <div className="prose prose-gray max-w-none">
-            <p className="text-gray-600 leading-relaxed m-0">
-              {answer}
-            </p>
-          </div>
+          <p className="m-0 leading-relaxed text-fg-muted">{answer}</p>
         </div>
       </div>
     </div>
@@ -135,47 +107,28 @@ function CategoryCard({
   return (
     <div
       id={categoryKey}
-      className={`rounded-2xl border transition-all duration-300 ${
-        isActive
-          ? 'border-primary-200 shadow-lg shadow-primary-100/50'
-          : 'border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300'
+      className={`overflow-hidden rounded-2xl border bg-card transition-all duration-300 ${
+        isActive ? 'border-primary-200 shadow-md' : 'border-line shadow-sm hover:border-line-strong hover:shadow-md'
       }`}
     >
-      {/* Category Header */}
       <button
         onClick={onClick}
-        className={`w-full px-6 py-5 flex items-center gap-4 rounded-t-2xl transition-colors ${
-          isActive ? 'bg-primary-50' : 'bg-white hover:bg-gray-50'
-        }`}
+        className={`flex w-full items-center gap-4 px-6 py-5 transition-colors ${isActive ? 'bg-primary-50' : 'bg-card hover:bg-card-muted'}`}
       >
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-          isActive
-            ? 'bg-primary-600 text-white'
-            : 'bg-gray-100 text-gray-600'
-        }`}>
+        <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${isActive ? 'bg-primary-600 text-white' : 'bg-card-muted text-fg-muted'}`}>
           {icon}
         </div>
         <div className="flex-1 text-left">
-          <h2 className={`text-lg font-bold transition-colors ${
-            isActive ? 'text-primary-900' : 'text-gray-900'
-          }`}>
-            {title}
-          </h2>
-          <p className="text-sm text-gray-500">{questionCount} questions</p>
+          <h2 className={`text-lg font-bold transition-colors ${isActive ? 'text-primary-900' : 'text-fg'}`}>{title}</h2>
+          <p className="text-sm text-fg-muted">{questionCount} questions</p>
         </div>
-        <svg
-          className={`w-5 h-5 text-gray-400 transition-transform ${isActive ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+        <svg className={`h-5 w-5 text-fg-subtle transition-transform ${isActive ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
-      {/* Questions List */}
       {isActive && (
-        <div className="bg-white rounded-b-2xl">
+        <div className="bg-card">
           {questions.map((faq, index) => (
             <FAQItem
               key={index}
@@ -263,54 +216,43 @@ export default function FAQPage() {
   const totalQuestions = faqCategories.reduce((acc, cat) => acc + cat.questions.length, 0);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <main className="min-h-screen bg-canvas">
       <Navigation variant="light" />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 bg-gradient-to-br from-primary-50 via-white to-blue-50 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-100 rounded-full opacity-50 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100 rounded-full opacity-50 blur-3xl" />
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-card-muted pb-16 pt-32">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-primary-100 opacity-40 blur-3xl" />
         </div>
 
-        <div className="container mx-auto px-6 max-w-4xl text-center relative z-10">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-primary-100 rounded-full px-4 py-2 mb-6">
-            <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="container-page relative z-10 max-w-4xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-2 shadow-xs">
+            <svg className="h-5 w-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span className="text-sm font-medium text-primary-700">{totalQuestions} {t('questionsAnswered')}</span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-            {t('title')}
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10">
-            {t('subtitle')}
-          </p>
+          <h1 className="text-4xl font-bold tracking-tight text-fg md:text-5xl lg:text-display-lg">{t('title')}</h1>
+          <p className="mx-auto mb-10 mt-4 max-w-2xl text-xl text-fg-muted">{t('subtitle')}</p>
 
-          {/* Search Bar */}
-          <div className="max-w-xl mx-auto">
+          <div className="mx-auto max-w-xl">
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <svg className="h-5 w-5 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
               <input
-                type="text"
+                type="search"
                 placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl shadow-lg shadow-gray-200/50 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-gray-900 placeholder-gray-400"
+                className="input py-4 pl-12 shadow-md"
               />
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onClick={() => setSearchQuery('')} className="absolute inset-y-0 right-0 flex items-center pr-4 text-fg-subtle hover:text-fg" aria-label="Clear search">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -320,43 +262,36 @@ export default function FAQPage() {
         </div>
       </section>
 
-      {/* Quick Category Navigation */}
-      <section className="py-4 bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-20">
-        <div className="container mx-auto px-6">
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide justify-center">
-            {faqCategories.map((category) => (
-              <button
-                key={category.key}
-                onClick={() => {
-                  setActiveCategory(category.key);
-                  setSearchQuery('');
-                  // Use setTimeout to allow state update before scrolling
-                  setTimeout(() => {
-                    const element = document.getElementById(category.key);
-                    if (element) {
-                      const headerOffset = 100; // Account for sticky header
-                      const elementPosition = element.getBoundingClientRect().top;
-                      const offsetPosition = elementPosition + window.scrollY - headerOffset;
-                      window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }, 50);
-                }}
-                className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeCategory === category.key
-                    ? 'bg-primary-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <span className="w-5 h-5">{categoryIcons[category.key]}</span>
-                <span className="hidden sm:inline">{category.title}</span>
-                <span className="bg-white/20 text-xs px-1.5 py-0.5 rounded-full">
-                  {category.questions.length}
-                </span>
-              </button>
-            ))}
+      {/* Category nav */}
+      <section className="sticky top-0 z-20 border-b border-line bg-canvas/95 py-4 backdrop-blur-xl">
+        <div className="container-page">
+          <div className="scrollbar-hide flex justify-center gap-2 overflow-x-auto pb-2">
+            {faqCategories.map((category) => {
+              const active = activeCategory === category.key;
+              return (
+                <button
+                  key={category.key}
+                  onClick={() => {
+                    setActiveCategory(category.key);
+                    setSearchQuery('');
+                    setTimeout(() => {
+                      const element = document.getElementById(category.key);
+                      if (element) {
+                        const offsetPosition = element.getBoundingClientRect().top + window.scrollY - 100;
+                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                      }
+                    }, 50);
+                  }}
+                  className={`flex flex-shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    active ? 'bg-ink-950 text-white shadow-sm' : 'bg-card-muted text-fg-muted hover:bg-line'
+                  }`}
+                >
+                  <span className="h-5 w-5">{categoryIcons[category.key]}</span>
+                  <span className="hidden sm:inline">{category.title}</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-xs ${active ? 'bg-white/20' : 'bg-card'}`}>{category.questions.length}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -367,7 +302,7 @@ export default function FAQPage() {
           <div className="max-w-3xl mx-auto">
             {/* Search Results Info */}
             {searchQuery && (
-              <div className="mb-8 p-4 bg-primary-50 rounded-xl border border-primary-100 text-center">
+              <div className="mb-8 rounded-xl border border-primary-100 bg-primary-50 p-4 text-center">
                 <p className="text-primary-800">
                   {filteredCategories.reduce((acc, cat) => acc + cat.questions.length, 0)} {t('resultsFound')} &quot;{searchQuery}&quot;
                 </p>
@@ -392,60 +327,45 @@ export default function FAQPage() {
 
             {/* No Results */}
             {searchQuery && filteredCategories.length === 0 && (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="py-16 text-center">
+                <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-card-muted text-fg-subtle">
+                  <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('noResults.title')}</h3>
-                <p className="text-gray-600 mb-4">{t('noResults.subtitle')}</p>
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-primary-600 font-medium hover:text-primary-700"
-                >
-                  {t('noResults.clearSearch')}
-                </button>
+                </span>
+                <h3 className="mb-2 text-lg font-semibold text-fg">{t('noResults.title')}</h3>
+                <p className="mb-4 text-fg-muted">{t('noResults.subtitle')}</p>
+                <button onClick={() => setSearchQuery('')} className="font-medium text-primary-600 hover:text-primary-700">{t('noResults.clearSearch')}</button>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* Still Have Questions Section */}
-      <section className="py-20 bg-gradient-to-br from-primary-600 to-primary-700 relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-2xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+      {/* Still Have Questions */}
+      <section className="relative overflow-hidden bg-ink-950 py-20">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-0 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-primary-600/20 blur-3xl" />
         </div>
 
-        <div className="container mx-auto px-6 max-w-4xl text-center relative z-10">
-          <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        <div className="container-page relative z-10 max-w-4xl text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-white backdrop-blur">
+            <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{t('stillHaveQuestions.title')}</h2>
-          <p className="text-primary-100 text-lg mb-8 max-w-xl mx-auto">
-            {t('stillHaveQuestions.subtitle')}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 bg-white text-primary-700 px-8 py-4 rounded-xl font-semibold hover:bg-primary-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">{t('stillHaveQuestions.title')}</h2>
+          <p className="mx-auto mb-8 max-w-xl text-lg text-ink-300">{t('stillHaveQuestions.subtitle')}</p>
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <Link href="/contact" className="btn bg-white px-8 py-4 text-ink-950 hover:-translate-y-0.5 hover:bg-ink-50">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               {t('stillHaveQuestions.contactButton')}
             </Link>
-            <a
-              href="mailto:support@propertycheck.app"
-              className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-8 py-4 rounded-xl font-semibold border border-white/20 hover:bg-white/20 transition-all"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <a href="mailto:support@propertycheck.app" className="btn border border-white/20 px-8 py-4 text-white hover:bg-white/10">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
               {t('stillHaveQuestions.emailButton')}
             </a>

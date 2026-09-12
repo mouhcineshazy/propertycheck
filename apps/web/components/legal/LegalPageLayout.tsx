@@ -32,94 +32,62 @@ export function LegalPageLayout({
     }, 100);
   };
 
+  const pills = [
+    { href: '/terms', label: 'Terms of Service', type: 'terms' },
+    { href: '/privacy', label: 'Privacy Policy', type: 'privacy' },
+    { href: '/cookies', label: 'Cookie Policy', type: 'cookies' },
+  ] as const;
+
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-canvas">
       <Navigation variant="light" />
 
-      <div className="pt-24 pb-16">
-        <div className="container mx-auto px-6 max-w-4xl legal-print-content">
+      <div className="pb-16 pt-24">
+        <div className="legal-print-content container-page max-w-4xl">
           {/* Header */}
-          <div className="mb-12 legal-print-header">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-              <h1 className="text-4xl font-bold text-gray-900">{title}</h1>
+          <div className="legal-print-header mb-12">
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <h1 className="text-3xl font-bold tracking-tight text-fg sm:text-4xl">{title}</h1>
 
-              {/* Download Button */}
-              <button
-                onClick={handleDownloadPDF}
-                className="print-hide inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium shrink-0"
-                title="Download as PDF"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
+              <button onClick={handleDownloadPDF} className="btn-secondary print-hide shrink-0 px-4 py-2 text-sm" title="Download as PDF">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Download PDF
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+            <div className="flex flex-wrap gap-4 text-sm text-fg-subtle">
               <span>Effective Date: {effectiveDate}</span>
               <span className="print-hide">|</span>
               <span>Last Updated: {lastUpdated}</span>
             </div>
 
-            <p className="mt-4 text-gray-600">
-              <em>
-                Une version française de ce document est disponible sur demande. /
-                A French version of this document is available upon request.
-              </em>
+            <p className="mt-4 text-fg-muted">
+              <em>Une version française de ce document est disponible sur demande. / A French version of this document is available upon request.</em>
             </p>
 
-            {/* Print-only header info */}
-            <div className="hidden print:block mt-4 pt-4 border-t border-gray-300">
+            <div className="mt-4 hidden border-t border-line pt-4 print:block">
               <p className="text-sm">
                 <strong>PropertyCheck</strong> | propertycheck.app | support@propertycheck.app
               </p>
             </div>
           </div>
 
-          {/* Related Documents Navigation - Hide on print */}
-          <nav className="mb-8 print-hide">
+          {/* Related documents */}
+          <nav className="print-hide mb-8">
             <div className="flex flex-wrap gap-2">
-              <Link
-                href="/terms"
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  documentType === 'terms'
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Terms of Service
-              </Link>
-              <Link
-                href="/privacy"
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  documentType === 'privacy'
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/cookies"
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  documentType === 'cookies'
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Cookie Policy
-              </Link>
+              {pills.map((pill) => (
+                <Link
+                  key={pill.type}
+                  href={pill.href}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                    documentType === pill.type ? 'bg-primary-50 text-primary-700' : 'bg-card-muted text-fg-muted hover:bg-line'
+                  }`}
+                >
+                  {pill.label}
+                </Link>
+              ))}
             </div>
           </nav>
 
@@ -127,12 +95,11 @@ export function LegalPageLayout({
           {children}
 
           {/* Footer Note */}
-          <div className="border-t pt-8 mt-12">
-            <p className="text-sm text-gray-500">
-              This document was last updated on {lastUpdated}.
-              A history of changes is maintained and available upon request.
+          <div className="mt-12 border-t border-line pt-8">
+            <p className="text-sm text-fg-subtle">
+              This document was last updated on {lastUpdated}. A history of changes is maintained and available upon request.
             </p>
-            <p className="text-sm text-gray-500 mt-4">
+            <p className="mt-4 text-sm text-fg-subtle">
               By using PropertyCheck, you acknowledge that you have read and understood this document.
             </p>
 

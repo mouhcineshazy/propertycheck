@@ -3,34 +3,22 @@ import { Logo } from '@/components/ui/Logo';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
-      <div className="text-center max-w-md">
-        <div className="mb-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-4">
+      <div className="max-w-md text-center">
+        <div className="mb-8 flex justify-center">
           <Logo size="lg" />
         </div>
 
-        <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-4xl font-bold text-primary-600">404</span>
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-50">
+          <span className="text-3xl font-bold tracking-tight text-primary-600">404</span>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">Page not found</h1>
-        <p className="text-gray-500 mb-8 leading-relaxed">
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
-        </p>
+        <h1 className="mb-3 text-2xl font-bold text-fg">Page not found</h1>
+        <p className="mb-8 leading-relaxed text-fg-muted">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            href="/dashboard"
-            className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
-          >
-            Go to Dashboard
-          </Link>
-          <Link
-            href="/"
-            className="inline-block bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-colors"
-          >
-            Back to Home
-          </Link>
+        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+          <Link href="/dashboard" className="btn-primary px-6 py-3">Go to Dashboard</Link>
+          <Link href="/" className="btn-secondary px-6 py-3">Back to Home</Link>
         </div>
       </div>
     </div>

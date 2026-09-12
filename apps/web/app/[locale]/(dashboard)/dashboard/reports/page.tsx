@@ -19,27 +19,16 @@ export default function ReportsPage() {
   useEffect(() => {
     const fetchInspections = async () => {
       const supabase = createClient();
-
       const { data, error } = await supabase
         .from('inspections')
-        .select(`
-          id,
-          inspection_date,
-          status,
-          properties (
-            address
-          ),
-          inspection_photos (id)
-        `)
+        .select(`id, inspection_date, status, properties ( address ), inspection_photos (id)`)
         .eq('status', 'completed')
         .order('inspection_date', { ascending: false });
-
       if (error) {
         console.error('Error fetching inspections:', error);
         setIsLoading(false);
         return;
       }
-
       if (data) {
         setInspections(
           data.map((i: { id: string; inspection_date: string; status: string; properties: { address: string } | null; inspection_photos: { id: string }[] }) => ({
@@ -51,20 +40,18 @@ export default function ReportsPage() {
           }))
         );
       }
-
       setIsLoading(false);
     };
-
     fetchInspections();
   }, []);
 
   if (isLoading) {
     return (
-      <div className="animate-pulse">
-        <div className="h-8 w-48 bg-gray-200 rounded mb-8" />
-        <div className="space-y-4">
+      <div>
+        <div className="skeleton mb-8 h-8 w-48" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-gray-200 rounded-xl" />
+            <div key={i} className="skeleton h-48" />
           ))}
         </div>
       </div>
@@ -74,66 +61,48 @@ export default function ReportsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-        <p className="text-gray-600 mt-1">Generate and share PDF reports for your inspections</p>
+        <h1 className="text-2xl font-bold tracking-tight text-fg">Reports</h1>
+        <p className="mt-1 text-fg-muted">Generate and share PDF reports for your inspections</p>
       </div>
 
       {inspections.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          <svg
-            className="w-16 h-16 text-gray-300 mx-auto mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No completed inspections</h3>
-          <p className="text-gray-500 mb-4">
-            Complete an inspection to generate a PDF report
-          </p>
-          <Link
-            href="/dashboard/inspections"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors"
-          >
+        <div className="card p-12 text-center">
+          <span className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-card-muted text-fg-subtle">
+            <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </span>
+          <h3 className="text-lg font-semibold text-fg">No completed inspections</h3>
+          <p className="mt-1 text-fg-muted">Complete an inspection to generate a PDF report</p>
+          <Link href="/dashboard/inspections" className="btn-primary mx-auto mt-5 w-fit px-4 py-2.5">
             View Inspections
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {inspections.map((inspection) => (
-            <div
-              key={inspection.id}
-              className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg hover:border-gray-300 transition-all"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div key={inspection.id} className="card-interactive p-5">
+              <div className="mb-4 flex items-start justify-between">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-verified-50 text-verified-500">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                </div>
-                <span className="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                  Completed
                 </span>
+                <span className="badge-verified">Completed</span>
               </div>
 
-              <h3 className="font-semibold text-gray-900 line-clamp-2">{inspection.property_address}</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                {new Date(inspection.inspection_date).toLocaleDateString()}
-              </p>
+              <h3 className="line-clamp-2 font-semibold text-fg">{inspection.property_address}</h3>
+              <p className="mt-1 text-sm text-fg-muted">{new Date(inspection.inspection_date).toLocaleDateString('en-CA')}</p>
 
-              <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <div className="mt-2 flex items-center gap-1.5 text-sm text-fg-muted">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 {inspection.photo_count} photos
               </div>
 
-              <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
-                <Link
-                  href={`/dashboard/inspections/${inspection.id}`}
-                  className="flex-1 px-3 py-2 text-center text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
+              <div className="mt-4 flex gap-2 border-t border-line pt-4">
+                <Link href={`/dashboard/inspections/${inspection.id}`} className="btn-secondary flex-1 py-2 text-sm">
                   View
                 </Link>
                 <a
@@ -141,10 +110,10 @@ export default function ReportsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   title="Generate PDF in the mobile app"
-                  className="flex-1 px-3 py-2 text-center text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-1.5"
+                  className="btn-primary flex-1 py-2 text-sm"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   PDF
                 </a>
@@ -154,20 +123,17 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* Info Box */}
-      <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-6">
+      <div className="mt-8 rounded-2xl border border-primary-100 bg-primary-50 p-6">
         <div className="flex gap-4">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-          </div>
+          </span>
           <div>
-            <h3 className="font-medium text-gray-900 mb-1">PDF Reports — Mobile App</h3>
-            <p className="text-sm text-gray-600">
-              PDF generation and emailing to your landlord is available in the PropertyCheck mobile app.
-              Use this dashboard to browse your inspection history. Tap the PDF button above to open the
-              App Store and download the app.
+            <h3 className="font-semibold text-fg">PDF Reports — Mobile App</h3>
+            <p className="mt-1 text-sm text-fg-muted">
+              PDF generation and emailing to your landlord is available in the PropertyCheck mobile app. Use this dashboard to browse your inspection history. Tap the PDF button above to open the App Store and download the app.
             </p>
           </div>
         </div>
