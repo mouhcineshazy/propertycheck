@@ -46,7 +46,7 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
     >
       <div className="container-page flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center" aria-label="PropertyCheck home">
-          <Logo size={40} color="#0B1524" />
+          <Logo size={40} />
         </Link>
 
         {variant === 'default' && (
@@ -65,14 +65,11 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
 
         <div className="hidden md:flex items-center gap-2">
           <LanguageSwitcher />
-          <Link
-            href="/login"
-            className="px-3.5 py-2 text-sm font-medium text-fg-muted hover:text-fg transition-colors"
-          >
-            {t('login')}
-          </Link>
-          <Link href="/signup" className="btn-primary">
-            {t('getStarted')}
+          <Link href="/#download" className="btn-primary">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" />
+            </svg>
+            {t('getApp')}
           </Link>
         </div>
 
@@ -119,18 +116,14 @@ export function Navigation({ variant = 'default' }: NavigationProps) {
               </div>
               <div className="h-px bg-line my-2" />
               <Link
-                href="/login"
-                className="px-3 py-3 text-base font-medium text-fg-muted rounded-lg hover:bg-card-muted"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t('login')}
-              </Link>
-              <Link
-                href="/signup"
+                href="/#download"
                 className="btn-primary mt-1"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                {t('getStarted')}
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" />
+                </svg>
+                {t('getApp')}
               </Link>
             </div>
           </motion.div>

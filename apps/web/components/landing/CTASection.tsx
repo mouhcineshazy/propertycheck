@@ -43,15 +43,15 @@ export function CTASection() {
           <p className="mx-auto mt-6 max-w-xl text-lg text-ink-300">{t('subtitle')}</p>
 
           <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
-              href="/signup"
+            <a
+              href="#download"
               className="btn group bg-white px-7 py-3.5 text-base text-ink-950 shadow-lg hover:-translate-y-0.5 hover:bg-ink-50"
             >
               {t('primaryCta')}
-              <svg className="h-5 w-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+              <svg className="h-5 w-5 transition-transform group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
               </svg>
-            </Link>
+            </a>
             <Link
               href="/contact"
               className="btn border border-white/25 px-7 py-3.5 text-base text-white hover:bg-white/10"

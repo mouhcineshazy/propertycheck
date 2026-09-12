@@ -73,85 +73,41 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired - critical for Server Components
-  // This must run before any protected route checks
-  // getUser() validates the JWT with Supabase servers (secure but slower)
-  // We use this to ensure the session is valid
-  let user = null;
-
-  try {
-    const { data, error } = await supabase.auth.getUser();
-    if (!error && data.user) {
-      user = data.user;
-    }
-  } catch {
-    // If getUser fails (network issue, etc.), check session from cookies as fallback
-    // This is less secure but allows the app to work offline
-    const { data: sessionData } = await supabase.auth.getSession();
-    user = sessionData.session?.user ?? null;
-  }
+  // Web auth is disabled (presentation-only site), so no session validation
+  // is needed here — the Supabase client above is retained only for cookie
+  // plumbing on API routes that still pass through this middleware.
+  void supabase;
 
   const pathname = request.nextUrl.pathname;
   const pathWithoutLocale = getPathWithoutLocale(pathname);
   const locale = getLocaleFromPath(pathname);
 
   // ─────────────────────────────────────────────────────────────────────────
-  // PROTECTED ROUTES
-  // Routes that require authentication - redirect to login if not logged in
+  // WEB IS PRESENTATION-ONLY
+  // The product lives in the mobile app. The web is a marketing site that
+  // introduces PropertyCheck and prompts users to download the app.
+  // Sign-in / sign-up / dashboard / the web upgrade page are disabled — any
+  // request to them is redirected to the marketing home.
+  //
+  // Explicitly still reachable (NOT redirected):
+  //  - /checkout/success, /checkout/report-success, /checkout/bundle-success
+  //    (Stripe return URLs used by the mobile app's checkout flow)
+  //  - /share/[token], /compare/[propertyId] (public acquisition surfaces)
+  //  - /api/* and /auth/* (handled before this function)
   // ─────────────────────────────────────────────────────────────────────────
-  const protectedPaths = [
-    '/dashboard',
-    '/properties',
-    '/inspections',
-    '/settings',
-    '/checkout', // Checkout requires auth to link subscription to user
-  ];
+  const disabledExact = ['/login', '/signup', '/forgot-password', '/reset-password', '/checkout'];
+  const disabledPrefixes = ['/dashboard'];
 
-  const isProtectedRoute = protectedPaths.some((path) =>
-    pathWithoutLocale.startsWith(path)
-  );
+  const isDisabled =
+    disabledExact.includes(pathWithoutLocale) ||
+    disabledPrefixes.some(
+      (p) => pathWithoutLocale === p || pathWithoutLocale.startsWith(`${p}/`)
+    );
 
-  if (isProtectedRoute && !user) {
+  if (isDisabled) {
     const url = request.nextUrl.clone();
-    url.pathname = `/${locale}/login`;
-
-    // Preserve the full URL including query params for redirect after login
-    // This ensures ?plan=premium is preserved when redirecting from checkout
-    const fullRedirectPath = pathname + request.nextUrl.search;
-    url.searchParams.set('redirect', fullRedirectPath);
-
-    return NextResponse.redirect(url);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // AUTH ROUTES
-  // Routes that should redirect to dashboard if already logged in
-  // ─────────────────────────────────────────────────────────────────────────
-  const authPaths = ['/login', '/signup', '/forgot-password'];
-
-  const isAuthRoute = authPaths.some((path) =>
-    pathWithoutLocale.startsWith(path)
-  );
-
-  if (isAuthRoute && user) {
-    // Check if there's a redirect URL in the query params
-    const redirectTo = request.nextUrl.searchParams.get('redirect');
-
-    const url = request.nextUrl.clone();
-
-    if (redirectTo && redirectTo.startsWith('/')) {
-      // Redirect to the intended destination (validated to start with /)
-      url.pathname = redirectTo.split('?')[0]; // Extract path without query
-      // Preserve query params from redirect URL
-      const redirectUrl = new URL(redirectTo, request.url);
-      redirectUrl.searchParams.forEach((value, key) => {
-        url.searchParams.set(key, value);
-      });
-    } else {
-      // Default to dashboard with current locale
-      url.pathname = `/${locale}/dashboard`;
-    }
-
+    url.pathname = `/${locale}`;
+    url.search = '';
     return NextResponse.redirect(url);
   }
 

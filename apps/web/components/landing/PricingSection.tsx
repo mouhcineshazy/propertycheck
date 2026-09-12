@@ -171,12 +171,12 @@ export function PricingSection() {
                 )}
               </div>
 
-              <Link
-                href={plan.price.monthly === 0 ? '/signup' : '/signup?plan=premium'}
+              <a
+                href="#download"
                 className={cn('mt-7', plan.popular ? 'btn-primary py-3' : 'btn-secondary py-3')}
               >
                 {t(plan.ctaKey)}
-              </Link>
+              </a>
 
               <div className="mt-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-fg-subtle">

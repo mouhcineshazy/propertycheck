@@ -9,6 +9,7 @@
  */
 @layer base {
   :root {
+    color-scheme: light;
     --canvas: 247 248 250; /* #F7F8FA page background */
     --card: 255 255 255; /* card surface */
     --card-muted: 242 244 248; /* ink-50 recessed surface */
@@ -17,6 +18,34 @@
     --fg-subtle: 134 149 171; /* ink-400 tertiary text */
     --line: 230 233 239; /* ink-100 hairline */
     --line-strong: 211 218 228; /* ink-200 stronger border */
+  }
+
+  /* Dark theme — applied by system preference (default) or an explicit
+     [data-theme="dark"] override. [data-theme="light"] always forces light. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      color-scheme: dark;
+      --canvas: 11 21 36;
+      --card: 15 27 45;
+      --card-muted: 28 42 62;
+      --fg: 242 244 248;
+      --fg-muted: 174 185 201;
+      --fg-subtle: 99 116 141;
+      --line: 30 43 62;
+      --line-strong: 44 59 82;
+    }
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --canvas: 11 21 36;
+    --card: 15 27 45;
+    --card-muted: 28 42 62;
+    --fg: 242 244 248;
+    --fg-muted: 174 185 201;
+    --fg-subtle: 99 116 141;
+    --line: 30 43 62;
+    --line-strong: 44 59 82;
   }
 
   * {

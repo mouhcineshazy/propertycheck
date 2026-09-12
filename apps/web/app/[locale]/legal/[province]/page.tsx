@@ -35,18 +35,18 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-card-muted">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-card border-b border-line">
         <div className="container mx-auto px-6 py-4">
-          <Link href="/" className="text-xl font-bold text-gray-900">
+          <Link href="/" className="text-xl font-bold text-fg">
             {APP_CONFIG.name}
           </Link>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="bg-gray-900 text-white py-16">
+      <section className="bg-ink-950 text-white py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl">
             <span className="inline-block bg-blue-600 text-white text-sm font-semibold px-3 py-1 rounded-full mb-4">
@@ -55,7 +55,7 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Rental Inspection Guide for {province.name}
             </h1>
-            <p className="text-xl text-gray-300">
+            <p className="text-xl text-ink-300">
               Everything you need to know about protecting your security deposit under the {province.tenancyActShort}.
             </p>
           </div>
@@ -67,24 +67,24 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
         <div className="max-w-3xl">
           {/* Legal Framework */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-fg mb-4">
               Legal Framework
             </h2>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-card rounded-xl shadow-sm border border-line p-6">
               <dl className="space-y-4">
                 <div>
-                  <dt className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                  <dt className="text-sm font-semibold text-fg-subtle uppercase tracking-wider">
                     Governing Legislation
                   </dt>
-                  <dd className="text-lg text-gray-900 mt-1">
+                  <dd className="text-lg text-fg mt-1">
                     {province.tenancyAct}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                  <dt className="text-sm font-semibold text-fg-subtle uppercase tracking-wider">
                     Regulatory Body
                   </dt>
-                  <dd className="text-lg text-gray-900 mt-1">
+                  <dd className="text-lg text-fg mt-1">
                     <a
                       href={province.regulatoryBodyUrl}
                       target="_blank"
@@ -96,10 +96,10 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                  <dt className="text-sm font-semibold text-fg-subtle uppercase tracking-wider">
                     Dispute Resolution
                   </dt>
-                  <dd className="text-lg text-gray-900 mt-1">
+                  <dd className="text-lg text-fg mt-1">
                     <a
                       href={province.disputeUrl}
                       target="_blank"
@@ -116,7 +116,7 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
 
           {/* Inspection Requirements */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-fg mb-4">
               Inspection Requirements
             </h2>
             <div className="bg-blue-50 rounded-xl border border-blue-100 p-6">
@@ -128,10 +128,10 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
 
           {/* Key Legal Highlights */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-fg mb-4">
               What {province.name} Renters Should Know
             </h2>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-card rounded-xl shadow-sm border border-line p-6">
               <ul className="space-y-4">
                 {province.legalHighlights.map((highlight, i) => (
                   <li key={i} className="flex items-start gap-3">
@@ -148,7 +148,7 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    <span className="text-gray-700">{highlight}</span>
+                    <span className="text-fg-muted">{highlight}</span>
                   </li>
                 ))}
               </ul>
@@ -157,10 +157,10 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
 
           {/* How PropertyCheck Helps */}
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-fg mb-4">
               How {APP_CONFIG.name} Helps {province.name} Renters
             </h2>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-card rounded-xl shadow-sm border border-line p-6">
               <ul className="space-y-4">
                 {province.appBenefits.map((benefit, i) => (
                   <li key={i} className="flex items-start gap-3">
@@ -177,7 +177,7 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                       />
                     </svg>
-                    <span className="text-gray-700">{benefit}</span>
+                    <span className="text-fg-muted">{benefit}</span>
                   </li>
                 ))}
               </ul>
@@ -185,11 +185,11 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
           </section>
 
           {/* CTA */}
-          <section className="bg-gray-900 rounded-2xl p-8 text-center">
+          <section className="bg-ink-950 rounded-2xl p-8 text-center">
             <h2 className="text-2xl font-bold text-white mb-4">
               Protect Your Deposit Today
             </h2>
-            <p className="text-gray-300 mb-6">
+            <p className="text-ink-300 mb-6">
               Start documenting your rental property with {APP_CONFIG.name}. Free for your first move-in & move-out inspections.
             </p>
             <Link
@@ -204,8 +204,8 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
           </section>
 
           {/* Other provinces */}
-          <section className="mt-12 pt-8 border-t border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <section className="mt-12 pt-8 border-t border-line">
+            <h3 className="text-lg font-semibold text-fg mb-4">
               Guides for Other Provinces
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -215,7 +215,7 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
                   <Link
                     key={code}
                     href={`/legal/${code.toLowerCase()}`}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                    className="px-4 py-2 bg-card-muted text-fg-muted rounded-lg hover:bg-line transition-colors text-sm font-medium"
                   >
                     {otherProvince.name}
                   </Link>
@@ -227,8 +227,8 @@ export default async function ProvinceLegalPage({ params }: { params: Promise<{ 
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 py-8">
-        <div className="container mx-auto px-6 text-center text-gray-500 text-sm">
+      <footer className="bg-card border-t border-line py-8">
+        <div className="container mx-auto px-6 text-center text-fg-subtle text-sm">
           <p className="mb-2">
             This page is for informational purposes only and does not constitute legal advice.
             Please consult with a qualified legal professional for specific legal questions.

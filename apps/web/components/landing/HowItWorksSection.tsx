@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -83,12 +82,12 @@ export function HowItWorksSection() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2, ease: easeOut }}
         >
-          <Link href="/signup" className="btn-primary px-7 py-3.5 text-base">
+          <a href="#download" className="btn-primary px-7 py-3.5 text-base">
             {t('cta')}
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
             </svg>
-          </Link>
+          </a>
         </motion.div>
       </div>
     </section>

@@ -43,7 +43,9 @@ function getFontSize(size: number | string): number {
  * Primary Logo - Text only
  */
 export function Logo({ size = 'md', color, className = '', variant = 'default' }: LogoProps) {
-  const textColor = color || (variant === 'light' ? BRAND.white : BRAND.dark);
+  const textColor =
+    color ||
+    (variant === 'light' ? BRAND.white : variant === 'dark' ? BRAND.dark : 'rgb(var(--fg))');
   const fontSize = getFontSize(size);
 
   return (
@@ -65,7 +67,7 @@ export function LogoSplash({ size = 120, className = '' }: { size?: number; clas
   return (
     <span
       className={`font-bold tracking-tight ${className}`}
-      style={{ fontSize, color: BRAND.dark }}
+      style={{ fontSize, color: 'rgb(var(--fg))' }}
     >
       Property<span className="font-extrabold" style={{ color: BRAND.primary }}>Check</span>
     </span>
@@ -81,7 +83,7 @@ export function LogoWithTagline({
   className = '',
   variant = 'default',
 }: LogoProps) {
-  const textColor = color || (variant === 'light' ? BRAND.white : BRAND.dark);
+  const textColor = color || (variant === 'light' ? BRAND.white : 'rgb(var(--fg))');
   const taglineColor = variant === 'light' ? 'rgba(255,255,255,0.7)' : BRAND.gray;
   const fontSize = getFontSize(size);
 
@@ -105,7 +107,7 @@ export function LogoWithTagline({
  */
 export function LogoWithText({
   size = 'md',
-  textColor = BRAND.dark,
+  textColor = 'rgb(var(--fg))',
   className = '',
   showTagline = false,
 }: {
@@ -126,7 +128,7 @@ export function LogoWithText({
  */
 export function LogoStacked({
   size = 'lg',
-  textColor = BRAND.dark,
+  textColor = 'rgb(var(--fg))',
   className = '',
   showTagline = true,
 }: {

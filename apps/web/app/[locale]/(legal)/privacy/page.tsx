@@ -24,8 +24,8 @@ export default function PrivacyPage() {
       </div>
 
       {/* Table of Contents */}
-      <nav className="mb-12 p-6 bg-gray-50 rounded-xl print-hide">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Table of Contents</h2>
+      <nav className="mb-12 p-6 bg-card-muted rounded-xl print-hide">
+        <h2 className="text-lg font-semibold text-fg mb-4">Table of Contents</h2>
         <ol className="grid md:grid-cols-2 gap-2 text-sm">
           <li><a href="#introduction" className="text-primary-600 hover:underline">1. Introduction</a></li>
           <li><a href="#information-collected" className="text-primary-600 hover:underline">2. Information We Collect</a></li>
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
       <div className="prose prose-gray max-w-none">
         {/* Section 1 */}
         <section id="introduction" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">1. Introduction</h2>
           <p>
             PropertyCheck (&ldquo;Company,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) operates the PropertyCheck website and mobile applications (collectively, the &ldquo;Service&rdquo;). This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our Service.
           </p>
@@ -65,10 +65,10 @@ export default function PrivacyPage() {
 
         {/* Section 2 */}
         <section id="information-collected" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Information We Collect</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">2. Information We Collect</h2>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">2.1 Information You Provide Directly</h3>
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <p className="font-semibold mb-2">Account Information:</p>
             <ul className="list-disc pl-6 text-sm space-y-1">
               <li>Email address</li>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
               <li>Google account identifier (if using Google OAuth)</li>
             </ul>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <p className="font-semibold mb-2">Property Information:</p>
             <ul className="list-disc pl-6 text-sm space-y-1">
               <li>Property address</li>
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
               <li>Property notes and descriptions</li>
             </ul>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <p className="font-semibold mb-2">Inspection Information:</p>
             <ul className="list-disc pl-6 text-sm space-y-1">
               <li>Inspection date and time</li>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
               <li>Inspection status and notes</li>
             </ul>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <p className="font-semibold mb-2">Photo Information:</p>
             <ul className="list-disc pl-6 text-sm space-y-1">
               <li>Photos you upload of property conditions</li>
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
           </div>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">2.2 Information Collected Automatically</h3>
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <p className="font-semibold mb-2">Technical Information:</p>
             <ul className="list-disc pl-6 text-sm space-y-1">
               <li>Device type and operating system</li>
@@ -131,7 +131,7 @@ export default function PrivacyPage() {
 
         {/* Section 3 */}
         <section id="how-we-use" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">3. How We Use Your Information</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">3. How We Use Your Information</h2>
           <p>We use your personal information for the following purposes:</p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">3.1 Providing the Service</h3>
@@ -162,23 +162,23 @@ export default function PrivacyPage() {
 
         {/* Section 4 */}
         <section id="legal-basis" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Legal Basis for Processing</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">4. Legal Basis for Processing</h2>
           <p>Under PIPEDA, we process your personal information based on the following legal grounds:</p>
 
           <div className="space-y-4 mt-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Consent:</p>
               <p className="text-sm">When you create an account, upload content, or opt-in to marketing communications, you provide express consent for us to process your information for those purposes.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Contract Performance:</p>
               <p className="text-sm">Processing necessary to provide the Service you requested and fulfill our contractual obligations under the Terms of Service.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Legitimate Business Interests:</p>
               <p className="text-sm">Processing for fraud prevention, security, Service improvement, and analytics, balanced against your privacy interests.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Legal Compliance:</p>
               <p className="text-sm">Processing required to comply with applicable laws, regulations, or legal processes.</p>
             </div>
@@ -187,12 +187,12 @@ export default function PrivacyPage() {
 
         {/* Section 5 */}
         <section id="information-sharing" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Information Sharing</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">5. Information Sharing</h2>
           <p>We do not sell your personal information. We share your information only in the following circumstances:</p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">5.1 Service Providers</h3>
           <p>We share information with trusted third-party service providers who assist us in operating the Service:</p>
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
@@ -251,10 +251,10 @@ export default function PrivacyPage() {
 
         {/* Section 6 */}
         <section id="data-retention" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Data Retention</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">6. Data Retention</h2>
           <p>We retain your personal information only as long as necessary for the purposes outlined in this policy:</p>
 
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
@@ -298,7 +298,7 @@ export default function PrivacyPage() {
 
         {/* Section 7 */}
         <section id="data-security" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Data Security</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">7. Data Security</h2>
           <p>We implement appropriate technical and organizational measures to protect your personal information:</p>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">7.1 Technical Safeguards</h3>
@@ -318,14 +318,14 @@ export default function PrivacyPage() {
             <li>Vendor security assessments</li>
           </ul>
 
-          <p className="mt-4 text-sm text-gray-600">
+          <p className="mt-4 text-sm text-fg-muted">
             While we strive to protect your information, no method of transmission over the Internet or electronic storage is 100% secure. We cannot guarantee absolute security.
           </p>
         </section>
 
         {/* Section 8 */}
         <section id="cross-border" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Cross-Border Data Transfers</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">8. Cross-Border Data Transfers</h2>
           <div className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400">
             <p className="font-semibold">Important Notice:</p>
             <p>
@@ -349,23 +349,23 @@ export default function PrivacyPage() {
 
         {/* Section 9 */}
         <section id="your-rights" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Your Privacy Rights</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">9. Your Privacy Rights</h2>
           <p>Under PIPEDA and provincial privacy laws, you have the following rights regarding your personal information:</p>
 
           <div className="space-y-4 mt-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Access</p>
               <p className="text-sm">Request a copy of the personal information we hold about you.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Correction</p>
               <p className="text-sm">Request correction of inaccurate or incomplete personal information.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Withdraw Consent</p>
               <p className="text-sm">Withdraw your consent to certain processing activities, subject to legal or contractual restrictions.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Challenge Compliance</p>
               <p className="text-sm">Challenge our compliance with PIPEDA by contacting the Office of the Privacy Commissioner of Canada.</p>
             </div>
@@ -393,7 +393,7 @@ export default function PrivacyPage() {
 
         {/* Section 10 */}
         <section id="quebec-rights" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Quebec Residents&apos; Rights (Law 25)</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">10. Quebec Residents&apos; Rights (Law 25)</h2>
           <div className="bg-primary-50 p-6 rounded-lg border-l-4 border-primary-600">
             <p className="font-semibold text-primary-900">Additional Rights for Quebec Residents</p>
             <p className="text-primary-800">
@@ -402,19 +402,19 @@ export default function PrivacyPage() {
           </div>
 
           <div className="space-y-4 mt-6">
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Data Portability</p>
               <p className="text-sm">You have the right to receive your personal information in a structured, commonly used, and machine-readable format, and to have it transferred to another organization where technically feasible.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Be Forgotten (Erasure)</p>
               <p className="text-sm">You have the right to request the deletion of your personal information when it is no longer necessary for the purposes for which it was collected, or when you withdraw consent.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Cease Dissemination</p>
               <p className="text-sm">You have the right to request that we stop disseminating your personal information or de-index any hyperlink attached to your name if dissemination causes harm.</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="bg-card-muted p-4 rounded-lg">
               <p className="font-semibold">Right to Know Automated Decision-Making</p>
               <p className="text-sm">You have the right to be informed if we use automated decision-making to make decisions about you, and to request human review of such decisions.</p>
             </div>
@@ -436,7 +436,7 @@ export default function PrivacyPage() {
 
         {/* Section 11 */}
         <section id="cookies" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Cookies & Tracking Technologies</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">11. Cookies & Tracking Technologies</h2>
           <p>
             We use cookies and similar technologies to improve your experience on our Service. For detailed information, please see our <Link href="/cookies" className="text-primary-600 hover:underline">Cookie Policy</Link>.
           </p>
@@ -461,7 +461,7 @@ export default function PrivacyPage() {
 
         {/* Section 12 */}
         <section id="marketing" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Marketing Communications (CASL Compliance)</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">12. Marketing Communications (CASL Compliance)</h2>
           <p>
             We comply with Canada&apos;s Anti-Spam Legislation (CASL) for all commercial electronic messages.
           </p>
@@ -500,7 +500,7 @@ export default function PrivacyPage() {
 
         {/* Section 13 */}
         <section id="children" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Children&apos;s Privacy</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">13. Children&apos;s Privacy</h2>
           <p>
             Our Service is not intended for individuals under 18 years of age (or the age of majority in their province, whichever is greater). We do not knowingly collect personal information from children.
           </p>
@@ -511,7 +511,7 @@ export default function PrivacyPage() {
 
         {/* Section 14 */}
         <section id="data-breach" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">14. Data Breach Procedures</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">14. Data Breach Procedures</h2>
           <p>
             In accordance with PIPEDA and provincial requirements, we have established data breach response procedures:
           </p>
@@ -539,58 +539,58 @@ export default function PrivacyPage() {
 
         {/* Section 15 */}
         <section id="pipeda-principles" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">15. PIPEDA Fair Information Principles</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">15. PIPEDA Fair Information Principles</h2>
           <p>
             We adhere to the 10 Fair Information Principles outlined in Schedule 1 of PIPEDA:
           </p>
 
           <div className="grid gap-3 mt-4">
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">1. Accountability</p>
-              <p className="text-xs text-gray-600">We are responsible for personal information under our control and have designated a Privacy Officer.</p>
+              <p className="text-xs text-fg-muted">We are responsible for personal information under our control and have designated a Privacy Officer.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">2. Identifying Purposes</p>
-              <p className="text-xs text-gray-600">We identify the purposes for collecting personal information at or before the time of collection.</p>
+              <p className="text-xs text-fg-muted">We identify the purposes for collecting personal information at or before the time of collection.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">3. Consent</p>
-              <p className="text-xs text-gray-600">We obtain meaningful consent for the collection, use, and disclosure of personal information.</p>
+              <p className="text-xs text-fg-muted">We obtain meaningful consent for the collection, use, and disclosure of personal information.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">4. Limiting Collection</p>
-              <p className="text-xs text-gray-600">We limit collection to what is necessary for identified purposes and collect information by fair and lawful means.</p>
+              <p className="text-xs text-fg-muted">We limit collection to what is necessary for identified purposes and collect information by fair and lawful means.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">5. Limiting Use, Disclosure, and Retention</p>
-              <p className="text-xs text-gray-600">We only use or disclose information for the purposes it was collected, and retain it only as long as necessary.</p>
+              <p className="text-xs text-fg-muted">We only use or disclose information for the purposes it was collected, and retain it only as long as necessary.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">6. Accuracy</p>
-              <p className="text-xs text-gray-600">We keep personal information accurate, complete, and up-to-date as necessary for its purposes.</p>
+              <p className="text-xs text-fg-muted">We keep personal information accurate, complete, and up-to-date as necessary for its purposes.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">7. Safeguards</p>
-              <p className="text-xs text-gray-600">We protect personal information with security safeguards appropriate to the sensitivity of the information.</p>
+              <p className="text-xs text-fg-muted">We protect personal information with security safeguards appropriate to the sensitivity of the information.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">8. Openness</p>
-              <p className="text-xs text-gray-600">We make information about our privacy policies and practices readily available.</p>
+              <p className="text-xs text-fg-muted">We make information about our privacy policies and practices readily available.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">9. Individual Access</p>
-              <p className="text-xs text-gray-600">Upon request, we inform individuals of the existence, use, and disclosure of their personal information and provide access.</p>
+              <p className="text-xs text-fg-muted">Upon request, we inform individuals of the existence, use, and disclosure of their personal information and provide access.</p>
             </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="bg-card-muted p-3 rounded-lg">
               <p className="font-semibold text-sm">10. Challenging Compliance</p>
-              <p className="text-xs text-gray-600">Individuals can challenge our compliance by contacting our Privacy Officer or the Office of the Privacy Commissioner.</p>
+              <p className="text-xs text-fg-muted">Individuals can challenge our compliance by contacting our Privacy Officer or the Office of the Privacy Commissioner.</p>
             </div>
           </div>
         </section>
 
         {/* Section 16 */}
         <section id="changes" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">16. Changes to This Policy</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">16. Changes to This Policy</h2>
           <p>
             We may update this Privacy Policy from time to time to reflect changes in our practices or for legal, regulatory, or operational reasons. When we make changes, we will:
           </p>
@@ -609,10 +609,10 @@ export default function PrivacyPage() {
 
         {/* Section 17 */}
         <section id="contact" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">17. Contact Us</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">17. Contact Us</h2>
           <p>If you have questions, concerns, or complaints about this Privacy Policy or our privacy practices, please contact us:</p>
 
-          <div className="bg-gray-50 p-6 rounded-lg mt-4">
+          <div className="bg-card-muted p-6 rounded-lg mt-4">
             <p className="font-semibold text-lg">PropertyCheck - Privacy Office</p>
             <p className="mt-2">Email: <a href="mailto:privacy@propertycheck.app" className="text-primary-600 hover:underline">privacy@propertycheck.app</a></p>
             <p>General Support: <a href="mailto:support@propertycheck.app" className="text-primary-600 hover:underline">support@propertycheck.app</a></p>
@@ -628,28 +628,28 @@ export default function PrivacyPage() {
 
           <h3 className="text-xl font-semibold mt-6 mb-3">17.1 Regulatory Contacts</h3>
           <p>If you are not satisfied with our response, you may contact:</p>
-          <div className="bg-gray-50 p-4 rounded-lg mt-4">
+          <div className="bg-card-muted p-4 rounded-lg mt-4">
             <p className="font-semibold">Office of the Privacy Commissioner of Canada</p>
             <p className="text-sm">
               Website: <a href="https://www.priv.gc.ca" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">www.priv.gc.ca</a><br />
               Phone: 1-800-282-1376
             </p>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg mt-4">
+          <div className="bg-card-muted p-4 rounded-lg mt-4">
             <p className="font-semibold">Commission d&apos;accès à l&apos;information du Québec (Quebec residents)</p>
             <p className="text-sm">
               Website: <a href="https://www.cai.gouv.qc.ca" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">www.cai.gouv.qc.ca</a><br />
               Phone: 1-888-528-7741
             </p>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg mt-4">
+          <div className="bg-card-muted p-4 rounded-lg mt-4">
             <p className="font-semibold">Office of the Information and Privacy Commissioner (BC residents)</p>
             <p className="text-sm">
               Website: <a href="https://www.oipc.bc.ca" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">www.oipc.bc.ca</a><br />
               Phone: 250-387-5629
             </p>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg mt-4">
+          <div className="bg-card-muted p-4 rounded-lg mt-4">
             <p className="font-semibold">Office of the Information and Privacy Commissioner (Alberta residents)</p>
             <p className="text-sm">
               Website: <a href="https://www.oipc.ab.ca" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">www.oipc.ab.ca</a><br />

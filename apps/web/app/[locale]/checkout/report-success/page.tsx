@@ -41,7 +41,7 @@ export default async function ReportSuccessPage({ searchParams }: Props) {
           </>
         )}
 
-        <Link href="/dashboard" className="btn-primary w-full py-3">Return to Dashboard</Link>
+        <Link href="/" className="btn-primary w-full py-3">Done</Link>
       </div>
     </div>
   );

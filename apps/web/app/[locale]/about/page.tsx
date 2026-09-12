@@ -107,7 +107,7 @@ function AboutContent() {
         <div className="container-page max-w-4xl text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-white">{t('cta.title')}</h2>
           <p className="mx-auto mb-8 max-w-xl text-ink-300">{t('cta.subtitle')}</p>
-          <Link href="/signup" className="btn bg-white px-8 py-3 text-ink-950 hover:bg-ink-50">{t('cta.button')}</Link>
+          <Link href="/#download" className="btn bg-white px-8 py-3 text-ink-950 hover:bg-ink-50">{t('cta.button')}</Link>
         </div>
       </section>
 

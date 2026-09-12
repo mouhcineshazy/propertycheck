@@ -273,8 +273,8 @@ export default async function ComparisonPage({
         <div className="mt-8 overflow-hidden rounded-2xl bg-ink-950 p-8 text-center print:hidden">
           <h3 className="mb-2 text-xl font-bold text-white">Protect Your Security Deposit</h3>
           <p className="mb-6 text-ink-300">Create your own inspection reports with timestamped evidence.</p>
-          <Link href="/signup" className="btn bg-white px-6 py-3 text-ink-950 hover:bg-ink-50">
-            Get Started Free
+          <Link href="/#download" className="btn bg-white px-6 py-3 text-ink-950 hover:bg-ink-50">
+            Get the app
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5-5 5M6 12h12" />
             </svg>

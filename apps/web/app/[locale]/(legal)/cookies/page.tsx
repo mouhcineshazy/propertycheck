@@ -26,7 +26,7 @@ export default function CookiesPage() {
       <div className="prose prose-gray max-w-none">
         {/* Section 1 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. What Are Cookies?</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">1. What Are Cookies?</h2>
           <p>
             Cookies are small text files that are stored on your device (computer, tablet, or mobile) when you visit a website. They are widely used to make websites work more efficiently, provide information to website owners, and enhance user experience.
           </p>
@@ -37,7 +37,7 @@ export default function CookiesPage() {
 
         {/* Section 2 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Our Cookie Philosophy</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">2. Our Cookie Philosophy</h2>
           <p>
             PropertyCheck prioritizes your privacy. We use a <strong>minimal cookies approach</strong>:
           </p>
@@ -51,7 +51,7 @@ export default function CookiesPage() {
 
         {/* Section 3 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Types of Cookies We Use</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">3. Types of Cookies We Use</h2>
 
           <h3 className="text-xl font-semibold mt-6 mb-3">3.1 Essential Cookies (Required)</h3>
           <p>
@@ -117,7 +117,7 @@ export default function CookiesPage() {
 
         {/* Section 4 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Third-Party Cookies</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">4. Third-Party Cookies</h2>
           <p>
             Some cookies are placed by third-party services that appear on our pages. We do not control these cookies, but we carefully select our partners.
           </p>
@@ -149,7 +149,7 @@ export default function CookiesPage() {
 
         {/* Section 5 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Mobile Applications</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">5. Mobile Applications</h2>
           <p>
             Our mobile applications (iOS and Android) do not use browser cookies. However, we may use similar technologies for:
           </p>
@@ -165,7 +165,7 @@ export default function CookiesPage() {
 
         {/* Section 6 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Managing Cookies</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">6. Managing Cookies</h2>
           <p>
             You have control over cookies on your device. Here&apos;s how you can manage them:
           </p>
@@ -182,7 +182,7 @@ export default function CookiesPage() {
             <li>Set your browser to notify you when a cookie is set</li>
           </ul>
 
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <p className="font-semibold mb-2">Browser-specific instructions:</p>
             <ul className="text-sm space-y-1">
               <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">Google Chrome</a></li>
@@ -212,7 +212,7 @@ export default function CookiesPage() {
 
         {/* Section 7 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Do Not Track Signals</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">7. Do Not Track Signals</h2>
           <p>
             Some browsers include a &ldquo;Do Not Track&rdquo; (DNT) feature that signals to websites that you do not want your online activity tracked.
           </p>
@@ -223,7 +223,7 @@ export default function CookiesPage() {
 
         {/* Section 8 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Updates to This Policy</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">8. Updates to This Policy</h2>
           <p>
             We may update this Cookie Policy from time to time to reflect changes in our practices or for legal, regulatory, or operational reasons. When we make changes, we will update the &ldquo;Last Updated&rdquo; date at the top of this page.
           </p>
@@ -234,10 +234,10 @@ export default function CookiesPage() {
 
         {/* Section 9 */}
         <section className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Contact Us</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">9. Contact Us</h2>
           <p>If you have questions about our use of cookies, please contact us:</p>
 
-          <div className="bg-gray-50 p-6 rounded-lg mt-4">
+          <div className="bg-card-muted p-6 rounded-lg mt-4">
             <p className="font-semibold text-lg">PropertyCheck</p>
             <p className="mt-2">Email: <a href="mailto:privacy@propertycheck.app" className="text-primary-600 hover:underline">privacy@propertycheck.app</a></p>
             <p>General Support: <a href="mailto:support@propertycheck.app" className="text-primary-600 hover:underline">support@propertycheck.app</a></p>

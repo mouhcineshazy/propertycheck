@@ -58,7 +58,7 @@ function FAQItem({
   }, [isOpen]);
 
   return (
-    <div className={`group border-b border-line transition-colors last:border-0 ${isOpen ? 'bg-primary-50/50' : 'hover:bg-card-muted/50'}`}>
+    <div className={`group border-b border-line transition-colors last:border-0 ${isOpen ? 'bg-primary-500/10' : 'hover:bg-card-muted/50'}`}>
       <button className="flex w-full items-start justify-between gap-4 px-6 py-5 text-left" onClick={onToggle} aria-expanded={isOpen}>
         <div className="flex items-start gap-4">
           <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
@@ -66,7 +66,7 @@ function FAQItem({
           }`}>
             {index + 1}
           </span>
-          <span className={`pt-1 font-medium transition-colors ${isOpen ? 'text-primary-900' : 'text-fg'}`}>{question}</span>
+          <span className={`pt-1 font-medium transition-colors ${isOpen ? 'text-fg' : 'text-fg'}`}>{question}</span>
         </div>
         <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all ${
           isOpen ? 'rotate-180 bg-primary-600 text-white' : 'bg-card-muted text-fg-muted group-hover:bg-primary-100 group-hover:text-primary-600'
@@ -113,13 +113,13 @@ function CategoryCard({
     >
       <button
         onClick={onClick}
-        className={`flex w-full items-center gap-4 px-6 py-5 transition-colors ${isActive ? 'bg-primary-50' : 'bg-card hover:bg-card-muted'}`}
+        className={`flex w-full items-center gap-4 px-6 py-5 transition-colors ${isActive ? 'bg-primary-500/10' : 'bg-card hover:bg-card-muted'}`}
       >
         <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${isActive ? 'bg-primary-600 text-white' : 'bg-card-muted text-fg-muted'}`}>
           {icon}
         </div>
         <div className="flex-1 text-left">
-          <h2 className={`text-lg font-bold transition-colors ${isActive ? 'text-primary-900' : 'text-fg'}`}>{title}</h2>
+          <h2 className={`text-lg font-bold transition-colors ${isActive ? 'text-fg' : 'text-fg'}`}>{title}</h2>
           <p className="text-sm text-fg-muted">{questionCount} questions</p>
         </div>
         <svg className={`h-5 w-5 text-fg-subtle transition-transform ${isActive ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -16,8 +16,8 @@ export default function TermsPage() {
       documentType="terms"
     >
       {/* Table of Contents */}
-      <nav className="mb-12 p-6 bg-gray-50 rounded-xl print-hide">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Table of Contents</h2>
+      <nav className="mb-12 p-6 bg-card-muted rounded-xl print-hide">
+        <h2 className="text-lg font-semibold text-fg mb-4">Table of Contents</h2>
         <ol className="grid md:grid-cols-2 gap-2 text-sm">
           <li><a href="#acceptance" className="text-primary-600 hover:underline">1. Acceptance of Terms</a></li>
           <li><a href="#eligibility" className="text-primary-600 hover:underline">2. Eligibility</a></li>
@@ -44,7 +44,7 @@ export default function TermsPage() {
       <div className="prose prose-gray max-w-none">
         {/* Section 1 */}
         <section id="acceptance" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Acceptance of Terms</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">1. Acceptance of Terms</h2>
           <p>
             Welcome to PropertyCheck. These Terms of Service (&ldquo;Terms&rdquo;) constitute a legally binding agreement between you (&ldquo;User,&rdquo; &ldquo;you,&rdquo; or &ldquo;your&rdquo;) and PropertyCheck (&ldquo;Company,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) governing your access to and use of the PropertyCheck website, mobile applications, and services (collectively, the &ldquo;Service&rdquo;).
           </p>
@@ -58,7 +58,7 @@ export default function TermsPage() {
 
         {/* Section 2 */}
         <section id="eligibility" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Eligibility</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">2. Eligibility</h2>
           <p>To use the Service, you must:</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>Be at least 18 years of age, or the age of majority in your province or territory of residence, whichever is greater;</li>
@@ -73,7 +73,7 @@ export default function TermsPage() {
 
         {/* Section 3 */}
         <section id="service-description" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Service Description</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">3. Service Description</h2>
           <p>
             PropertyCheck is a software-as-a-service (SaaS) platform designed to help Canadian renters document the condition of rental properties. Our Service includes:
           </p>
@@ -92,7 +92,7 @@ export default function TermsPage() {
 
         {/* Section 4 */}
         <section id="account" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">4. Account Registration</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">4. Account Registration</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">4.1 Account Creation</h3>
           <p>
             To access certain features of the Service, you must create an account. You may register using your email address and password, or through Google OAuth authentication.
@@ -113,10 +113,10 @@ export default function TermsPage() {
 
         {/* Section 5 */}
         <section id="subscriptions" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">5. Subscriptions & Payments</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">5. Subscriptions & Payments</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">5.1 Subscription Tiers</h3>
           <p>PropertyCheck offers the following subscription options:</p>
-          <div className="bg-gray-50 p-4 rounded-lg my-4">
+          <div className="bg-card-muted p-4 rounded-lg my-4">
             <p className="font-semibold">Free Tier:</p>
             <ul className="list-disc pl-6 text-sm">
               <li>1 property maximum</li>
@@ -155,7 +155,7 @@ export default function TermsPage() {
 
         {/* Section 6 */}
         <section id="refunds" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Refunds & Cancellations</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">6. Refunds & Cancellations</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">6.1 Money-Back Guarantee</h3>
           <p>
             First-time Premium subscribers are eligible for a full refund within 7 days of their initial subscription purchase, no questions asked.
@@ -180,7 +180,7 @@ export default function TermsPage() {
 
         {/* Section 7 */}
         <section id="acceptable-use" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Acceptable Use Policy</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">7. Acceptable Use Policy</h2>
           <p>When using our Service, you agree NOT to:</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>Violate any applicable federal, provincial, or local laws or regulations;</li>
@@ -204,7 +204,7 @@ export default function TermsPage() {
 
         {/* Section 8 */}
         <section id="user-content" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">8. User Content</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">8. User Content</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">8.1 Your Content</h3>
           <p>
             &ldquo;User Content&rdquo; includes all photos, notes, property information, and other materials you upload, submit, or create through the Service. You retain ownership of your User Content.
@@ -225,7 +225,7 @@ export default function TermsPage() {
 
         {/* Section 9 */}
         <section id="intellectual-property" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">9. Intellectual Property</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">9. Intellectual Property</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">9.1 Our Intellectual Property</h3>
           <p>
             The Service, including its design, features, functionality, content, trademarks, and all related intellectual property rights, is owned by PropertyCheck and protected by Canadian and international copyright, trademark, and other intellectual property laws.
@@ -242,7 +242,7 @@ export default function TermsPage() {
 
         {/* Section 10 */}
         <section id="disclaimers" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">10. Disclaimers</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">10. Disclaimers</h2>
           <div className="bg-red-50 p-6 rounded-lg border-l-4 border-red-500">
             <h3 className="text-xl font-semibold mb-3">10.1 NOT LEGAL ADVICE</h3>
             <p className="font-semibold">
@@ -271,8 +271,8 @@ export default function TermsPage() {
 
         {/* Section 11 */}
         <section id="limitation" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">11. Limitation of Liability</h2>
-          <div className="bg-gray-100 p-6 rounded-lg">
+          <h2 className="text-2xl font-bold text-fg mb-4">11. Limitation of Liability</h2>
+          <div className="bg-card-muted p-6 rounded-lg">
             <p className="font-semibold">
               TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW:
             </p>
@@ -295,7 +295,7 @@ export default function TermsPage() {
 
         {/* Section 12 */}
         <section id="indemnification" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">12. Indemnification</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">12. Indemnification</h2>
           <p>
             You agree to indemnify, defend, and hold harmless PropertyCheck, its officers, directors, employees, agents, and affiliates from and against any and all claims, damages, losses, costs, and expenses (including reasonable legal fees) arising from or related to:
           </p>
@@ -310,7 +310,7 @@ export default function TermsPage() {
 
         {/* Section 13 */}
         <section id="termination" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">13. Termination</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">13. Termination</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">13.1 Termination by You</h3>
           <p>
             You may terminate your account at any time by contacting us at <a href="mailto:support@propertycheck.app" className="text-primary-600 hover:underline">support@propertycheck.app</a> or through your account settings.
@@ -327,7 +327,7 @@ export default function TermsPage() {
 
         {/* Section 14 */}
         <section id="disputes" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">14. Dispute Resolution</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">14. Dispute Resolution</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">14.1 Informal Resolution</h3>
           <p>
             Before initiating any formal dispute resolution, you agree to first contact us at <a href="mailto:support@propertycheck.app" className="text-primary-600 hover:underline">support@propertycheck.app</a> to attempt to resolve the dispute informally. We will attempt to resolve disputes within 30 days.
@@ -348,7 +348,7 @@ export default function TermsPage() {
 
         {/* Section 15 */}
         <section id="governing-law" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">15. Governing Law</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">15. Governing Law</h2>
           <p>
             These Terms shall be governed by and construed in accordance with the laws of your province of residence in Canada, without regard to conflict of law principles. For residents of Quebec, this agreement is governed by the laws of Quebec and the federal laws of Canada applicable therein.
           </p>
@@ -359,7 +359,7 @@ export default function TermsPage() {
 
         {/* Section 16 */}
         <section id="modifications" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">16. Modifications to Terms</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">16. Modifications to Terms</h2>
           <p>
             We reserve the right to modify these Terms at any time. We will provide notice of material changes by:
           </p>
@@ -378,7 +378,7 @@ export default function TermsPage() {
 
         {/* Section 17 */}
         <section id="general" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">17. General Provisions</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">17. General Provisions</h2>
           <h3 className="text-xl font-semibold mt-6 mb-3">17.1 Entire Agreement</h3>
           <p>
             These Terms, together with the Privacy Policy and any other policies referenced herein, constitute the entire agreement between you and PropertyCheck regarding the Service.
@@ -411,13 +411,13 @@ export default function TermsPage() {
 
         {/* Section 18 */}
         <section id="contact" className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">18. Contact Information</h2>
+          <h2 className="text-2xl font-bold text-fg mb-4">18. Contact Information</h2>
           <p>If you have any questions about these Terms, please contact us:</p>
-          <div className="bg-gray-50 p-6 rounded-lg mt-4">
+          <div className="bg-card-muted p-6 rounded-lg mt-4">
             <p className="font-semibold text-lg">PropertyCheck</p>
             <p className="mt-2">Email: <a href="mailto:support@propertycheck.app" className="text-primary-600 hover:underline">support@propertycheck.app</a></p>
             <p>Legal Inquiries: <a href="mailto:legal@propertycheck.app" className="text-primary-600 hover:underline">legal@propertycheck.app</a></p>
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-4 text-sm text-fg-muted">
               For Quebec residents - Person responsible for the protection of personal information:<br />
               Email: <a href="mailto:privacy@propertycheck.app" className="text-primary-600 hover:underline">privacy@propertycheck.app</a>
             </p>

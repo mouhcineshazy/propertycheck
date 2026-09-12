@@ -84,7 +84,7 @@ function CheckoutSuccessContent() {
           </ul>
         </div>
 
-        <Link href="/dashboard" className="btn-primary w-full py-3.5">Go to Dashboard</Link>
+        <Link href="/" className="btn-primary w-full py-3.5">Done</Link>
 
         <p className="mt-4 text-sm text-fg-subtle">
           Need help getting started?{' '}
