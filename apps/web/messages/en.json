@@ -126,7 +126,7 @@
       "badge": "Pricing",
       "title": "Simple,",
       "titleHighlight": "Transparent Pricing",
-      "subtitle": "Document your move-in & move-out for free. Upgrade to email PDF reports directly to your landlord.",
+      "subtitle": "Free to document your rental. Pay once for a clean, dispute-ready report — or subscribe if you move often.",
       "monthly": "Monthly",
       "annual": "Annual",
       "perMonth": "month",
@@ -167,14 +167,14 @@
         }
       },
       "addons": {
-        "title": "Pay As You Go",
-        "subtitle": "No subscription needed — unlock what you need, when you need it.",
+        "title": "Pay per move",
+        "subtitle": "No subscription. Pay once for the clean, dispute-ready report you need.",
         "appNote": "Available in the free app — download to purchase",
         "reportUnlock": {
           "name": "Report Unlock",
-          "price": "$5.99",
+          "price": "$9.99",
           "period": "one-time",
-          "description": "Remove the watermark from one completed inspection report.",
+          "description": "One clean, watermark-free report you can send your landlord — evidence to protect your deposit.",
           "feature1": "Watermark-free PDF",
           "feature2": "Email directly to your landlord",
           "feature3": "Per inspection",
@@ -182,16 +182,17 @@
         },
         "bundle": {
           "name": "Moving Bundle",
-          "price": "$19.99",
+          "price": "$24.99",
           "period": "one-time",
-          "description": "Move-in, move-out, and comparison report for one property.",
+          "description": "Move-in, move-out, and a side-by-side comparison report for one property. The full deposit-protection kit.",
           "feature1": "Move-in & move-out coverage",
           "feature2": "Watermark-free comparison PDF",
           "feature3": "One property",
           "feature4": "Valid for 18 months",
           "cta": "Get the App"
         }
-      }
+      },
+      "subscribeDivider": "Or subscribe — for frequent movers & roommates"
     },
     "download": {
       "badge": "Available Now",

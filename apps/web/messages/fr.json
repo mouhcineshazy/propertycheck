@@ -126,7 +126,7 @@
       "badge": "Tarifs",
       "title": "Des prix simples et",
       "titleHighlight": "transparents",
-      "subtitle": "Documentez votre emménagement et déménagement gratuitement. Passez à Premium pour envoyer vos rapports PDF directement à votre propriétaire.",
+      "subtitle": "Documentez votre logement gratuitement. Payez une fois pour un rapport prêt à défendre votre dépôt — ou abonnez-vous si vous déménagez souvent.",
       "monthly": "Mensuel",
       "annual": "Annuel",
       "perMonth": "mois",
@@ -167,14 +167,14 @@
         }
       },
       "addons": {
-        "title": "Paiement à l'utilisation",
-        "subtitle": "Sans abonnement — payez uniquement ce dont vous avez besoin.",
+        "title": "Payez par déménagement",
+        "subtitle": "Sans abonnement. Payez une seule fois pour le rapport clair et prêt à défendre votre dépôt.",
         "appNote": "Disponible dans l'application gratuite — téléchargez pour acheter",
         "reportUnlock": {
           "name": "Rapport sans filigrane",
-          "price": "5,99 $",
+          "price": "9,99 $",
           "period": "paiement unique",
-          "description": "Supprimez le filigrane d'un rapport d'inspection complété.",
+          "description": "Un rapport clair sans filigrane à envoyer à votre propriétaire — une preuve pour protéger votre dépôt.",
           "feature1": "PDF sans filigrane",
           "feature2": "Envoi direct au propriétaire",
           "feature3": "Par inspection",
@@ -182,16 +182,17 @@
         },
         "bundle": {
           "name": "Forfait déménagement",
-          "price": "19,99 $",
+          "price": "24,99 $",
           "period": "paiement unique",
-          "description": "Rapport d'entrée, de sortie et de comparaison pour une propriété.",
+          "description": "Emménagement, déménagement et rapport comparatif pour un logement. La trousse complète de protection du dépôt.",
           "feature1": "Couverture entrée et sortie",
           "feature2": "Rapport de comparaison sans filigrane",
           "feature3": "Une propriété",
           "feature4": "Valide 18 mois",
           "cta": "Télécharger l'application"
         }
-      }
+      },
+      "subscribeDivider": "Ou abonnez-vous — pour les déménagements fréquents"
     },
     "download": {
       "badge": "Disponible maintenant",

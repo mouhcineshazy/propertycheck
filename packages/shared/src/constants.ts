@@ -83,6 +83,34 @@ export const PRICING = {
   },
 } as const;
 
+// Pay-per-use pricing (CAD) — the PRIMARY monetization path.
+// Usage is transactional (people inspect ~twice per lease), so the one-time
+// products are the hero; the subscription (PRICING above) is the secondary tier
+// for frequent movers / people managing multiple places.
+//
+// IMPORTANT: `amount` is display-only here. The real charge is the Stripe Price
+// referenced by NEXT_PUBLIC_STRIPE_REPORT_PRICE_ID / _BUNDLE_PRICE_ID — update
+// those Prices in Stripe to match, and on mobile these MUST be sold via native
+// In-App Purchase (StoreKit / Play Billing), not Stripe web checkout.
+export const PAY_PER_USE = {
+  report: {
+    priceId: process.env.NEXT_PUBLIC_STRIPE_REPORT_PRICE_ID || '',
+    amount: 999, // $9.99 CAD — one clean, watermark-free, shareable report
+    currency: 'cad',
+    displayPrice: '$9.99',
+    period: 'one-time',
+  },
+  bundle: {
+    // The hero product: matches the "I'm moving" purchase intent.
+    priceId: process.env.NEXT_PUBLIC_STRIPE_BUNDLE_PRICE_ID || '',
+    amount: 2499, // $24.99 CAD — move-in + move-out + comparison, one property, 18 mo
+    currency: 'cad',
+    displayPrice: '$24.99',
+    period: 'one-time',
+    validityMonths: 18,
+  },
+} as const;
+
 // Share link configuration
 export const SHARE_LINK_CONFIG = {
   expiryDays: 7,

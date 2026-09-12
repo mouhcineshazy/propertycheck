@@ -68,24 +68,24 @@ export function PricingSection() {
 
   const addons = [
     {
-      nameKey: 'addons.reportUnlock.name',
-      periodKey: 'addons.reportUnlock.period',
-      descKey: 'addons.reportUnlock.description',
-      priceKey: 'addons.reportUnlock.price',
-      ctaKey: 'addons.reportUnlock.cta',
-      featureKeys: ['feature1', 'feature2', 'feature3'] as const,
-      prefix: 'addons.reportUnlock',
-      primary: false,
-    },
-    {
+      descKey: 'addons.bundle.description',
       nameKey: 'addons.bundle.name',
       periodKey: 'addons.bundle.period',
-      descKey: 'addons.bundle.description',
       priceKey: 'addons.bundle.price',
       ctaKey: 'addons.bundle.cta',
       featureKeys: ['feature1', 'feature2', 'feature3', 'feature4'] as const,
       prefix: 'addons.bundle',
       primary: true,
+    },
+    {
+      descKey: 'addons.reportUnlock.description',
+      nameKey: 'addons.reportUnlock.name',
+      periodKey: 'addons.reportUnlock.period',
+      priceKey: 'addons.reportUnlock.price',
+      ctaKey: 'addons.reportUnlock.cta',
+      featureKeys: ['feature1', 'feature2', 'feature3'] as const,
+      prefix: 'addons.reportUnlock',
+      primary: false,
     },
   ];
 
@@ -109,8 +109,61 @@ export function PricingSection() {
           <p className="mt-4 text-lg text-fg-muted">{t('subtitle')}</p>
         </motion.div>
 
+        {/* PRIMARY — Pay per move (transactional) */}
+        <div className="mx-auto mt-12 max-w-4xl">
+          <div className="mb-6 text-center">
+            <h3 className="text-xl font-bold tracking-tight text-fg">{t('addons.title')}</h3>
+            <p className="mt-1 text-sm text-fg-muted">{t('addons.subtitle')}</p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {addons.map((addon, i) => (
+              <motion.div
+                key={addon.prefix}
+                className={cn(
+                  'relative flex flex-col overflow-hidden rounded-3xl bg-card p-6',
+                  addon.primary ? 'shadow-lg ring-2 ring-primary-600' : 'border border-line shadow-sm'
+                )}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: i * 0.06, ease: easeOut }}
+              >
+                {addon.primary && (
+                  <div className="absolute right-5 top-5">
+                    <span className="badge-primary">{t('mostPopular')}</span>
+                  </div>
+                )}
+                <h4 className="text-lg font-bold text-fg">{t(addon.nameKey)}</h4>
+                <p className="mb-4 mt-1.5 text-sm text-fg-muted">{t(addon.descKey)}</p>
+                <div className="mb-5 flex items-baseline gap-1.5">
+                  <span className="text-4xl font-bold tracking-tight text-fg tabular-nums">{t(addon.priceKey)}</span>
+                  <span className="text-sm text-fg-subtle">{t(addon.periodKey)}</span>
+                </div>
+                <Link href="#download" className={cn('w-full', addon.primary ? 'btn-primary py-3' : 'btn-secondary py-3')}>
+                  {t(addon.ctaKey)}
+                </Link>
+                <ul className="mt-5 space-y-2.5">
+                  {addon.featureKeys.map((key) => (
+                    <li key={key} className="flex items-center gap-2.5 text-sm text-fg-muted">
+                      <Check className="h-4 w-4 text-verified-500" />
+                      {t(`${addon.prefix}.${key}`)}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+          <p className="mt-4 text-center text-xs text-fg-subtle">{t('addons.appNote')}</p>
+        </div>
+
+        {/* SECONDARY — subscription for frequent movers */}
+        <div className="mx-auto mt-16 flex max-w-4xl items-center gap-4">
+          <div className="h-px flex-1 bg-line" />
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-fg-subtle">{t('subscribeDivider')}</p>
+          <div className="h-px flex-1 bg-line" />
+        </div>
+
         {/* Billing toggle */}
-        <div className="mt-10 flex items-center justify-center gap-4">
+        <div className="mt-8 flex items-center justify-center gap-4">
           <div className="inline-flex items-center rounded-xl border border-line bg-card p-1 shadow-xs">
             {(['monthly', 'annual'] as const).map((cycle) => {
               const active = (cycle === 'annual') === isAnnual;
@@ -132,15 +185,13 @@ export function PricingSection() {
         </div>
 
         {/* Plan cards */}
-        <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
+        <div className="mx-auto mt-8 grid max-w-4xl gap-6 md:grid-cols-2">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.nameKey}
               className={cn(
                 'relative flex flex-col overflow-hidden rounded-3xl bg-card p-8',
-                plan.popular
-                  ? 'shadow-lg ring-2 ring-primary-600'
-                  : 'border border-line shadow-sm'
+                plan.popular ? 'shadow-lg ring-2 ring-primary-600' : 'border border-line shadow-sm'
               )}
               initial={{ opacity: 0, y: 28 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -171,10 +222,7 @@ export function PricingSection() {
                 )}
               </div>
 
-              <a
-                href="#download"
-                className={cn('mt-7', plan.popular ? 'btn-primary py-3' : 'btn-secondary py-3')}
-              >
+              <a href="#download" className={cn('mt-7', plan.popular ? 'btn-primary py-3' : 'btn-secondary py-3')}>
                 {t(plan.ctaKey)}
               </a>
 
@@ -213,51 +261,6 @@ export function PricingSection() {
           <Check className="text-verified-500" />
           <span>{t('guarantee')}</span>
         </motion.div>
-
-        {/* Add-ons */}
-        <div className="mx-auto mt-16 flex max-w-4xl items-center gap-4">
-          <div className="h-px flex-1 bg-line" />
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-fg">{t('addons.title')}</p>
-            <p className="mt-0.5 text-xs text-fg-subtle">{t('addons.subtitle')}</p>
-          </div>
-          <div className="h-px flex-1 bg-line" />
-        </div>
-
-        <div className="mx-auto mt-8 grid max-w-4xl gap-6 md:grid-cols-2">
-          {addons.map((addon, i) => (
-            <motion.div
-              key={addon.prefix}
-              className="card-interactive p-6 hover:border-primary-200"
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.5 + i * 0.05, ease: easeOut }}
-            >
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-fg">{t(addon.nameKey)}</h3>
-                <span className="badge-warning">{t(addon.periodKey)}</span>
-              </div>
-              <p className="mb-4 text-sm text-fg-muted">{t(addon.descKey)}</p>
-              <div className="mb-5 flex items-baseline gap-1.5">
-                <span className="text-3xl font-bold text-fg tabular-nums">{t(addon.priceKey)}</span>
-                <span className="text-sm text-fg-subtle">{t(addon.periodKey)}</span>
-              </div>
-              <Link href="#download" className={cn('w-full', addon.primary ? 'btn-primary py-2.5' : 'btn-secondary py-2.5')}>
-                {t(addon.ctaKey)}
-              </Link>
-              <ul className="mt-5 space-y-2.5">
-                {addon.featureKeys.map((key) => (
-                  <li key={key} className="flex items-center gap-2.5 text-sm text-fg-muted">
-                    <Check className="h-4 w-4 text-verified-500" />
-                    {t(`${addon.prefix}.${key}`)}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </div>
-
-        <p className="mt-4 text-center text-xs text-fg-subtle">{t('addons.appNote')}</p>
       </div>
     </section>
   );
