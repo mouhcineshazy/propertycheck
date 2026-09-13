@@ -11,8 +11,9 @@ const monorepoRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
-// 1. Watch the whole monorepo so changes in packages/* are picked up.
-config.watchFolders = [monorepoRoot];
+// 1. Watch the whole monorepo so changes in packages/* are picked up
+//    (append to Expo's defaults rather than replacing them).
+config.watchFolders = [...(config.watchFolders ?? []), monorepoRoot];
 
 // 2. Resolve modules from the app first, then the hoisted root node_modules.
 config.resolver.nodeModulesPaths = [
