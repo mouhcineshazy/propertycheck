@@ -191,4 +191,4 @@ PropertyCheck stores sensitive legal evidence. The compliance posture is built i
 - **Landlord-side accounts** — landlords receiving reports can sign up and manage their portfolio
 - **AI damage detection** — flag potential issues automatically from photos
 - **Integration with provincial RTB filing systems** — submit documentation directly to the Landlord and Tenant Board
-- **Pay-per-report** — one-time $5.99 purchase for users who only need one clean PDF (not yet implemented)
+- **Pay-per-report** — one-time **$14.99 CAD** purchase for users who only need one clean PDF (implemented; sold via native IAP / RevenueCat)

@@ -26,7 +26,6 @@ import {
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Sharing from 'expo-sharing';
-import * as Linking from 'expo-linking';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { getMobileSupabaseClient } from '../../lib/supabase';
@@ -38,7 +37,7 @@ import {
   getPhotoUrl,
   canGenerateComparison,
   sendReportByEmail,
-  createReportUnlockCheckout,
+  purchaseReportUnlock,
 } from '../../lib';
 import type { InspectionWithPhotos, PDFOptions } from '../../lib';
 import { useI18n } from '../../contexts';
@@ -359,12 +358,19 @@ export default function InspectionDetailScreen() {
     if (!inspection || !id) return;
     setIsPurchasingReport(true);
     try {
-      const { url, error } = await createReportUnlockCheckout(id);
-      if (error || !url) {
-        Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
+      const result = await purchaseReportUnlock(id);
+      if (result.status === 'cancelled') return;
+      if (result.status === 'error') {
+        Alert.alert(t('common.error'), result.message || t('inspection.detail.purchaseFailed'));
         return;
       }
-      await Linking.openURL(url);
+      // The RevenueCat webhook grants the unlock server-side; poll briefly for it.
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const fresh = await fetchInspectionWithPhotos(id);
+        if (fresh) setInspection(fresh);
+        if (fresh?.report_unlocked) break;
+        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
     } catch {
       Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
     } finally {

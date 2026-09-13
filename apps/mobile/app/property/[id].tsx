@@ -21,7 +21,6 @@ import {
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import * as Linking from 'expo-linking';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Inspection } from '@propertycheck/database';
@@ -33,7 +32,7 @@ import {
   checkFreeTierLimits,
   canGenerateComparison,
   checkBundleAccess,
-  createBundleCheckout,
+  purchaseMovingBundle,
 } from '../../lib';
 import type { PropertyWithInspections } from '../../lib';
 import { UpgradeModal } from '../../components';
@@ -108,12 +107,21 @@ export default function PropertyDetailScreen() {
     if (!id) return;
     setIsPurchasingBundle(true);
     try {
-      const { url, error } = await createBundleCheckout(id);
-      if (error || !url) {
-        Alert.alert(t('common.error'), t('property.detail.bundlePurchaseFailed'));
+      const result = await purchaseMovingBundle(id);
+      if (result.status === 'cancelled') return;
+      if (result.status === 'error') {
+        Alert.alert(t('common.error'), result.message || t('property.detail.bundlePurchaseFailed'));
         return;
       }
-      await Linking.openURL(url);
+      // The RevenueCat webhook records the bundle server-side; poll briefly for it.
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const bundleResult = await checkBundleAccess(id);
+        if (bundleResult.hasBundle) {
+          setHasBundle(true);
+          break;
+        }
+        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
     } catch {
       Alert.alert(t('common.error'), t('property.detail.bundlePurchaseFailed'));
     } finally {

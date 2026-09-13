@@ -111,6 +111,24 @@ export const PAY_PER_USE = {
   },
 } as const;
 
+// Native In-App Purchase product identifiers (RevenueCat).
+// These are the store-level product IDs created in App Store Connect + Play Console
+// and mapped in the RevenueCat dashboard. On mobile, digital goods MUST be sold via
+// these (Apple Guideline 3.1.1 / Play Payments policy) — never Stripe web checkout.
+// The prices above (PAY_PER_USE / PRICING) are display-only; the real charge is the
+// price you set on each store product. Keep the two in sync manually.
+// The RevenueCat webhook (supabase/functions/revenuecat-webhook) grants entitlements
+// from these product IDs — change one, change the webhook mapping too.
+export const IAP_PRODUCT_IDS = {
+  report: 'pc_report_unlock', // consumable — one watermark-free report
+  bundle: 'pc_moving_bundle', // consumable — move-in + move-out + comparison, 18 mo
+  premiumMonthly: 'pc_premium_monthly', // auto-renewing subscription
+  premiumAnnual: 'pc_premium_annual', // auto-renewing subscription
+} as const;
+
+// RevenueCat entitlement identifier that grants premium (subscription) access.
+export const REVENUECAT_PREMIUM_ENTITLEMENT = 'premium';
+
 // Share link configuration
 export const SHARE_LINK_CONFIG = {
   expiryDays: 7,

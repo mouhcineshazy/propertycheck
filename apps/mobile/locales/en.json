@@ -271,7 +271,11 @@
       "manageButton": "Manage Subscription",
       "renewsOn": "Renews: {{date}}",
       "expiresOn": "Expires: {{date}}",
-      "provinceUpdated": "Province updated successfully"
+      "provinceUpdated": "Province updated successfully",
+      "restoreButton": "Restore Purchases",
+      "restoreTitle": "Restore Purchases",
+      "restoreSuccess": "Your purchases have been restored.",
+      "restoreNone": "No previous purchases were found for this account."
     },
     "about": {
       "version": "Version",

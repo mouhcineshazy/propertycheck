@@ -70,6 +70,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    // RevenueCat public SDK keys (safe to ship — they only identify the project).
+    // Server-side entitlement grants are authorized by the webhook secret, not these.
+    revenueCatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY,
+    revenueCatAndroidKey: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY,
     eas: {
       projectId: '72f8fc13-76e6-4f15-8c19-d5d4470d247a',
     },

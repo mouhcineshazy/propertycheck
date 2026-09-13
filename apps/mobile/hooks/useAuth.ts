@@ -11,6 +11,21 @@
 import { useSyncExternalStore, useCallback } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { getMobileSupabaseClient } from '../lib/supabase';
+import {
+  configureRevenueCat,
+  identifyRevenueCatUser,
+  logOutRevenueCat,
+} from '../lib/revenuecat';
+
+// Keep RevenueCat's identity in lockstep with the Supabase session so purchases
+// and the webhook resolve to the same user id. Fire-and-forget — never block auth.
+function syncRevenueCat(session: Session | null) {
+  if (session?.user?.id) {
+    void identifyRevenueCatUser(session.user.id);
+  } else {
+    void logOutRevenueCat();
+  }
+}
 
 type AuthState = {
   session: Session | null;
@@ -35,11 +50,13 @@ function initializeAuth() {
   initialized = true;
 
   const supabase = getMobileSupabaseClient();
+  configureRevenueCat();
 
   // Get initial session - this restores the persisted session
   _authInitPromise = supabase.auth.getSession().then(({ data: { session } }) => {
     console.log('[useAuth] Session restored:', session ? 'authenticated' : 'not authenticated');
     authState = { session, isLoading: false };
+    syncRevenueCat(session);
     emitChange();
   }).catch((error) => {
     console.error('[useAuth] Failed to restore session:', error);
@@ -51,6 +68,7 @@ function initializeAuth() {
   supabase.auth.onAuthStateChange((event, session) => {
     console.log('[useAuth] Auth state changed:', event, session ? 'authenticated' : 'not authenticated');
     authState = { session, isLoading: false };
+    syncRevenueCat(session);
     emitChange();
   });
 }

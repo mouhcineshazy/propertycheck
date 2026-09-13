@@ -79,6 +79,12 @@ differentiation code in the app. Pay the 1% (only above $2.5K/mo) to not own it.
 
 **`expo-in-app-purchases` is deprecated and archived by Expo — do not use it.**
 
+> **Decision (implemented):** we shipped the **RevenueCat** integration — founder's
+> call for the largest ecosystem, best docs, and least-risk path to launch. The
+> client wrapper, webhook, migration, and UI wiring are done; the remaining work is
+> dashboard/store config. See **[REVENUECAT_SETUP.md](./REVENUECAT_SETUP.md)**. The
+> comparison below is kept for context and for a future re-evaluation at scale.
+
 ### Is RevenueCat the only option? (2026 landscape)
 
 No. There are three real paths. Free-tier ceilings verified Sep 2026:

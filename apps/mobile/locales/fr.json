@@ -271,7 +271,11 @@
       "manageButton": "Gérer l'abonnement",
       "renewsOn": "Renouvellement: {{date}}",
       "expiresOn": "Expiration: {{date}}",
-      "provinceUpdated": "Province mise à jour avec succès"
+      "provinceUpdated": "Province mise à jour avec succès",
+      "restoreButton": "Restaurer les achats",
+      "restoreTitle": "Restaurer les achats",
+      "restoreSuccess": "Vos achats ont été restaurés.",
+      "restoreNone": "Aucun achat antérieur n'a été trouvé pour ce compte."
     },
     "about": {
       "version": "Version",

@@ -17,6 +17,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Linking,
+  Platform,
   RefreshControl,
   Modal,
 } from 'react-native';
@@ -24,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { User, Subscription } from '@propertycheck/database';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { deleteAccount } from '../../lib/api';
+import { restorePurchases, hasActivePremium } from '../../lib/revenuecat';
 import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@propertycheck/shared';
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
@@ -49,6 +51,7 @@ export default function SettingsScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isManagingSubscription, setIsManagingSubscription] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
   const [showProvincePicker, setShowProvincePicker] = useState(false);
   const [isSavingProvince, setIsSavingProvince] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
@@ -181,38 +184,44 @@ export default function SettingsScreen() {
     }
   };
 
-  // Handle manage subscription - open Stripe portal
+  // Manage subscription - IAP subscriptions are managed by the store, not Stripe.
   const handleManageSubscription = async () => {
     setIsManagingSubscription(true);
     try {
-      const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'http://localhost:3000';
-      const response = await fetch(`${appUrl}/api/stripe/create-portal-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to open subscription portal');
-      }
-
-      if (data.url) {
-        const supported = await Linking.canOpenURL(data.url);
-        if (supported) {
-          await Linking.openURL(data.url);
-        } else {
-          throw new Error('Cannot open subscription portal');
-        }
-      }
+      const url =
+        Platform.OS === 'ios'
+          ? 'https://apps.apple.com/account/subscriptions'
+          : 'https://play.google.com/store/account/subscriptions';
+      await Linking.openURL(url);
     } catch (error) {
       const message = error instanceof Error ? error.message : t('errors.generic');
       Alert.alert(t('alerts.error'), message);
     } finally {
       setIsManagingSubscription(false);
+    }
+  };
+
+  // Restore Purchases — required by Apple for apps with subscriptions. Re-syncs
+  // RevenueCat; the webhook updates the subscription row, so refresh after a beat.
+  const handleRestorePurchases = async () => {
+    setIsRestoring(true);
+    try {
+      const result = await restorePurchases();
+      if (result.status === 'cancelled') return;
+      if (result.status === 'error') {
+        Alert.alert(t('alerts.error'), result.message);
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await fetchUserData();
+      Alert.alert(
+        t('settings.subscription.restoreTitle'),
+        hasActivePremium(result.customerInfo)
+          ? t('settings.subscription.restoreSuccess')
+          : t('settings.subscription.restoreNone')
+      );
+    } finally {
+      setIsRestoring(false);
     }
   };
 
@@ -384,6 +393,18 @@ export default function SettingsScreen() {
                 : t('settings.subscription.renewsOn', { date: new Date(subscription.current_period_end).toLocaleDateString() })}
             </Text>
           )}
+
+          <TouchableOpacity
+            style={styles.restoreButton}
+            onPress={handleRestorePurchases}
+            disabled={isRestoring}
+          >
+            {isRestoring ? (
+              <ActivityIndicator size="small" color={th.semantic.fgMuted} />
+            ) : (
+              <Text style={styles.restoreButtonText}>{t('settings.subscription.restoreButton')}</Text>
+            )}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -779,6 +800,17 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     color: th.semantic.fgMuted,
     textAlign: 'center',
     marginTop: 12,
+  },
+  restoreButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  restoreButtonText: {
+    color: th.semantic.fgMuted,
+    fontSize: 14,
+    fontWeight: '600',
   },
   infoRow: {
     flexDirection: 'row',

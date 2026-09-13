@@ -14,13 +14,12 @@ import {
   Modal,
   TouchableOpacity,
   Alert,
-  Linking,
   ActivityIndicator,
   ScrollView,
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getMobileSupabaseClient } from '../lib/supabase';
+import { purchasePremium } from '../lib/revenuecat';
 import {
   PRICING,
   FREE_TIER_LIMITS,
@@ -111,40 +110,14 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
   const handleUpgrade = async () => {
     setIsLoading(true);
     try {
-      // Get the current session token for API authentication
-      const supabase = getMobileSupabaseClient();
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError || !session?.access_token) {
-        throw new Error('Please log in to upgrade your account.');
+      // Native In-App Purchase via RevenueCat. The webhook grants premium
+      // server-side (subscriptions table); the app just starts the purchase.
+      const result = await purchasePremium(billingCycle);
+      if (result.status === 'cancelled') return;
+      if (result.status === 'error') {
+        throw new Error(result.message);
       }
-
-      const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'http://localhost:3001';
-    
-      const response = await fetch(`${appUrl}/api/stripe/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ billingCycle }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
-      }
-
-      if (data.url) {
-        const supported = await Linking.canOpenURL(data.url);
-        if (supported) {
-          await Linking.openURL(data.url);
-          onClose();
-        } else {
-          throw new Error('Cannot open checkout URL');
-        }
-      }
+      onClose();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An error occurred';
       Alert.alert('Error', message);
