@@ -152,7 +152,7 @@
       },
       "bundleTitle": "Moving Bundle",
       "bundleDesc": "Get watermark-free move-in, move-out, and comparison reports for this property. Valid 18 months.",
-      "bundleButton": "Buy Moving Bundle — $19.99",
+      "bundleButton": "Buy Moving Bundle — $24.99",
       "bundleActive": "Moving Bundle Active",
       "bundleActiveDesc": "Your bundle covers this property for 18 months. Comparison PDF is watermark-free.",
       "bundlePurchaseFailed": "Could not open checkout. Please try again."
@@ -226,8 +226,8 @@
       },
       "unlockReport": "Unlock Watermark-Free PDF",
       "unlockReportDesc": "One-time purchase — no subscription needed",
-      "unlockReportPrice": "$5.99 CAD",
-      "unlockReportButton": "Unlock — $5.99",
+      "unlockReportPrice": "$9.99 CAD",
+      "unlockReportButton": "Unlock — $9.99",
       "reportUnlocked": "Report Unlocked",
       "reportUnlockedDesc": "Your PDF has no watermark. Tap PDF to generate your clean report.",
       "purchaseFailed": "Could not open checkout. Please try again."
@@ -252,7 +252,8 @@
       "about": "About",
       "legal": "Legal",
       "language": "Language",
-      "appearance": "Appearance"
+      "appearance": "Appearance",
+      "privacy": "Privacy & Data"
     },
     "account": {
       "province": "Province",
@@ -290,6 +291,16 @@
       "button": "Sign Out",
       "confirmTitle": "Sign Out",
       "confirmMessage": "Are you sure you want to sign out?"
+    },
+    "deleteAccount": {
+      "title": "Delete account",
+      "subtitle": "Permanently erase your account and all data. Under PIPEDA you can request erasure at any time.",
+      "button": "Delete account",
+      "confirmTitle": "Delete your account?",
+      "confirmMessage": "This permanently deletes your account, all properties, all inspection reports, and all photos. This cannot be undone.",
+      "confirmButton": "Yes, delete everything",
+      "cancel": "Cancel",
+      "error": "Failed to delete account. Please try again or contact support."
     },
     "appearance": {
       "system": "System",

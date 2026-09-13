@@ -23,6 +23,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { User, Subscription } from '@propertycheck/database';
 import { getMobileSupabaseClient } from '../../lib/supabase';
+import { deleteAccount } from '../../lib/api';
 import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@propertycheck/shared';
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
@@ -51,6 +52,9 @@ export default function SettingsScreen() {
   const [showProvincePicker, setShowProvincePicker] = useState(false);
   const [isSavingProvince, setIsSavingProvince] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Fetch user data function (reusable for refresh)
   const fetchUserData = useCallback(async (showRefreshIndicator = false) => {
@@ -102,6 +106,23 @@ export default function SettingsScreen() {
         onPress: signOut,
       },
     ]);
+  };
+
+  // Handle account deletion. The server erases storage + DB + auth user; on
+  // success we clear the local session and the root layout routes to (auth).
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    const { success, error } = await deleteAccount();
+
+    if (success) {
+      await signOut();
+      return;
+    }
+
+    setIsDeleting(false);
+    setDeleteError(error ?? t('settings.deleteAccount.error'));
   };
 
   // Handle language change
@@ -521,6 +542,72 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </Modal>
 
+      {/* Privacy & Data Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('settings.sections.privacy')}</Text>
+        <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.dangerRow}
+            onPress={() => {
+              setDeleteError(null);
+              setShowDeleteConfirm(true);
+            }}
+          >
+            <View style={styles.dangerRowContent}>
+              <View style={styles.dangerIcon}>
+                <Ionicons name="trash-outline" size={20} color={th.semantic.danger} />
+              </View>
+              <View style={styles.dangerTextWrap}>
+                <Text style={styles.dangerTitle}>{t('settings.deleteAccount.title')}</Text>
+                <Text style={styles.dangerSubtitle}>{t('settings.deleteAccount.subtitle')}</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={th.semantic.fgSubtle} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Delete Account Confirmation Modal */}
+      <Modal
+        visible={showDeleteConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!isDeleting) setShowDeleteConfirm(false);
+        }}
+      >
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmContainer}>
+            <View style={styles.confirmIconCircle}>
+              <Ionicons name="warning-outline" size={28} color={th.semantic.danger} />
+            </View>
+            <Text style={styles.confirmTitle}>{t('settings.deleteAccount.confirmTitle')}</Text>
+            <Text style={styles.confirmMessage}>{t('settings.deleteAccount.confirmMessage')}</Text>
+            {deleteError && <Text style={styles.confirmError}>{deleteError}</Text>}
+            <View style={styles.confirmActions}>
+              <TouchableOpacity
+                style={[styles.confirmButton, styles.confirmCancel]}
+                onPress={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+              >
+                <Text style={styles.confirmCancelText}>{t('settings.deleteAccount.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmButton, styles.confirmDelete, isDeleting && styles.confirmDeleteDisabled]}
+                onPress={handleDeleteAccount}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <ActivityIndicator size="small" color={th.semantic.primaryContrast} />
+                ) : (
+                  <Text style={styles.confirmDeleteText}>{t('settings.deleteAccount.confirmButton')}</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Logout Button */}
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Ionicons name="log-out-outline" size={20} color={th.semantic.danger} />
@@ -808,5 +895,110 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
   },
   languageFlag: {
     fontSize: 24,
+  },
+  dangerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  dangerRowContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  dangerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: th.semantic.dangerSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dangerTextWrap: {
+    flex: 1,
+  },
+  dangerTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: th.semantic.danger,
+  },
+  dangerSubtitle: {
+    fontSize: 13,
+    color: th.semantic.fgMuted,
+    marginTop: 2,
+  },
+  confirmOverlay: {
+    flex: 1,
+    backgroundColor: th.semantic.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  confirmContainer: {
+    backgroundColor: th.semantic.card,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 360,
+    padding: 24,
+  },
+  confirmIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: th.semantic.dangerSoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  confirmTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: th.semantic.fg,
+  },
+  confirmMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: th.semantic.fgMuted,
+    marginTop: 8,
+  },
+  confirmError: {
+    fontSize: 14,
+    color: th.semantic.danger,
+    marginTop: 12,
+  },
+  confirmActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  confirmButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    minHeight: 44,
+  },
+  confirmCancel: {
+    backgroundColor: th.semantic.cardMuted,
+  },
+  confirmCancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: th.semantic.fg,
+  },
+  confirmDelete: {
+    backgroundColor: th.semantic.danger,
+  },
+  confirmDeleteDisabled: {
+    opacity: 0.6,
+  },
+  confirmDeleteText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: th.semantic.primaryContrast,
   },
 });

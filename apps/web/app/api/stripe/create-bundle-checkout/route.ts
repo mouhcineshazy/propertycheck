@@ -41,7 +41,7 @@ async function getAuthUser(request: NextRequest) {
 }
 
 // POST /api/stripe/create-bundle-checkout
-// One-time $19.99 CAD purchase: move-in + move-out + comparison for one property, valid 18 months
+// One-time $24.99 CAD purchase: move-in + move-out + comparison for one property, valid 18 months
 export async function POST(request: NextRequest) {
   const user = await getAuthUser(request);
   if (!user) {

@@ -578,7 +578,7 @@ export async function checkBundleAccess(propertyId: string): Promise<{
 }
 
 /**
- * Create a Stripe Checkout session for the $19.99 CAD moving bundle.
+ * Create a Stripe Checkout session for the $24.99 CAD moving bundle.
  * Returns the checkout URL to open in the device browser.
  */
 export async function createBundleCheckout(propertyId: string): Promise<{
@@ -621,7 +621,7 @@ export async function createBundleCheckout(propertyId: string): Promise<{
 // ============================================
 
 /**
- * Create a Stripe Checkout session for a $5.99 one-time report unlock.
+ * Create a Stripe Checkout session for a $9.99 one-time report unlock.
  * Returns the checkout URL to open in the device browser.
  */
 export async function createReportUnlockCheckout(inspectionId: string): Promise<{
@@ -656,5 +656,48 @@ export async function createReportUnlockCheckout(inspectionId: string): Promise<
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to start checkout';
     return { url: null, error: message };
+  }
+}
+
+// ============================================
+// ACCOUNT
+// ============================================
+
+/**
+ * Permanently delete the current user's account and all associated data.
+ *
+ * Deleting a Supabase auth user requires the service-role key, which mobile must
+ * never hold. So this hands the user's session token to the web API route, which
+ * validates the Bearer token server-side, then service-role deletes Storage
+ * photos + DB rows + the auth user (PIPEDA / Quebec Law 25 right to erasure).
+ * The route is idempotent — a partial delete can be safely retried.
+ */
+export async function deleteAccount(): Promise<{ success: boolean; error: string | null }> {
+  try {
+    const supabase = getMobileSupabaseClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app';
+    const response = await fetch(`${appUrl}/api/account/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+    });
+
+    const data = await response.json() as { success?: boolean; error?: string };
+
+    if (!response.ok) {
+      return { success: false, error: data.error ?? 'Failed to delete account' };
+    }
+
+    return { success: true, error: null };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to delete account';
+    return { success: false, error: message };
   }
 }

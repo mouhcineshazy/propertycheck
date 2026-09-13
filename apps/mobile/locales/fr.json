@@ -152,7 +152,7 @@
       },
       "bundleTitle": "Forfait déménagement",
       "bundleDesc": "Obtenez les rapports d'emménagement, de déménagement et de comparaison sans filigrane pour cette propriété. Valide 18 mois.",
-      "bundleButton": "Acheter le forfait — 19,99 $",
+      "bundleButton": "Acheter le forfait — 24,99 $",
       "bundleActive": "Forfait déménagement actif",
       "bundleActiveDesc": "Votre forfait couvre cette propriété pour 18 mois. Le PDF de comparaison est sans filigrane.",
       "bundlePurchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer."
@@ -226,8 +226,8 @@
       },
       "unlockReport": "Déverrouiller le PDF sans filigrane",
       "unlockReportDesc": "Achat unique — aucun abonnement requis",
-      "unlockReportPrice": "5,99 $ CAD",
-      "unlockReportButton": "Déverrouiller — 5,99 $",
+      "unlockReportPrice": "9,99 $ CAD",
+      "unlockReportButton": "Déverrouiller — 9,99 $",
       "reportUnlocked": "Rapport déverrouillé",
       "reportUnlockedDesc": "Votre PDF n'a pas de filigrane. Appuyez sur PDF pour générer votre rapport propre.",
       "purchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer."
@@ -252,7 +252,8 @@
       "about": "À propos",
       "legal": "Légal",
       "language": "Langue",
-      "appearance": "Apparence"
+      "appearance": "Apparence",
+      "privacy": "Confidentialité et données"
     },
     "account": {
       "province": "Province",
@@ -290,6 +291,16 @@
       "button": "Se déconnecter",
       "confirmTitle": "Se déconnecter",
       "confirmMessage": "Êtes-vous sûr de vouloir vous déconnecter?"
+    },
+    "deleteAccount": {
+      "title": "Supprimer le compte",
+      "subtitle": "Effacez définitivement votre compte et toutes vos données. En vertu de la LPRPDE, vous pouvez demander l'effacement en tout temps.",
+      "button": "Supprimer le compte",
+      "confirmTitle": "Supprimer votre compte?",
+      "confirmMessage": "Cette action supprime définitivement votre compte, toutes vos propriétés, tous vos rapports d'inspection et toutes vos photos. Elle est irréversible.",
+      "confirmButton": "Oui, tout supprimer",
+      "cancel": "Annuler",
+      "error": "Échec de la suppression du compte. Veuillez réessayer ou contacter le soutien."
     },
     "appearance": {
       "system": "Système",
