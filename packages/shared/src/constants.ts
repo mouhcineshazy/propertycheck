@@ -95,9 +95,9 @@ export const PRICING = {
 export const PAY_PER_USE = {
   report: {
     priceId: process.env.NEXT_PUBLIC_STRIPE_REPORT_PRICE_ID || '',
-    amount: 999, // $9.99 CAD — one clean, watermark-free, shareable report
+    amount: 1499, // $14.99 CAD — one clean, watermark-free, shareable report
     currency: 'cad',
-    displayPrice: '$9.99',
+    displayPrice: '$14.99',
     period: 'one-time',
   },
   bundle: {

@@ -79,6 +79,39 @@ differentiation code in the app. Pay the 1% (only above $2.5K/mo) to not own it.
 
 **`expo-in-app-purchases` is deprecated and archived by Expo — do not use it.**
 
+### Is RevenueCat the only option? (2026 landscape)
+
+No. There are three real paths. Free-tier ceilings verified Sep 2026:
+
+| Option | What it is | Free until | After free | Solo-dev verdict |
+|---|---|---|---|---|
+| **RevenueCat** (`react-native-purchases`) | Market-leader managed IAP: validation, renewals, refunds, entitlement webhooks | **$2.5K/mo** tracked revenue | 1% MTR | Biggest ecosystem, best docs — safest default |
+| **Adapty** (`react-native-adapty`) | RevenueCat-compatible managed IAP + strong paywall A/B testing | **$5K/mo** MTR (doubled in early 2026) | 1% MTR | **Highest free ceiling among mature managed SDKs** — our pick |
+| **Qonversion** | Managed IAP, analytics-leaning | ~$10K/mo MTR | ~$6–8 per $1K MTR | Even higher free band, but more analytics tool than infra |
+| **`expo-iap` / `react-native-iap`** (OpenIAP) | Open-source (MIT), actively maintained (v14, Nitro modules) | **Free forever, no %** | — | You build + host receipt validation & entitlement sync yourself (~weeks + ongoing maintenance) |
+
+**Truly free forever = `expo-iap`** — but "free" means you own the two highest-risk pieces:
+cross-store receipt validation and renewal/refund state, in your own Supabase Edge Function.
+That's ~10–15 weeks of work plus a permanent maintenance tax, and it's the code most likely
+to cause silent revenue bugs.
+
+**Revised recommendation for PropertyCheck:** a **managed free tier**, because we're
+pre-revenue and shipping solo — the managed SDK is $0 until we're actually earning, and it
+deletes the riskiest code. Between them, **Adapty edges out RevenueCat**: same managed
+guarantees, RevenueCat-compatible API (easy to switch), and **double the free ceiling
+($5K/mo vs $2.5K/mo)** — at $14.99/report that's ~330 paid reports/mo before we pay a cent.
+RevenueCat remains the safe alternative (larger community, more integrations). Either is
+swappable later; **`expo-iap` DIY only becomes worth it at real scale** when shaving the 1%
+outweighs the maintenance, and even then the entitlement model here (three Supabase rows) is
+already decoupled, so migration is contained.
+
+Sources: [npm react-native-purchases](https://www.npmjs.com/package/react-native-purchases),
+[Adapty pricing 2026 (Outmano)](https://outmano.com/tools/adapty/pricing),
+[RevenueCat vs Adapty vs Qonversion (theswiftk.it)](https://theswiftk.it.com/blog/revenuecat-vs-adapty-vs-qonversion-ios),
+[RevenueCat alternatives 2026 (sph.sh)](https://sph.sh/en/posts/revenuecat-alternatives-comparison-2026/),
+[expo-iap (GitHub)](https://github.com/hyochan/expo-iap),
+[LogRocket — best RN subscription libraries](https://blog.logrocket.com/).
+
 RevenueCat needs a **custom dev client / EAS build** (native module); it does **not** work
 in Expo Go. That's already our reality — `apps/mobile/CLAUDE.md` documents EAS dev-client
 usage, and native `ios/` + `android/` dirs are already prebuilt.

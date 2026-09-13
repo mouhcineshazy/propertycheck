@@ -621,7 +621,7 @@ export async function createBundleCheckout(propertyId: string): Promise<{
 // ============================================
 
 /**
- * Create a Stripe Checkout session for a $9.99 one-time report unlock.
+ * Create a Stripe Checkout session for a $14.99 one-time report unlock.
  * Returns the checkout URL to open in the device browser.
  */
 export async function createReportUnlockCheckout(inspectionId: string): Promise<{

@@ -32,7 +32,7 @@ Display copy: `apps/web/messages/{en,fr}.json` (`landing.pricing.addons.*`).
 | Product | Price (CAD) | What it is |
 |---|---|---|
 | **Moving Bundle** (hero) | **$24.99** one-time | move-in + move-out + comparison, 1 property, 18 mo |
-| **Report Unlock** | **$9.99** one-time | one clean, watermark-free, shareable report |
+| **Report Unlock** | **$14.99** one-time | one clean, watermark-free, shareable report |
 | Premium (secondary) | $9.99/mo · $95.88/yr | unlimited + comparison, for frequent movers |
 | Free (funnel) | $0 | document + watermarked PDF (the hook; value moment is gated) |
 

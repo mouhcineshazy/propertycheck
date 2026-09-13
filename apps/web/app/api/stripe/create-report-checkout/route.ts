@@ -41,7 +41,7 @@ async function getAuthUser(request: NextRequest) {
 }
 
 // POST /api/stripe/create-report-checkout
-// Creates a one-time Stripe Checkout for a $9.99 CAD watermark-free PDF unlock
+// Creates a one-time Stripe Checkout for a $14.99 CAD watermark-free PDF unlock
 // (amount set by NEXT_PUBLIC_STRIPE_REPORT_PRICE_ID; see PAY_PER_USE in shared)
 export async function POST(request: NextRequest) {
   const user = await getAuthUser(request);
