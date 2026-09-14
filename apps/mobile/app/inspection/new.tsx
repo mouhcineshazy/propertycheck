@@ -26,6 +26,8 @@ import * as ImagePicker from 'expo-image-picker';
 import {
   ROOM_TYPES,
   MAX_PHOTOS_PER_ROOM,
+  MAX_ROOMS_PER_INSPECTION,
+  MAX_ROOM_NAME_LENGTH,
   FREE_TIER_LIMITS,
   PREMIUM_TIER_LIMITS,
   type RoomTypeValue,
@@ -55,6 +57,7 @@ export default function NewInspectionScreen() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
   const [showRoomPicker, setShowRoomPicker] = useState(false);
+  const [customRoomName, setCustomRoomName] = useState('');
   const [selectedPhoto, setSelectedPhoto] = useState<{ roomId: string; index: number } | null>(null);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,17 +114,51 @@ export default function NewInspectionScreen() {
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
 
+  const genRoomId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+  // Make a label unique within the inspection by appending a number if needed.
+  const uniqueLabel = (base: string) => {
+    const existing = new Set(rooms.map((r) => r.label.toLowerCase()));
+    if (!existing.has(base.toLowerCase())) return base;
+    let n = 2;
+    while (existing.has(`${base} ${n}`.toLowerCase())) n++;
+    return `${base} ${n}`;
+  };
+
+  const addRoomWithLimit = (room: Room): boolean => {
+    if (rooms.length >= MAX_ROOMS_PER_INSPECTION) {
+      Alert.alert('Room limit reached', `An inspection can have up to ${MAX_ROOMS_PER_INSPECTION} rooms.`);
+      return false;
+    }
+    setRooms((prev) => [...prev, room]);
+    setActiveRoomId(room.id);
+    return true;
+  };
+
   const addRoom = (category: (typeof ROOM_TYPES)[number]) => {
     const count = rooms.filter((r) => r.room_type === category.value).length;
     const room: Room = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: genRoomId(),
       room_type: category.value,
       label: `${category.label} ${count + 1}`,
       photos: [],
     };
-    setRooms((prev) => [...prev, room]);
-    setActiveRoomId(room.id);
-    setShowRoomPicker(false);
+    if (addRoomWithLimit(room)) setShowRoomPicker(false);
+  };
+
+  const addCustomRoom = () => {
+    const name = customRoomName.trim();
+    if (!name) return;
+    const room: Room = {
+      id: genRoomId(),
+      room_type: 'other',
+      label: uniqueLabel(name),
+      photos: [],
+    };
+    if (addRoomWithLimit(room)) {
+      setCustomRoomName('');
+      setShowRoomPicker(false);
+    }
   };
 
   const removeRoom = (roomId: string) => {
@@ -311,8 +348,10 @@ export default function NewInspectionScreen() {
           <Text style={styles.headerTitle}>Add a Room</Text>
           <View style={styles.headerRight} />
         </View>
-        <ScrollView style={styles.content}>
-          <Text style={styles.pickerHint}>Pick a room type — we'll number it automatically.</Text>
+        <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+          <Text style={styles.pickerHint}>
+            Pick a room type (auto-numbered) — or add a custom room. {rooms.length}/{MAX_ROOMS_PER_INSPECTION} rooms.
+          </Text>
           {ROOM_TYPES.map((category) => {
             const existing = rooms.filter((r) => r.room_type === category.value).length;
             return (
@@ -328,6 +367,27 @@ export default function NewInspectionScreen() {
               </TouchableOpacity>
             );
           })}
+
+          <Text style={styles.customRoomLabel}>Custom room</Text>
+          <View style={styles.customRoomRow}>
+            <TextInput
+              style={[styles.input, styles.customRoomInput]}
+              placeholder="e.g. Garage, Balcony, Hallway"
+              placeholderTextColor={th.semantic.fgSubtle}
+              value={customRoomName}
+              onChangeText={setCustomRoomName}
+              maxLength={MAX_ROOM_NAME_LENGTH}
+              onSubmitEditing={addCustomRoom}
+              returnKeyType="done"
+            />
+            <TouchableOpacity
+              style={[styles.customRoomAdd, !customRoomName.trim() && styles.customRoomAddDisabled]}
+              onPress={addCustomRoom}
+              disabled={!customRoomName.trim()}
+            >
+              <Ionicons name="add" size={22} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </View>
     );
@@ -688,6 +748,32 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: th.semantic.fg,
+  },
+  customRoomLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: th.semantic.fg,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  customRoomRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  customRoomInput: {
+    flex: 1,
+  },
+  customRoomAdd: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: th.semantic.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  customRoomAddDisabled: {
+    opacity: 0.5,
   },
   inputContainer: {
     marginBottom: 20,

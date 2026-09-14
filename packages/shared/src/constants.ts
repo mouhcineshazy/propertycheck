@@ -153,6 +153,12 @@ export const PHOTO_CONFIG = {
 // across all rooms.
 export const MAX_PHOTOS_PER_ROOM = 10;
 
+// Max distinct rooms (category-numbered or custom-named) per inspection.
+export const MAX_ROOMS_PER_INSPECTION = 20;
+
+// Max length of a custom room name.
+export const MAX_ROOM_NAME_LENGTH = 40;
+
 // Validation limits
 export const VALIDATION_LIMITS = {
   address: { min: 5, max: 200 },
