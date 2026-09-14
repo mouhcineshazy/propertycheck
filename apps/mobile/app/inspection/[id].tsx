@@ -117,6 +117,28 @@ export default function InspectionDetailScreen() {
     return labels[roomType] || labels.other;
   };
 
+  // Group photos by room (room_label, falling back to the category label for
+  // legacy photos), preserving order and each photo's flat index for the viewer.
+  const groupPhotosByRoom = (photos: InspectionWithPhotos['photos']) => {
+    const groups: {
+      key: string;
+      label: string;
+      items: { photo: InspectionWithPhotos['photos'][number]; index: number }[];
+    }[] = [];
+    const byKey = new Map<string, number>();
+    photos.forEach((photo, index) => {
+      const label = photo.room_label || getRoomLabel(photo.room_type || 'other');
+      let gi = byKey.get(label);
+      if (gi === undefined) {
+        gi = groups.length;
+        byKey.set(label, gi);
+        groups.push({ key: label, label, items: [] });
+      }
+      groups[gi].items.push({ photo, index });
+    });
+    return groups;
+  };
+
   const [inspection, setInspection] = useState<InspectionWithPhotos | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -419,7 +441,7 @@ export default function InspectionDetailScreen() {
 
           <View style={styles.modalInfo}>
             <Text style={styles.modalRoomType}>
-              {getRoomLabel(photo.room_type || 'other')}
+              {photo.room_label || getRoomLabel(photo.room_type || 'other')}
             </Text>
             {photo.caption && (
               <Text style={styles.modalCaption}>{photo.caption}</Text>
@@ -538,18 +560,23 @@ export default function InspectionDetailScreen() {
               <Text style={styles.emptyText}>{t('inspection.detail.noPhotos')}</Text>
             </View>
           ) : (
-            <View style={styles.photoGrid}>
-              {inspection.photos?.map((photo, index) => (
-                <PhotoThumbnail
-                  key={photo.id}
-                  storagePath={photo.storage_path}
-                  roomType={photo.room_type || 'other'}
-                  roomLabel={getRoomLabel(photo.room_type || 'other')}
-                  errorText={t('inspection.detail.photoLoadError')}
-                  onPress={() => setSelectedPhotoIndex(index)}
-                />
-              ))}
-            </View>
+            groupPhotosByRoom(inspection.photos ?? []).map((group) => (
+              <View key={group.key} style={styles.roomGroup}>
+                <Text style={styles.roomGroupTitle}>{group.label}</Text>
+                <View style={styles.photoGrid}>
+                  {group.items.map(({ photo, index }) => (
+                    <PhotoThumbnail
+                      key={photo.id}
+                      storagePath={photo.storage_path}
+                      roomType={photo.room_type || 'other'}
+                      roomLabel={group.label}
+                      errorText={t('inspection.detail.photoLoadError')}
+                      onPress={() => setSelectedPhotoIndex(index)}
+                    />
+                  ))}
+                </View>
+              </View>
+            ))
           )}
         </View>
 
@@ -826,6 +853,15 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     fontSize: 14,
     color: th.semantic.fgMuted,
     marginTop: 8,
+  },
+  roomGroup: {
+    marginBottom: 20,
+  },
+  roomGroupTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: th.semantic.fgMuted,
+    marginBottom: 10,
   },
   photoGrid: {
     flexDirection: 'row',

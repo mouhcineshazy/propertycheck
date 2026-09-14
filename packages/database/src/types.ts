@@ -136,6 +136,7 @@ export interface Database {
           storage_path: string;
           caption: string | null;
           room_type: RoomType | null;
+          room_label: string | null;
           sort_order: number;
           created_at: string;
         };
@@ -145,6 +146,7 @@ export interface Database {
           storage_path: string;
           caption?: string | null;
           room_type?: RoomType | null;
+          room_label?: string | null;
           sort_order?: number;
           created_at?: string;
         };
@@ -152,6 +154,7 @@ export interface Database {
           storage_path?: string;
           caption?: string | null;
           room_type?: RoomType | null;
+          room_label?: string | null;
           sort_order?: number;
         };
         Relationships: [

@@ -7,6 +7,7 @@
 
 import { INSPECTION_PHOTOS_BUCKET } from '@propertycheck/database';
 import { getMobileSupabaseClient } from './supabase';
+import { compressImage } from './image';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 
@@ -26,24 +27,24 @@ export async function uploadInspectionPhoto(
   try {
     const supabase = getMobileSupabaseClient();
 
-    // Read file as base64
-    const base64 = await FileSystem.readAsStringAsync(uri, {
+    // Compress + resize before upload (always JPEG) to minimize storage use.
+    const compressedUri = await compressImage(uri);
+    const base64 = await FileSystem.readAsStringAsync(compressedUri, {
       encoding: 'base64',
     });
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { path: '', error: 'Not authenticated' };
 
-    // Path: {user_id}/{inspection_id}/{timestamp}_{index}.{ext}
+    // Path: {user_id}/{inspection_id}/{timestamp}_{index}.jpg
     // The user_id prefix is enforced by the storage RLS policy
-    const fileExt = uri.split('.').pop() || 'jpg';
-    const fileName = `${user.id}/${inspectionId}/${Date.now()}_${index}.${fileExt}`;
+    const fileName = `${user.id}/${inspectionId}/${Date.now()}_${index}.jpg`;
 
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
       .from(INSPECTION_PHOTOS_BUCKET)
       .upload(fileName, decode(base64), {
-        contentType: `image/${fileExt}`,
+        contentType: 'image/jpeg',
         cacheControl: '3600',
         upsert: false,
       });

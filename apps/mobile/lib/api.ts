@@ -264,6 +264,7 @@ export async function createInspection(
       storage_path: path,
       caption: photo.caption || null,
       room_type: photo.room_type || 'other',
+      room_label: photo.room_label || null,
       sort_order: i,
     });
 

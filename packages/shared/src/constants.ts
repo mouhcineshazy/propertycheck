@@ -139,9 +139,19 @@ export const SHARE_LINK_CONFIG = {
 export const PHOTO_CONFIG = {
   maxSizeMb: 10,
   allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  compressionQuality: 0.8,
+  // Balanced compression: resize longest side to maxDimension and re-encode JPEG
+  // at compressionQuality. Keeps damage/detail legible while cutting storage
+  // ~5-10x. Note: re-encoding strips EXIF; the immutable photo `created_at` is
+  // the chain-of-custody timestamp.
+  maxDimension: 1600,
+  compressionQuality: 0.6,
   thumbnailWidth: 200,
 } as const;
+
+// Max photos attached to a single room within an inspection. The per-inspection
+// cap (FREE_TIER_LIMITS / PREMIUM_TIER_LIMITS maxPhotosPerInspection) still applies
+// across all rooms.
+export const MAX_PHOTOS_PER_ROOM = 10;
 
 // Validation limits
 export const VALIDATION_LIMITS = {

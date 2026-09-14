@@ -35,6 +35,7 @@ export type LocalPhoto = {
   uri: string;
   caption?: string;
   room_type?: 'bedroom' | 'bathroom' | 'kitchen' | 'living_room' | 'other';
+  room_label?: string;
 };
 
 // Navigation params

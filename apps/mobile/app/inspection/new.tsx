@@ -1,12 +1,10 @@
 /**
- * New Inspection Screen - React 19 Pattern
+ * New Inspection Screen - room-by-room documentation.
  *
- * Features:
- * - Camera/photo capture for inspection
- * - Multiple photos with captions
- * - Room type selection
- * - Notes input
- * - Free tier limit enforcement
+ * Flow: add a room (category → auto-numbered, e.g. "Bedroom 1"), attach up to
+ * MAX_PHOTOS_PER_ROOM photos to it (camera or library), repeat. Photos are
+ * compressed on upload (see lib/image). Free-tier inspection + total-photo caps
+ * still apply.
  */
 
 import { useState, useRef, useEffect } from 'react';
@@ -20,26 +18,30 @@ import {
   ScrollView,
   TextInput,
   Image,
-  FlatList,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
+import {
+  ROOM_TYPES,
+  MAX_PHOTOS_PER_ROOM,
+  FREE_TIER_LIMITS,
+  PREMIUM_TIER_LIMITS,
+  type RoomTypeValue,
+} from '@propertycheck/shared';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { createInspection, checkFreeTierLimits } from '../../lib';
 import type { LocalPhoto } from '../../lib';
 import { UpgradeModal } from '../../components';
 import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
 
-// Room types for photo categorization
-const ROOM_TYPES = [
-  { value: 'living_room', label: 'Living Room' },
-  { value: 'bedroom', label: 'Bedroom' },
-  { value: 'bathroom', label: 'Bathroom' },
-  { value: 'kitchen', label: 'Kitchen' },
-  { value: 'other', label: 'Other' },
-] as const;
+type Room = {
+  id: string;
+  room_type: RoomTypeValue;
+  label: string;
+  photos: LocalPhoto[];
+};
 
 export default function NewInspectionScreen() {
   const router = useRouter();
@@ -50,38 +52,49 @@ export default function NewInspectionScreen() {
 
   const [permission, requestPermission] = useCameraPermissions();
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [photos, setPhotos] = useState<LocalPhoto[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
+  const [showRoomPicker, setShowRoomPicker] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ roomId: string; index: number } | null>(null);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
 
   // Free tier limit enforcement
   const [isCheckingLimits, setIsCheckingLimits] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [userProvince, setUserProvince] = useState<string | undefined>();
+  const [maxTotalPhotos, setMaxTotalPhotos] = useState<number>(FREE_TIER_LIMITS.maxPhotosPerInspection);
 
-  // Check free tier limits on mount - block access if limit reached
+  const totalPhotos = rooms.reduce((sum, room) => sum + room.photos.length, 0);
+
   useEffect(() => {
     async function checkLimits() {
       try {
         const supabase = getMobileSupabaseClient();
+        const { data: { user } } = await supabase.auth.getUser();
 
-        // Check limits and get user province in parallel
-        const [limitsResult, userResult] = await Promise.all([
+        const [limitsResult, userResult, subResult] = await Promise.all([
           checkFreeTierLimits(),
           supabase.from('users').select('province').single(),
+          user
+            ? supabase.from('subscriptions').select('status').eq('user_id', user.id).single()
+            : Promise.resolve({ data: null }),
         ]);
 
         setUserProvince(userResult.data?.province || undefined);
+        const isPremium = subResult.data?.status === 'premium';
+        setMaxTotalPhotos(
+          isPremium
+            ? PREMIUM_TIER_LIMITS.maxPhotosPerInspection
+            : FREE_TIER_LIMITS.maxPhotosPerInspection
+        );
 
-        // If can't add inspection, show upgrade modal
         if (!limitsResult.data?.canAddInspection) {
           setShowUpgradeModal(true);
           return;
         }
       } catch (err) {
         console.error('Error checking limits:', err);
-        // On error, block access to be safe
         setShowUpgradeModal(true);
       } finally {
         setIsCheckingLimits(false);
@@ -91,14 +104,77 @@ export default function NewInspectionScreen() {
     checkLimits();
   }, []);
 
-  // Handle upgrade modal close - go back since they can't create inspection
   const handleUpgradeModalClose = () => {
     setShowUpgradeModal(false);
     router.back();
   };
 
-  // Request camera permission
-  const handleOpenCamera = async () => {
+  const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
+
+  const addRoom = (category: (typeof ROOM_TYPES)[number]) => {
+    const count = rooms.filter((r) => r.room_type === category.value).length;
+    const room: Room = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      room_type: category.value,
+      label: `${category.label} ${count + 1}`,
+      photos: [],
+    };
+    setRooms((prev) => [...prev, room]);
+    setActiveRoomId(room.id);
+    setShowRoomPicker(false);
+  };
+
+  const removeRoom = (roomId: string) => {
+    setRooms((prev) => prev.filter((r) => r.id !== roomId));
+  };
+
+  // Add photos to a room, enforcing the per-room and per-inspection caps.
+  const addPhotosToRoom = (roomId: string, incoming: LocalPhoto[]) => {
+    const room = rooms.find((r) => r.id === roomId);
+    if (!room) return;
+
+    const roomRemaining = MAX_PHOTOS_PER_ROOM - room.photos.length;
+    const totalRemaining = maxTotalPhotos - totalPhotos;
+    const allowed = Math.max(0, Math.min(roomRemaining, totalRemaining));
+
+    if (allowed <= 0) {
+      Alert.alert(
+        'Photo limit reached',
+        roomRemaining <= 0
+          ? `Each room can hold up to ${MAX_PHOTOS_PER_ROOM} photos.`
+          : `This inspection can hold up to ${maxTotalPhotos} photos.`
+      );
+      return;
+    }
+
+    const toAdd = incoming.slice(0, allowed);
+    setRooms((prev) =>
+      prev.map((r) => (r.id === roomId ? { ...r, photos: [...r.photos, ...toAdd] } : r))
+    );
+
+    if (toAdd.length < incoming.length) {
+      Alert.alert('Some photos skipped', `Only ${toAdd.length} photo(s) fit within the limit.`);
+    }
+  };
+
+  const updatePhotoCaption = (roomId: string, index: number, caption: string) => {
+    setRooms((prev) =>
+      prev.map((r) =>
+        r.id === roomId
+          ? { ...r, photos: r.photos.map((p, i) => (i === index ? { ...p, caption } : p)) }
+          : r
+      )
+    );
+  };
+
+  const removePhoto = (roomId: string, index: number) => {
+    setRooms((prev) =>
+      prev.map((r) => (r.id === roomId ? { ...r, photos: r.photos.filter((_, i) => i !== index) } : r))
+    );
+    setSelectedPhoto(null);
+  };
+
+  const handleOpenCamera = async (roomId: string) => {
     if (!permission?.granted) {
       const result = await requestPermission();
       if (!result.granted) {
@@ -106,20 +182,16 @@ export default function NewInspectionScreen() {
         return;
       }
     }
+    setActiveRoomId(roomId);
     setIsCameraActive(true);
   };
 
-  // Take a photo
   const handleTakePhoto = async () => {
-    if (!cameraRef.current) return;
-
+    if (!cameraRef.current || !activeRoomId) return;
     try {
       const photo = await cameraRef.current.takePictureAsync();
       if (photo) {
-        setPhotos((prev) => [
-          ...prev,
-          { uri: photo.uri, caption: '', room_type: 'other' },
-        ]);
+        addPhotosToRoom(activeRoomId, [{ uri: photo.uri, caption: '' }]);
         setIsCameraActive(false);
       }
     } catch (err) {
@@ -128,51 +200,45 @@ export default function NewInspectionScreen() {
     }
   };
 
-  // Pick photo from gallery
-  const handlePickImage = async () => {
+  const handlePickImage = async (roomId: string) => {
+    const room = rooms.find((r) => r.id === roomId);
+    if (!room) return;
+    const selectionLimit = Math.max(1, MAX_PHOTOS_PER_ROOM - room.photos.length);
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsMultipleSelection: true,
+      selectionLimit,
       quality: 0.8,
     });
 
     if (!result.canceled) {
-      const newPhotos = result.assets.map((asset) => ({
-        uri: asset.uri,
-        caption: '',
-        room_type: 'other' as const,
-      }));
-      setPhotos((prev) => [...prev, ...newPhotos]);
+      addPhotosToRoom(
+        roomId,
+        result.assets.map((asset) => ({ uri: asset.uri, caption: '' }))
+      );
     }
   };
 
-  // Update photo details
-  const updatePhoto = (index: number, updates: Partial<LocalPhoto>) => {
-    setPhotos((prev) =>
-      prev.map((photo, i) => (i === index ? { ...photo, ...updates } : photo))
-    );
-  };
-
-  // Remove photo
-  const removePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
-    setSelectedPhotoIndex(null);
-  };
-
-  // Submit inspection
   const handleSubmit = async () => {
     if (!propertyId) {
       Alert.alert('Error', 'Property ID is required');
       return;
     }
-
-    if (photos.length === 0) {
-      Alert.alert('Photos Required', 'Please add at least one photo to the inspection.');
+    if (totalPhotos === 0) {
+      Alert.alert('Photos Required', 'Add at least one room with a photo before saving.');
       return;
     }
 
-    setIsSubmitting(true);
+    // Flatten rooms into photos, tagging each with its room category + label.
+    const photos: LocalPhoto[] = [];
+    rooms.forEach((room) => {
+      room.photos.forEach((p) => {
+        photos.push({ ...p, room_type: room.room_type, room_label: room.label });
+      });
+    });
 
+    setIsSubmitting(true);
     try {
       await createInspection(propertyId, notes, photos);
       Alert.alert('Success', 'Inspection created successfully', [
@@ -186,7 +252,6 @@ export default function NewInspectionScreen() {
     }
   };
 
-  // Loading state while checking limits
   if (isCheckingLimits) {
     return (
       <View style={styles.centered}>
@@ -196,7 +261,6 @@ export default function NewInspectionScreen() {
     );
   }
 
-  // Show upgrade modal if limit reached (will redirect on close)
   if (showUpgradeModal) {
     return (
       <View style={styles.container}>
@@ -216,13 +280,15 @@ export default function NewInspectionScreen() {
       <View style={styles.cameraContainer}>
         <CameraView ref={cameraRef} style={styles.camera} facing="back">
           <View style={styles.cameraOverlay}>
-            <TouchableOpacity
-              style={styles.cameraCloseButton}
-              onPress={() => setIsCameraActive(false)}
-            >
-              <Ionicons name="close" size={28} color="#FFFFFF" />
-            </TouchableOpacity>
-
+            <View style={styles.cameraTopBar}>
+              <TouchableOpacity
+                style={styles.cameraCloseButton}
+                onPress={() => setIsCameraActive(false)}
+              >
+                <Ionicons name="close" size={28} color="#FFFFFF" />
+              </TouchableOpacity>
+              {activeRoom && <Text style={styles.cameraRoomLabel}>{activeRoom.label}</Text>}
+            </View>
             <View style={styles.cameraControls}>
               <TouchableOpacity style={styles.captureButton} onPress={handleTakePhoto}>
                 <View style={styles.captureButtonInner} />
@@ -234,84 +300,81 @@ export default function NewInspectionScreen() {
     );
   }
 
-  // Photo detail modal
-  if (selectedPhotoIndex !== null && photos[selectedPhotoIndex]) {
-    const photo = photos[selectedPhotoIndex];
+  // Room category picker
+  if (showRoomPicker) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => setSelectedPhotoIndex(null)}
-            style={styles.backButton}
-          >
+          <TouchableOpacity onPress={() => setShowRoomPicker(false)} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={th.semantic.fg} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Photo</Text>
-          <TouchableOpacity
-            onPress={() => removePhoto(selectedPhotoIndex)}
-            style={styles.deleteButton}
-          >
-            <Ionicons name="trash-outline" size={22} color={th.semantic.danger} />
-          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Add a Room</Text>
+          <View style={styles.headerRight} />
         </View>
-
         <ScrollView style={styles.content}>
-          <Image source={{ uri: photo.uri }} style={styles.photoPreviewLarge} />
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Room Type</Text>
-            <View style={styles.typeGrid}>
-              {ROOM_TYPES.map((type) => (
-                <TouchableOpacity
-                  key={type.value}
-                  style={[
-                    styles.typeButton,
-                    photo.room_type === type.value && styles.typeButtonActive,
-                  ]}
-                  onPress={() =>
-                    updatePhoto(selectedPhotoIndex, { room_type: type.value })
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.typeButtonText,
-                      photo.room_type === type.value && styles.typeButtonTextActive,
-                    ]}
-                  >
-                    {type.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Caption</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Add a caption for this photo..."
-              placeholderTextColor={th.semantic.fgSubtle}
-              value={photo.caption}
-              onChangeText={(text) =>
-                updatePhoto(selectedPhotoIndex, { caption: text })
-              }
-            />
-          </View>
-
-          <TouchableOpacity
-            style={styles.doneButton}
-            onPress={() => setSelectedPhotoIndex(null)}
-          >
-            <Text style={styles.doneButtonText}>Done</Text>
-          </TouchableOpacity>
+          <Text style={styles.pickerHint}>Pick a room type — we'll number it automatically.</Text>
+          {ROOM_TYPES.map((category) => {
+            const existing = rooms.filter((r) => r.room_type === category.value).length;
+            return (
+              <TouchableOpacity
+                key={category.value}
+                style={styles.roomPickerRow}
+                onPress={() => addRoom(category)}
+              >
+                <Text style={styles.roomPickerLabel}>
+                  {category.label} {existing + 1}
+                </Text>
+                <Ionicons name="add-circle-outline" size={22} color={th.semantic.primary} />
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
       </View>
     );
   }
 
+  // Photo detail (caption + delete)
+  if (selectedPhoto) {
+    const room = rooms.find((r) => r.id === selectedPhoto.roomId);
+    const photo = room?.photos[selectedPhoto.index];
+    if (room && photo) {
+      return (
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setSelectedPhoto(null)} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color={th.semantic.fg} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>{room.label}</Text>
+            <TouchableOpacity
+              onPress={() => removePhoto(selectedPhoto.roomId, selectedPhoto.index)}
+              style={styles.deleteButton}
+            >
+              <Ionicons name="trash-outline" size={22} color={th.semantic.danger} />
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.content}>
+            <Image source={{ uri: photo.uri }} style={styles.photoPreviewLarge} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Caption</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Add a caption for this photo..."
+                placeholderTextColor={th.semantic.fgSubtle}
+                value={photo.caption}
+                onChangeText={(text) => updatePhotoCaption(selectedPhoto.roomId, selectedPhoto.index, text)}
+              />
+            </View>
+            <TouchableOpacity style={styles.doneButton} onPress={() => setSelectedPhoto(null)}>
+              <Text style={styles.doneButtonText}>Done</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      );
+    }
+  }
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="close" size={24} color={th.semantic.fg} />
@@ -321,48 +384,85 @@ export default function NewInspectionScreen() {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Photo Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Photos ({photos.length})</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Rooms</Text>
+            <Text style={styles.totalCount}>{totalPhotos}/{maxTotalPhotos} photos</Text>
+          </View>
 
-          {photos.length > 0 && (
-            <FlatList
-              data={photos}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(_, index) => index.toString()}
-              contentContainerStyle={styles.photoList}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity
-                  style={styles.photoThumbnail}
-                  onPress={() => setSelectedPhotoIndex(index)}
-                >
-                  <Image source={{ uri: item.uri }} style={styles.thumbnailImage} />
-                  <View style={styles.thumbnailBadge}>
-                    <Text style={styles.thumbnailBadgeText}>
-                      {ROOM_TYPES.find((t) => t.value === item.room_type)?.label ||
-                        'Other'}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
+          {rooms.length === 0 && (
+            <View style={styles.emptyState}>
+              <Ionicons name="home-outline" size={32} color={th.semantic.fgSubtle} />
+              <Text style={styles.emptyStateText}>
+                Add a room to start documenting this inspection.
+              </Text>
+            </View>
           )}
 
-          <View style={styles.photoActions}>
-            <TouchableOpacity style={styles.photoActionButton} onPress={handleOpenCamera}>
-              <Ionicons name="camera-outline" size={24} color={th.semantic.primary} />
-              <Text style={styles.photoActionText}>Take Photo</Text>
-            </TouchableOpacity>
+          {rooms.map((room) => {
+            const roomFull = room.photos.length >= MAX_PHOTOS_PER_ROOM;
+            return (
+              <View key={room.id} style={styles.roomCard}>
+                <View style={styles.roomHeader}>
+                  <Text style={styles.roomTitle}>{room.label}</Text>
+                  <View style={styles.roomHeaderRight}>
+                    <Text style={styles.roomCount}>
+                      {room.photos.length}/{MAX_PHOTOS_PER_ROOM}
+                    </Text>
+                    <TouchableOpacity onPress={() => removeRoom(room.id)} hitSlop={8}>
+                      <Ionicons name="trash-outline" size={18} color={th.semantic.danger} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
-            <TouchableOpacity style={styles.photoActionButton} onPress={handlePickImage}>
-              <Ionicons name="images-outline" size={24} color={th.semantic.primary} />
-              <Text style={styles.photoActionText}>Choose from Library</Text>
-            </TouchableOpacity>
-          </View>
+                {room.photos.length > 0 && (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.photoList}
+                  >
+                    {room.photos.map((photo, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.photoThumbnail}
+                        onPress={() => setSelectedPhoto({ roomId: room.id, index })}
+                      >
+                        <Image source={{ uri: photo.uri }} style={styles.thumbnailImage} />
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
+
+                {roomFull ? (
+                  <Text style={styles.roomFullText}>Room full ({MAX_PHOTOS_PER_ROOM} photos)</Text>
+                ) : (
+                  <View style={styles.roomActions}>
+                    <TouchableOpacity
+                      style={styles.roomActionButton}
+                      onPress={() => handleOpenCamera(room.id)}
+                    >
+                      <Ionicons name="camera-outline" size={20} color={th.semantic.primary} />
+                      <Text style={styles.roomActionText}>Take Photo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.roomActionButton}
+                      onPress={() => handlePickImage(room.id)}
+                    >
+                      <Ionicons name="images-outline" size={20} color={th.semantic.primary} />
+                      <Text style={styles.roomActionText}>Library</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            );
+          })}
+
+          <TouchableOpacity style={styles.addRoomButton} onPress={() => setShowRoomPicker(true)}>
+            <Ionicons name="add" size={20} color={th.semantic.primary} />
+            <Text style={styles.addRoomText}>Add room</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Notes Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notes (Optional)</Text>
           <TextInput
@@ -377,11 +477,10 @@ export default function NewInspectionScreen() {
           />
         </View>
 
-        {/* Submit Button */}
         <TouchableOpacity
-          style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+          style={[styles.submitButton, (isSubmitting || totalPhotos === 0) && styles.submitButtonDisabled]}
           onPress={handleSubmit}
-          disabled={isSubmitting || photos.length === 0}
+          disabled={isSubmitting || totalPhotos === 0}
         >
           {isSubmitting ? (
             <ActivityIndicator color="#FFFFFF" />
@@ -389,7 +488,7 @@ export default function NewInspectionScreen() {
             <>
               <Ionicons name="checkmark-circle-outline" size={20} color="#FFFFFF" />
               <Text style={styles.submitButtonText}>
-                Create Inspection ({photos.length} photos)
+                Create Inspection ({totalPhotos} {totalPhotos === 1 ? 'photo' : 'photos'})
               </Text>
             </>
           )}
@@ -454,19 +553,71 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
   section: {
     marginBottom: 24,
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: th.semantic.fg,
     marginBottom: 12,
   },
-  photoList: {
-    marginBottom: 16,
+  totalCount: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: th.semantic.fgMuted,
+    marginBottom: 12,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 28,
+    gap: 10,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: th.semantic.fgMuted,
+    textAlign: 'center',
+    paddingHorizontal: 24,
+  },
+  roomCard: {
+    borderWidth: 1,
+    borderColor: th.semantic.line,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    backgroundColor: th.semantic.cardMuted,
+  },
+  roomHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  roomTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: th.semantic.fg,
+  },
+  roomHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
   },
+  roomCount: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: th.semantic.fgMuted,
+  },
+  photoList: {
+    gap: 10,
+    paddingBottom: 12,
+  },
   photoThumbnail: {
-    width: 100,
-    height: 100,
+    width: 88,
+    height: 88,
     borderRadius: 8,
     overflow: 'hidden',
   },
@@ -474,40 +625,69 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  thumbnailBadge: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  thumbnailBadgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '500',
-  },
-  photoActions: {
+  roomActions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
-  photoActionButton: {
+  roomActionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: th.semantic.primary,
+    borderRadius: 8,
+    gap: 6,
+    borderStyle: 'dashed',
+  },
+  roomActionText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: th.semantic.primary,
+  },
+  roomFullText: {
+    fontSize: 13,
+    color: th.semantic.fgSubtle,
+    textAlign: 'center',
+    paddingVertical: 8,
+  },
+  addRoomButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
     borderWidth: 1,
     borderColor: th.semantic.primary,
     borderRadius: 8,
     gap: 8,
-    borderStyle: 'dashed',
   },
-  photoActionText: {
+  addRoomText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
     color: th.semantic.primary,
+  },
+  pickerHint: {
+    fontSize: 14,
+    color: th.semantic.fgMuted,
+    marginBottom: 16,
+  },
+  roomPickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: th.semantic.line,
+    borderRadius: 10,
+    marginBottom: 10,
+    backgroundColor: th.semantic.cardMuted,
+  },
+  roomPickerLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: th.semantic.fg,
   },
   inputContainer: {
     marginBottom: 20,
@@ -530,31 +710,6 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
   textArea: {
     height: 100,
     paddingTop: 12,
-  },
-  typeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  typeButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: th.semantic.lineStrong,
-    backgroundColor: th.semantic.cardMuted,
-  },
-  typeButtonActive: {
-    backgroundColor: th.semantic.primary,
-    borderColor: th.semantic.primary,
-  },
-  typeButtonText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: th.semantic.fgMuted,
-  },
-  typeButtonTextActive: {
-    color: '#fff',
   },
   photoPreviewLarge: {
     width: '100%',
@@ -607,6 +762,16 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     justifyContent: 'space-between',
     padding: 20,
     paddingTop: 60,
+  },
+  cameraTopBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  cameraRoomLabel: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   cameraCloseButton: {
     width: 44,

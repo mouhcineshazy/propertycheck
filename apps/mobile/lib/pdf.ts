@@ -231,31 +231,34 @@ function generateReportHtml(
   const province = provinceCode ? getProvince(provinceCode) : undefined;
   const legalDisclaimer = getLegalDisclaimer(province, locale);
 
-  // Group photos by room type
-  const photosByRoom = inspection.photos.reduce(
-    (acc, photo) => {
-      const room = photo.room_type || 'other';
-      if (!acc[room]) acc[room] = [];
-      acc[room].push(photo);
-      return acc;
-    },
-    {} as Record<string, typeof inspection.photos>
-  );
+  // Group photos by room (room_label; fall back to the category label for legacy
+  // photos). Each group keeps its category for icon + ordering.
+  const roomGroups = new Map<
+    string,
+    { roomType: string; label: string; photos: typeof inspection.photos }
+  >();
+  inspection.photos.forEach((photo) => {
+    const roomType = photo.room_type || 'other';
+    const config = ROOM_CONFIG[roomType as keyof typeof ROOM_CONFIG];
+    const label = photo.room_label || (config ? config.label[locale] : roomType);
+    if (!roomGroups.has(label)) roomGroups.set(label, { roomType, label, photos: [] });
+    roomGroups.get(label)!.photos.push(photo);
+  });
 
-  // Sort rooms by configured order
-  const sortedRooms = Object.keys(photosByRoom).sort((a, b) => {
-    const orderA = ROOM_CONFIG[a as keyof typeof ROOM_CONFIG]?.order ?? 99;
-    const orderB = ROOM_CONFIG[b as keyof typeof ROOM_CONFIG]?.order ?? 99;
-    return orderA - orderB;
+  // Sort by category order, then by label (numeric — Bedroom 1 before Bedroom 2).
+  const sortedGroups = Array.from(roomGroups.values()).sort((a, b) => {
+    const orderA = ROOM_CONFIG[a.roomType as keyof typeof ROOM_CONFIG]?.order ?? 99;
+    const orderB = ROOM_CONFIG[b.roomType as keyof typeof ROOM_CONFIG]?.order ?? 99;
+    if (orderA !== orderB) return orderA - orderB;
+    return a.label.localeCompare(b.label, undefined, { numeric: true });
   });
 
   // Generate photo sections grouped by room
-  const photoSections = sortedRooms
-    .map((room) => {
-      const photos = photosByRoom[room];
-      const roomConfigItem = ROOM_CONFIG[room as keyof typeof ROOM_CONFIG];
-      const roomLabel = roomConfigItem ? roomConfigItem.label[locale] : room;
-      const roomIcon = roomConfigItem?.icon || '📷';
+  const photoSections = sortedGroups
+    .map((group) => {
+      const photos = group.photos;
+      const roomLabel = group.label;
+      const roomIcon = ROOM_CONFIG[group.roomType as keyof typeof ROOM_CONFIG]?.icon || '📷';
 
       const photoHtml = photos
         .map(
