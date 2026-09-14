@@ -307,39 +307,50 @@ function generateComparisonHtml(
     dateLocale
   );
 
-  // Group photos by room type
+  // Group photos by room (room_label, falling back to the category label) so
+  // move-in and move-out align on the same room. Track category for ordering.
+  const roomLabels = ct.roomLabels;
+  const ROOM_ORDER: Record<string, number> = {
+    living_room: 1,
+    kitchen: 2,
+    bedroom: 3,
+    bathroom: 4,
+    other: 5,
+  };
+  const labelFor = (photo: (typeof data.moveInInspection.photos)[number]) =>
+    photo.room_label || roomLabels[photo.room_type || 'other'] || (photo.room_type || 'other');
+
   const groupByRoom = (photos: typeof data.moveInInspection.photos) => {
-    return photos.reduce(
-      (acc, photo) => {
-        const room = photo.room_type || 'other';
-        if (!acc[room]) acc[room] = [];
-        acc[room].push(photo);
-        return acc;
-      },
-      {} as Record<string, typeof photos>
-    );
+    const map: Record<string, typeof photos> = {};
+    photos.forEach((photo) => {
+      const key = labelFor(photo);
+      if (!map[key]) map[key] = [];
+      map[key].push(photo);
+    });
+    return map;
   };
 
   const moveInByRoom = groupByRoom(data.moveInInspection.photos);
   const moveOutByRoom = groupByRoom(data.moveOutInspection.photos);
 
-  const roomLabels = ct.roomLabels;
+  // Category per room label (for ordering), taken from whichever inspection has it.
+  const roomTypeByLabel: Record<string, string> = {};
+  [...data.moveInInspection.photos, ...data.moveOutInspection.photos].forEach((photo) => {
+    const key = labelFor(photo);
+    if (!roomTypeByLabel[key]) roomTypeByLabel[key] = photo.room_type || 'other';
+  });
 
-  const roomIcons: Record<string, string> = {
-    living_room: '🏠',
-    bedroom: '🛏️',
-    bathroom: '🚿',
-    kitchen: '🍳',
-    other: '📷',
-  };
+  // Ordered union of room labels: category order, then numeric label order.
+  const allRooms = Array.from(
+    new Set([...Object.keys(moveInByRoom), ...Object.keys(moveOutByRoom)])
+  ).sort((a, b) => {
+    const oa = ROOM_ORDER[roomTypeByLabel[a] || 'other'] ?? 99;
+    const ob = ROOM_ORDER[roomTypeByLabel[b] || 'other'] ?? 99;
+    if (oa !== ob) return oa - ob;
+    return a.localeCompare(b, undefined, { numeric: true });
+  });
 
-  // Generate comparison sections
-  const allRooms = new Set([
-    ...Object.keys(moveInByRoom),
-    ...Object.keys(moveOutByRoom),
-  ]);
-
-  const roomSections = Array.from(allRooms)
+  const roomSections = allRooms
     .map((room) => {
       const moveInPhotos = moveInByRoom[room] || [];
       const moveOutPhotos = moveOutByRoom[room] || [];
@@ -378,8 +389,7 @@ function generateComparisonHtml(
       return `
         <div class="room-section">
           <div class="room-header">
-            <span class="room-icon">${roomIcons[room] || '📷'}</span>
-            <h3>${roomLabels[room] || room}</h3>
+            <h3>${room}</h3>
             <span class="photo-count">${moveInPhotos.length + moveOutPhotos.length} ${ct.photos}</span>
           </div>
           <table class="comparison-table">
@@ -416,385 +426,137 @@ function generateComparisonHtml(
       <meta charset="utf-8">
       <title>Comparison Report - ${data.propertyAddress}</title>
       <style>
-        * {
-          box-sizing: border-box;
-          margin: 0;
-          padding: 0;
+        :root {
+          --primary: ${colors.primary};
+          --primary-dark: ${colors.primaryDark};
+          --ink: ${colors.dark};
+          --gray: ${colors.gray};
+          --muted: ${colors.lightGray};
+          --bg: ${colors.background};
+          --line: #e5e7eb;
+          --line-strong: #cbd5e1;
+          --move-in: #15966e;
+          --move-out: #d97706;
         }
 
-        @page {
-          margin: 0.5in;
-          size: letter;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @page { size: letter; margin: 14mm 14mm 16mm 14mm; }
+
+        html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
         body {
           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-          line-height: 1.6;
-          color: ${colors.dark};
-          margin: 0;
-          padding: 0;
+          font-size: 10.5pt;
+          line-height: 1.5;
+          color: var(--ink);
+          background: #ffffff;
         }
 
-        /* Wrapper to contain all content */
-        .content-wrapper {
-          padding: 20px 30px 50px 30px; /* Extra bottom padding for footer */
-        }
+        .content-wrapper { }
 
-        /* Fixed footer that appears on every printed page */
-        .page-footer {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 30px;
-          text-align: center;
-          font-size: 9px;
-          color: ${colors.gray};
-          padding-top: 10px;
-          border-top: 1px solid #e5e5e5;
-          background: white;
-        }
-
-        .page-footer a {
-          color: ${colors.primary};
-          text-decoration: none;
-        }
-
-        /* No watermark - clean professional look for all tiers */
-
-        /* Header - compact to reduce first page space */
+        /* ---------- Header ---------- */
         .header {
-          border-bottom: 3px solid ${colors.primary};
+          border-bottom: 2px solid var(--primary);
           padding-bottom: 16px;
           margin-bottom: 20px;
-          ${isPremium ? `background: linear-gradient(135deg, ${colors.background} 0%, ${colors.white} 100%); margin: -20px -30px 20px -30px; padding: 20px 30px 16px 30px;` : ''}
         }
-
-        .header-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 16px;
-        }
-
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .logo {
-          font-size: 24px;
-          font-weight: 800;
-          letter-spacing: -0.5px;
-        }
-
-        .logo-property {
-          color: ${colors.dark};
-        }
-
-        .logo-check {
-          color: ${colors.primary};
-        }
-
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .brand { display: flex; align-items: center; gap: 9px; }
+        .logo { font-size: 16pt; font-weight: 800; letter-spacing: -0.4px; }
+        .logo-property { color: var(--ink); }
+        .logo-check { color: var(--primary); }
         .tier-badge {
-          display: inline-block;
-          padding: 4px 10px;
-          border-radius: 12px;
-          font-size: 9px;
+          padding: 3px 8px; border: 1px solid var(--line-strong); border-radius: 4px;
+          font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+          color: var(--gray); background: #fff;
+        }
+        .tier-badge.premium { color: var(--primary); border-color: var(--primary); }
+        h1 { font-size: 20pt; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; margin-bottom: 4px; }
+        .meta { font-size: 10.5pt; color: var(--gray); }
+        .meta strong { color: var(--ink); font-weight: 600; }
+
+        /* ---------- Summary legend ---------- */
+        .summary {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-bottom: 22px;
+        }
+        .summary-item {
+          display: flex; align-items: center; gap: 10px;
+          padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px;
+        }
+        .summary-item.move-in-item { border-left: 3px solid var(--move-in); }
+        .summary-item.move-out-item { border-left: 3px solid var(--move-out); }
+        .summary-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .summary-dot.move-in { background: var(--move-in); }
+        .summary-dot.move-out { background: var(--move-out); }
+        .summary-info { display: flex; flex-direction: column; }
+        .summary-info strong { font-size: 10.5pt; color: var(--ink); }
+        .summary-info span { font-size: 8.5pt; color: var(--gray); }
+
+        /* ---------- Room ---------- */
+        .room-section { margin-bottom: 22px; page-break-inside: avoid; }
+        .room-header {
+          display: flex; align-items: center; gap: 10px;
+          padding: 6px 0 6px 12px; margin-bottom: 10px;
+          border-left: 3px solid var(--primary);
+        }
+        .room-header h3 { font-size: 12pt; font-weight: 700; color: var(--ink); flex: 1; letter-spacing: -0.2px; }
+        .photo-count { font-size: 8.5pt; font-weight: 600; color: var(--gray); white-space: nowrap; }
+
+        /* ---------- Comparison table ---------- */
+        .comparison-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .comparison-table th {
+          width: 50%;
+          text-align: left;
+          font-size: 8.5pt;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          color: var(--gray);
+          padding: 0 0 8px 0;
+          border-bottom: 1px solid var(--line-strong);
         }
-
-        .tier-badge.premium {
-          background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%);
-          color: ${colors.white};
-        }
-
-        .tier-badge.free {
-          background: ${colors.background};
-          color: ${colors.gray};
-          border: 1px solid #e2e8f0;
-        }
-
-        h1 {
-          font-size: 26px;
-          font-weight: 700;
-          color: ${colors.dark};
-          margin-bottom: 8px;
-        }
-
-        .meta {
-          color: ${colors.gray};
-          font-size: 14px;
-        }
-
-        .meta strong {
-          color: ${colors.dark};
-        }
-
-        /* Summary - compact layout */
-        .summary {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 20px;
-          padding: 14px;
-          background: ${isPremium ? colors.white : colors.background};
-          border-radius: 10px;
-          ${isPremium ? `border: 2px solid ${colors.primary}20; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);` : ''}
-        }
-
-        .summary-item {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 12px;
-          background: ${colors.background};
-          border-radius: 8px;
-          ${isPremium ? 'border-left: 3px solid;' : ''}
-        }
-
-        .summary-item.move-in-item {
-          ${isPremium ? `border-left-color: ${colors.success};` : ''}
-        }
-
-        .summary-item.move-out-item {
-          ${isPremium ? `border-left-color: ${colors.warning};` : ''}
-        }
-
-        .summary-dot {
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          flex-shrink: 0;
-        }
-
-        .summary-dot.move-in {
-          background: ${colors.success};
-        }
-
-        .summary-dot.move-out {
-          background: ${colors.warning};
-        }
-
-        .summary-info strong {
-          display: block;
-          font-size: 13px;
-          color: ${colors.dark};
-          margin-bottom: 2px;
-        }
-
-        .summary-info span {
-          font-size: 12px;
-          color: ${colors.gray};
-        }
-
-        /* Room Section */
-        .room-section {
-          margin-bottom: 20px;
-          /* Allow page breaks inside room sections to prevent large white spaces */
-        }
-
-        .room-header {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 12px;
-          padding: 10px 14px;
-          background: ${isPremium ? `linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)` : '#EFF6FF'};
-          border-radius: 8px;
-          ${isPremium ? `border-left: 3px solid ${colors.primary};` : ''}
-        }
-
-        .room-icon {
-          font-size: 20px;
-        }
-
-        .room-header h3 {
-          flex: 1;
-          font-size: 15px;
-          font-weight: 600;
-          color: ${colors.primaryDark};
-          margin: 0;
-          border: none;
-          padding: 0;
-        }
-
-        .photo-count {
-          font-size: 11px;
-          color: ${colors.gray};
-          background: ${colors.white};
-          padding: 4px 12px;
-          border-radius: 12px;
-        }
-
-        /* Comparison Table */
-        .comparison-table {
-          width: 100%;
-          border-collapse: separate;
-          border-spacing: 0;
-          border-radius: 12px;
-          overflow: hidden;
-          ${isPremium ? `box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);` : ''}
-        }
-
-        .comparison-table th {
-          background: ${colors.background};
-          padding: 14px 12px;
-          text-align: left;
-          font-size: 13px;
-          font-weight: 600;
-          color: ${colors.dark};
-          border-bottom: 2px solid #e5e5e5;
-        }
-
-        .move-in-header {
-          border-right: 1px solid #e5e5e5;
-        }
-
-        .header-dot {
-          display: inline-block;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          margin-right: 8px;
-          vertical-align: middle;
-        }
-
-        .header-dot.move-in {
-          background: ${colors.success};
-        }
-
-        .header-dot.move-out {
-          background: ${colors.warning};
-        }
-
-        .photo-cell {
-          width: 50%;
-          padding: 12px;
-          vertical-align: top;
-          border-bottom: 1px solid #e5e5e5;
-          background: ${colors.white};
-        }
-
-        .photo-cell:first-child {
-          border-right: 1px solid #e5e5e5;
-        }
-
+        .comparison-table th:first-child { padding-right: 7px; }
+        .comparison-table th:last-child { padding-left: 7px; }
+        .header-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+        .header-dot.move-in { background: var(--move-in); }
+        .header-dot.move-out { background: var(--move-out); }
+        .comparison-table tr { page-break-inside: avoid; }
+        .photo-cell { width: 50%; vertical-align: top; padding: 12px 7px 0 0; }
+        .comparison-table td.photo-cell:last-child { padding: 12px 0 0 7px; }
         .photo-wrapper {
           position: relative;
-          border-radius: ${isPremium ? '10px' : '6px'};
+          border: 1px solid var(--line-strong);
+          border-radius: 4px;
           overflow: hidden;
-          ${isPremium ? `box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);` : ''}
+          background: #f1f5f9;
         }
-
-        .photo-cell img {
-          width: 100%;
-          height: 160px;
-          object-fit: cover;
-          display: block;
-        }
-
+        .photo-wrapper img { width: 100%; height: 185px; object-fit: cover; display: block; }
         .photo-number {
-          position: absolute;
-          top: 8px;
-          left: 8px;
-          background: ${isPremium ? BRAND_COLORS.primary : 'rgba(0, 0, 0, 0.7)'};
-          color: ${colors.white};
-          font-size: 10px;
-          font-weight: 600;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          position: absolute; top: 7px; left: 7px;
+          background: rgba(15, 23, 42, 0.82); color: #fff;
+          font-size: 8pt; font-weight: 700; min-width: 20px; height: 20px; padding: 0 6px;
+          border-radius: 3px; display: flex; align-items: center; justify-content: center;
         }
-
         .no-photo {
-          width: 100%;
-          height: 160px;
-          background: ${colors.background};
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: ${colors.lightGray};
-          font-size: 13px;
+          height: 185px;
+          border: 1px dashed var(--line-strong);
+          border-radius: 4px;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 9pt; color: var(--muted);
+          background: #fafafa;
         }
+        .caption { font-size: 8.5pt; color: var(--gray); line-height: 1.35; margin-top: 6px; }
 
-        .caption {
-          font-size: 11px;
-          color: ${colors.gray};
-          margin-top: 8px;
-          line-height: 1.4;
-        }
-
-        /* Upgrade Banner */
-        .upgrade-banner {
-          margin-top: 30px;
-          padding: 20px;
-          background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-          border-radius: 12px;
-          border: 2px dashed #f59e0b;
-        }
-
-        .upgrade-content {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .upgrade-icon {
-          font-size: 32px;
-        }
-
-        .upgrade-text {
-          flex: 1;
-        }
-
-        .upgrade-title {
-          font-size: 15px;
-          font-weight: 700;
-          color: ${colors.dark};
-          margin-bottom: 4px;
-        }
-
-        .upgrade-desc {
-          font-size: 12px;
-          color: #92400e;
-        }
-
-        .upgrade-url {
-          margin-top: 12px;
-          text-align: center;
-          font-size: 13px;
-          font-weight: 600;
-          color: ${colors.primary};
-          background: ${colors.white};
-          padding: 10px 16px;
-          border-radius: 8px;
-        }
-
-        /* Print */
         @media print {
-          /* Keep individual photo rows together, but allow room sections to split */
-          .comparison-table tr {
-            page-break-inside: avoid;
-          }
-          .photo-wrapper {
-            page-break-inside: avoid;
-          }
+          .room-section, .comparison-table tr { page-break-inside: avoid; }
         }
       </style>
     </head>
     <body>
-      <!-- Footer first so it's rendered behind content -->
-      <div class="page-footer">
-        Generated by PropertyCheck &bull; <a href="${process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app'}">${process.env.EXPO_PUBLIC_APP_URL || 'propertycheck.app'}</a>
-      </div>
 
       <div class="content-wrapper">
       <div class="header">
