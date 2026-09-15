@@ -88,13 +88,12 @@ export const PRICING = {
 // products are the hero; the subscription (PRICING above) is the secondary tier
 // for frequent movers / people managing multiple places.
 //
-// IMPORTANT: `amount` is display-only here. The real charge is the Stripe Price
-// referenced by NEXT_PUBLIC_STRIPE_REPORT_PRICE_ID / _BUNDLE_PRICE_ID — update
-// those Prices in Stripe to match, and on mobile these MUST be sold via native
-// In-App Purchase (StoreKit / Play Billing), not Stripe web checkout.
+// These are one-time In-App Purchases (StoreKit / Play Billing), mapped in
+// RevenueCat via IAP_PRODUCT_IDS. The real charge is the price set on each store
+// product — the amounts below are the canonical display reference; keep them in
+// sync with the store prices manually.
 export const PAY_PER_USE = {
   report: {
-    priceId: process.env.NEXT_PUBLIC_STRIPE_REPORT_PRICE_ID || '',
     amount: 1499, // $14.99 CAD — one clean, watermark-free, shareable report
     currency: 'cad',
     displayPrice: '$14.99',
@@ -102,7 +101,6 @@ export const PAY_PER_USE = {
   },
   bundle: {
     // The hero product: matches the "I'm moving" purchase intent.
-    priceId: process.env.NEXT_PUBLIC_STRIPE_BUNDLE_PRICE_ID || '',
     amount: 2499, // $24.99 CAD — move-in + move-out + comparison, one property, 18 mo
     currency: 'cad',
     displayPrice: '$24.99',

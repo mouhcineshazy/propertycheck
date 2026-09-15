@@ -125,56 +125,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle moving bundle purchase
-async function handleBundlePurchase(session: Stripe.Checkout.Session) {
-  const { userId, propertyId } = session.metadata ?? {};
-  if (!userId || !propertyId) {
-    console.error('moving_bundle: missing userId or propertyId in metadata');
-    return;
-  }
-
-  // Bundle expires 18 months from purchase
-  const expiresAt = new Date();
-  expiresAt.setMonth(expiresAt.getMonth() + 18);
-
-  const { error } = await getSupabaseAdmin()
-    .from('bundle_purchases')
-    .insert({
-      user_id: userId,
-      property_id: propertyId,
-      stripe_payment_intent_id: session.payment_intent as string | null,
-      expires_at: expiresAt.toISOString(),
-    });
-
-  if (error) {
-    console.error('Failed to create bundle purchase:', error);
-    throw error;
-  }
-
-  console.log(`Moving bundle created for property ${propertyId} by user ${userId}, expires ${expiresAt.toISOString()}`);
-}
-
-// Handle one-time report unlock payment
-async function handleReportUnlock(session: Stripe.Checkout.Session) {
-  const { userId, inspectionId } = session.metadata ?? {};
-  if (!userId || !inspectionId) {
-    console.error('report_unlock: missing userId or inspectionId in metadata');
-    return;
-  }
-
-  const { error } = await getSupabaseAdmin()
-    .from('inspections')
-    .update({ report_unlocked: true })
-    .eq('id', inspectionId);
-
-  if (error) {
-    console.error('Failed to unlock report:', error);
-    throw error;
-  }
-
-  console.log(`Report unlocked for inspection ${inspectionId} by user ${userId}`);
-}
-
 // Handle successful checkout session
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   console.log('=== HANDLING CHECKOUT COMPLETED ===');
@@ -190,16 +140,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Route one-time purchases to their own handlers
-  if (session.metadata?.type === 'report_unlock') {
-    await handleReportUnlock(session);
-    return;
-  }
-
-  if (session.metadata?.type === 'moving_bundle') {
-    await handleBundlePurchase(session);
-    return;
-  }
+  // One-time report/bundle purchases are sold via native IAP (RevenueCat) and
+  // handled by supabase/functions/revenuecat-webhook. Web checkout here is
+  // subscription-only.
 
   console.log(`Checkout completed for user ${userId}`);
 

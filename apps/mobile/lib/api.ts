@@ -578,87 +578,10 @@ export async function checkBundleAccess(propertyId: string): Promise<{
   }
 }
 
-/**
- * Create a Stripe Checkout session for the $24.99 CAD moving bundle.
- * Returns the checkout URL to open in the device browser.
- */
-export async function createBundleCheckout(propertyId: string): Promise<{
-  url: string | null;
-  error: string | null;
-}> {
-  try {
-    const supabase = getMobileSupabaseClient();
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      return { url: null, error: 'Not authenticated' };
-    }
-
-    const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app';
-    const response = await fetch(`${appUrl}/api/stripe/create-bundle-checkout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ propertyId }),
-    });
-
-    const data = await response.json() as { url?: string; error?: string };
-
-    if (!response.ok) {
-      return { url: null, error: data.error ?? 'Failed to create checkout session' };
-    }
-
-    return { url: data.url ?? null, error: null };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to start checkout';
-    return { url: null, error: message };
-  }
-}
-
-// ============================================
-// REPORT UNLOCK (pay-per-report)
-// ============================================
-
-/**
- * Create a Stripe Checkout session for a $14.99 one-time report unlock.
- * Returns the checkout URL to open in the device browser.
- */
-export async function createReportUnlockCheckout(inspectionId: string): Promise<{
-  url: string | null;
-  error: string | null;
-}> {
-  try {
-    const supabase = getMobileSupabaseClient();
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session?.access_token) {
-      return { url: null, error: 'Not authenticated' };
-    }
-
-    const appUrl = process.env.EXPO_PUBLIC_APP_URL || 'https://propertycheck.app';
-    const response = await fetch(`${appUrl}/api/stripe/create-report-checkout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ inspectionId }),
-    });
-
-    const data = await response.json() as { url?: string; error?: string };
-
-    if (!response.ok) {
-      return { url: null, error: data.error ?? 'Failed to create checkout session' };
-    }
-
-    return { url: data.url ?? null, error: null };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to start checkout';
-    return { url: null, error: message };
-  }
-}
+// Bundle and report purchases are sold via native In-App Purchase (RevenueCat),
+// not Stripe web checkout — see lib/revenuecat.ts (purchaseMovingBundle /
+// purchaseReportUnlock). Apple Guideline 3.1.1 / Play Payments policy forbid
+// selling digital goods through an external web checkout on mobile.
 
 // ============================================
 // ACCOUNT
