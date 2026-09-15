@@ -18,13 +18,13 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { z } from 'zod';
 import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
-import { createProperty } from '../../lib';
+import { createProperty, purchaseMovingBundle, checkBundleAccess, deleteProperty } from '../../lib';
 import { useTranslation } from '../../contexts';
 import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
@@ -49,6 +49,7 @@ async function createPropertyAction(
     address: string;
     property_type: string;
     notes: string;
+    requireBundle: boolean;
     onSuccess: () => void;
     t: (key: string) => string;
   }
@@ -64,11 +65,32 @@ async function createPropertyAction(
   }
 
   try {
-    await createProperty({
+    const property = await createProperty({
       address: result.data.address,
       property_type: result.data.property_type,
       notes: result.data.notes,
     });
+
+    // Properties beyond the free one require a Moving Bundle. Buy it for the new
+    // property; if the user cancels or it fails, roll the property back so the
+    // free cap stays honest. On success the webhook grants the bundle — poll
+    // briefly, but keep the property regardless (the grant may land moments later).
+    if (payload.requireBundle) {
+      const purchase = await purchaseMovingBundle(property.id);
+      if (purchase.status !== 'success') {
+        await deleteProperty(property.id);
+        if (purchase.status === 'error') {
+          Alert.alert(payload.t('alerts.error'), purchase.message || payload.t('property.new.errors.createFailed'));
+        }
+        return { errors: {} };
+      }
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const bundle = await checkBundleAccess(property.id);
+        if (bundle.hasBundle) break;
+        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
+    }
+
     payload.onSuccess();
     return { errors: {} };
   } catch (err) {
@@ -80,6 +102,8 @@ async function createPropertyAction(
 
 export default function NewPropertyScreen() {
   const router = useRouter();
+  const { intent } = useLocalSearchParams<{ intent?: string }>();
+  const requireBundle = intent === 'bundle';
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { semantic } = useTheme();
@@ -95,6 +119,7 @@ export default function NewPropertyScreen() {
       address,
       property_type: propertyType,
       notes,
+      requireBundle,
       t,
       onSuccess: () => {
         Alert.alert(t('common.success'), t('property.new.success'), [

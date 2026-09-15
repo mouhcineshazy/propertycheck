@@ -22,7 +22,8 @@ import { Property } from '@propertycheck/database';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { useProperties, useOptimistic, useAuth } from '../../hooks';
-import { UpgradeModal } from '../../components';
+import { checkFreeTierLimits } from '../../lib';
+import { UpgradeModal, AddPropertySheet } from '../../components';
 import { useTranslation } from '../../contexts';
 import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
@@ -35,7 +36,12 @@ export default function PropertiesScreen() {
   const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showAddSheet, setShowAddSheet] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  // Free property slot available? Driven by the server RPC, which excludes
+  // bundle-backed properties from the free cap.
+  const [canAddFreeProperty, setCanAddFreeProperty] = useState(true);
+  const [freePropertyCount, setFreePropertyCount] = useState(0);
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -54,6 +60,12 @@ export default function PropertiesScreen() {
   useFocusEffect(
     useCallback(() => {
       refetch();
+      checkFreeTierLimits().then(({ data }) => {
+        if (data) {
+          setCanAddFreeProperty(data.canAddProperty);
+          setFreePropertyCount(data.propertyCount);
+        }
+      });
     }, [refetch])
   );
 
@@ -133,11 +145,13 @@ export default function PropertiesScreen() {
     );
   }
 
-  const isAtLimit = !isPremium && optimisticProperties.length >= FREE_TIER_LIMITS.maxProperties;
+  // "At the free slot" — the free property is used. Additional properties need a
+  // bundle or Premium, offered via the add-property sheet (not a hard wall).
+  const isAtLimit = !isPremium && !canAddFreeProperty;
 
   const handleAddProperty = () => {
     if (isAtLimit) {
-      setShowUpgradeModal(true);
+      setShowAddSheet(true);
     } else {
       router.push('/property/new' as Href);
     }
@@ -153,7 +167,7 @@ export default function PropertiesScreen() {
             <TouchableOpacity
               style={[styles.limitBanner, isAtLimit && styles.limitBannerWarning]}
               activeOpacity={isAtLimit ? 0.7 : 1}
-              onPress={isAtLimit ? () => setShowUpgradeModal(true) : undefined}
+              onPress={isAtLimit ? () => setShowAddSheet(true) : undefined}
             >
               <Ionicons
                 name={isAtLimit ? 'star' : 'information-circle-outline'}
@@ -162,7 +176,7 @@ export default function PropertiesScreen() {
               />
               <Text style={[styles.limitText, isAtLimit && styles.limitTextWarning]}>
                 {t('properties.limitBanner.text', {
-                  current: optimisticProperties.length,
+                  current: Math.min(freePropertyCount, FREE_TIER_LIMITS.maxProperties),
                   max: FREE_TIER_LIMITS.maxProperties,
                 })}
                 {isAtLimit && t('properties.limitBanner.tapToUpgrade')}
@@ -192,6 +206,19 @@ export default function PropertiesScreen() {
           </TouchableOpacity>
         </>
       )}
+
+      <AddPropertySheet
+        visible={showAddSheet}
+        onBundle={() => {
+          setShowAddSheet(false);
+          router.push({ pathname: '/property/new', params: { intent: 'bundle' } } as Href);
+        }}
+        onSubscribe={() => {
+          setShowAddSheet(false);
+          setShowUpgradeModal(true);
+        }}
+        onClose={() => setShowAddSheet(false)}
+      />
 
       <UpgradeModal
         visible={showUpgradeModal}

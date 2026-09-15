@@ -7,3 +7,4 @@ export { SplashScreen } from './SplashScreen';
 export { UpgradeModal } from './UpgradeModal';
 export { ComparisonReport } from './ComparisonReport';
 export { ExportOptionsSheet } from './ExportOptionsSheet';
+export { AddPropertySheet } from './AddPropertySheet';

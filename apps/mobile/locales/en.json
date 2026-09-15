@@ -98,6 +98,15 @@
       "text": "{{current}} / {{max}} properties (Free tier)",
       "tapToUpgrade": " - Tap to upgrade"
     },
+    "addSheet": {
+      "title": "Add another property",
+      "subtitle": "You've used your free property. Add another place with a one-time bundle, or subscribe.",
+      "bundleTitle": "Moving Bundle",
+      "bundleDesc": "One new place — both reports + comparison, 18 months",
+      "subscribeTitle": "Premium",
+      "subscribeDesc": "Unlimited properties & reports",
+      "perMonth": "/mo"
+    },
     "limitReached": {
       "title": "Property Limit Reached",
       "message": "Free plan allows {{limit}} property. Upgrade to Premium for unlimited properties.",

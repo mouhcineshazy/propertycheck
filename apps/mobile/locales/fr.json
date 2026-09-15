@@ -98,6 +98,15 @@
       "text": "{{current}} / {{max}} propriétés (Plan gratuit)",
       "tapToUpgrade": " - Appuyez pour passer à Premium"
     },
+    "addSheet": {
+      "title": "Ajouter une autre propriété",
+      "subtitle": "Vous avez utilisé votre propriété gratuite. Ajoutez un autre logement avec un forfait unique, ou abonnez-vous.",
+      "bundleTitle": "Forfait déménagement",
+      "bundleDesc": "Un nouveau logement — les deux rapports + comparaison, 18 mois",
+      "subscribeTitle": "Premium",
+      "subscribeDesc": "Propriétés et rapports illimités",
+      "perMonth": "/mois"
+    },
     "limitReached": {
       "title": "Limite de propriétés atteinte",
       "message": "Le plan gratuit permet {{limit}} propriété. Passez à Premium pour des propriétés illimitées.",
