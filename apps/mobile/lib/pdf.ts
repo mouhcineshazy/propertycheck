@@ -571,19 +571,15 @@ function generateReportHtml(
         }
         .watermark {
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transform: rotate(-32deg);
-          font-size: 90px;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-32deg);
+          font-size: 82px;
           font-weight: 800;
-          letter-spacing: 10px;
-          color: rgba(15, 23, 42, 0.08);
+          letter-spacing: 8px;
+          color: rgba(15, 23, 42, 0.18);
           text-transform: uppercase;
+          white-space: nowrap;
           z-index: 9999;
           pointer-events: none;
           -webkit-print-color-adjust: exact;
