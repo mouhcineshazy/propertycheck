@@ -38,8 +38,11 @@ import {
   canGenerateComparison,
   sendReportByEmail,
   purchaseReportUnlock,
+  purchaseMovingBundle,
+  checkBundleAccess,
 } from '../../lib';
 import type { InspectionWithPhotos, PDFOptions } from '../../lib';
+import { ExportOptionsSheet } from '../../components';
 import { useI18n } from '../../contexts';
 import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
 
@@ -153,8 +156,10 @@ export default function InspectionDetailScreen() {
   const [emailFieldError, setEmailFieldError] = useState('');
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [hasBundle, setHasBundle] = useState(false);
   const [isFirstInspection, setIsFirstInspection] = useState(true);
   const [isPurchasingReport, setIsPurchasingReport] = useState(false);
+  const [showExportSheet, setShowExportSheet] = useState(false);
 
   // Refetch data when screen gains focus (after completing/editing inspection elsewhere)
   useFocusEffect(
@@ -169,19 +174,21 @@ export default function InspectionDetailScreen() {
           const data = await fetchInspectionWithPhotos(id);
           setInspection(data);
 
-          // Fetch subscription status and property inspections in parallel
+          // Fetch subscription status, property inspections, and bundle access in parallel
           const propertyId = data.property?.id || data.property_id;
-          const [subResult, inspectionsResult] = await Promise.all([
+          const [subResult, inspectionsResult, bundleResult] = await Promise.all([
             supabase.from('subscriptions').select('status').single(),
             supabase
               .from('inspections')
               .select('id, created_at')
               .eq('property_id', propertyId)
               .order('created_at', { ascending: true }),
+            checkBundleAccess(propertyId),
           ]);
 
-          // Set premium status
+          // Set premium + bundle status
           setIsPremium(subResult.data?.status === 'premium');
+          setHasBundle(bundleResult.hasBundle);
 
           // Determine if this is the first inspection (move-in) or not (move-out)
           if (inspectionsResult.data && inspectionsResult.data.length > 0) {
@@ -360,22 +367,54 @@ export default function InspectionDetailScreen() {
     }
   };
 
+  // Buy the moving bundle for this property, wait for the webhook grant, then
+  // export the clean report. The bundle also unlocks the comparison report.
+  const bundleThenExport = async () => {
+    if (!inspection) return;
+    const propertyId = inspection.property?.id || inspection.property_id;
+    if (!propertyId) return;
+    setIsPurchasingReport(true);
+    try {
+      const result = await purchaseMovingBundle(propertyId);
+      if (result.status === 'cancelled') return;
+      if (result.status === 'error') {
+        Alert.alert(t('common.error'), result.message || t('inspection.detail.purchaseFailed'));
+        return;
+      }
+      let granted = false;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const bundle = await checkBundleAccess(propertyId);
+        if (bundle.hasBundle) {
+          setHasBundle(true);
+          granted = true;
+          break;
+        }
+        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
+      if (granted) {
+        await runPdfExport(true);
+      } else {
+        Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
+      }
+    } catch {
+      Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
+    } finally {
+      setIsPurchasingReport(false);
+    }
+  };
+
   const handleGeneratePdf = () => {
     if (!inspection) return;
 
-    // Premium or already-unlocked users export the clean report directly.
-    if (isPremium || inspection.report_unlocked) {
+    // Premium / unlocked / bundle holders export the clean report directly.
+    if (isPremium || inspection.report_unlocked || hasBundle) {
       runPdfExport(true);
       return;
     }
 
-    // Free users choose: pay $14.99 for a watermark-free report, or export a
-    // watermarked copy for free.
-    Alert.alert(t('inspection.detail.exportTitle'), t('inspection.detail.exportMessage'), [
-      { text: t('inspection.detail.exportUnlockOption'), onPress: () => unlockThenExport() },
-      { text: t('inspection.detail.exportWatermarkedOption'), onPress: () => runPdfExport(false) },
-      { text: t('common.cancel'), style: 'cancel' },
-    ]);
+    // Free users pick: the bundle ($24.99, best value), this report ($14.99),
+    // or a free watermarked copy.
+    setShowExportSheet(true);
   };
 
   const handleEmailButtonPress = () => {
@@ -403,7 +442,7 @@ export default function InspectionDetailScreen() {
         : undefined;
       // Email API route refreshes share_expires_at to 30 days server-side
       const pdfOptions: PDFOptions = {
-        isPremium: isPremium || !!inspection.report_unlocked,
+        isPremium: isPremium || !!inspection.report_unlocked || hasBundle,
         isFirstInspection,
         locale: locale as 'en' | 'fr',
         shareUrl,
@@ -475,6 +514,7 @@ export default function InspectionDetailScreen() {
   }
 
   const isCompleted = inspection.status === 'completed';
+  const isEntitled = isPremium || !!inspection.report_unlocked || hasBundle;
   const photoCount = inspection.photos?.length || 0;
 
   // Photo modal
@@ -639,7 +679,7 @@ export default function InspectionDetailScreen() {
         </View>
 
         {/* Report Unlock Card — only for completed inspections */}
-        {isCompleted && !isPremium && (
+        {isCompleted && !isEntitled && (
           <View style={styles.unlockCard}>
             {inspection.report_unlocked ? (
               <>
@@ -776,6 +816,24 @@ export default function InspectionDetailScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      <ExportOptionsSheet
+        visible={showExportSheet}
+        busy={isPurchasingReport || isGeneratingPdf}
+        onBundle={() => {
+          setShowExportSheet(false);
+          bundleThenExport();
+        }}
+        onSingle={() => {
+          setShowExportSheet(false);
+          unlockThenExport();
+        }}
+        onFree={() => {
+          setShowExportSheet(false);
+          runPdfExport(false);
+        }}
+        onClose={() => setShowExportSheet(false)}
+      />
     </View>
   );
 }

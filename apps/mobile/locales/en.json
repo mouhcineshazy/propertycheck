@@ -232,9 +232,14 @@
       "reportUnlockedDesc": "Your PDF has no watermark. Tap PDF to generate your clean report.",
       "purchaseFailed": "Could not open checkout. Please try again.",
       "exportTitle": "Export Report",
-      "exportMessage": "Get a clean, watermark-free report to share with your landlord, or export a free watermarked copy.",
-      "exportUnlockOption": "Watermark-free — $14.99",
-      "exportWatermarkedOption": "Free watermarked copy"
+      "exportSheetSubtitle": "Choose how to export this report.",
+      "exportBundleTitle": "Moving Bundle",
+      "exportBundleDesc": "Both move-in & move-out reports + comparison",
+      "exportBestValue": "Best value",
+      "exportSingleTitle": "This report only",
+      "exportSingleDesc": "Watermark-free single report",
+      "exportFreeTitle": "Free watermarked copy",
+      "exportFreeDesc": "Grayscale, with a \"Sample Copy\" mark"
     },
     "compare": {
       "title": "Compare Inspections",

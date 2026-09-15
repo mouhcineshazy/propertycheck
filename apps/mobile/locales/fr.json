@@ -232,9 +232,14 @@
       "reportUnlockedDesc": "Votre PDF n'a pas de filigrane. Appuyez sur PDF pour générer votre rapport propre.",
       "purchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer.",
       "exportTitle": "Exporter le rapport",
-      "exportMessage": "Obtenez un rapport clair et sans filigrane à partager avec votre propriétaire, ou exportez une copie gratuite avec filigrane.",
-      "exportUnlockOption": "Sans filigrane — 14,99 $",
-      "exportWatermarkedOption": "Copie gratuite avec filigrane"
+      "exportSheetSubtitle": "Choisissez comment exporter ce rapport.",
+      "exportBundleTitle": "Forfait déménagement",
+      "exportBundleDesc": "Rapports d'emménagement et de déménagement + comparaison",
+      "exportBestValue": "Meilleure valeur",
+      "exportSingleTitle": "Ce rapport seulement",
+      "exportSingleDesc": "Rapport unique sans filigrane",
+      "exportFreeTitle": "Copie gratuite avec filigrane",
+      "exportFreeDesc": "Niveaux de gris, avec la mention « Copie échantillon »"
     },
     "compare": {
       "title": "Comparer les inspections",
