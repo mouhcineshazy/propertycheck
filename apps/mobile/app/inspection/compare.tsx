@@ -23,7 +23,8 @@ import { format } from 'date-fns';
 import { fr as frLocale } from 'date-fns/locale';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { ComparisonReport, UpgradeModal } from '../../components';
-import { fetchComparisonData, getPhotoUrl, checkBundleAccess } from '../../lib';
+import { fetchComparisonData, checkBundleAccess } from '../../lib';
+import { buildPhotoDataUris, PDF_IMAGE_FALLBACK } from '../../lib/pdfImages';
 import type { InspectionWithPhotos } from '../../lib';
 import { useTranslation } from '../../contexts';
 import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
@@ -136,7 +137,11 @@ export default function ComparisonScreen() {
 
     setIsGeneratingPdf(true);
     try {
-      const html = generateComparisonHtml(comparisonData, false, locale as 'en' | 'fr');
+      const imageMap = await buildPhotoDataUris([
+        ...comparisonData.moveInInspection.photos.map((p) => p.storage_path),
+        ...comparisonData.moveOutInspection.photos.map((p) => p.storage_path),
+      ]);
+      const html = generateComparisonHtml(comparisonData, imageMap, false, locale as 'en' | 'fr');
       const { uri } = await Print.printToFileAsync({ html, base64: false });
 
       // Generate filename from address: {streetNumber}-{streetName}-report.pdf
@@ -251,6 +256,7 @@ function generateComparisonHtml(
     moveInInspection: InspectionWithPhotos;
     moveOutInspection: InspectionWithPhotos;
   },
+  imageMap: Map<string, string>,
   showWatermark: boolean,
   locale: 'en' | 'fr' = 'en'
 ): string {
@@ -368,7 +374,7 @@ function generateComparisonHtml(
             <td class="photo-cell">
               ${
                 miPhoto
-                  ? `<div class="photo-wrapper"><img src="${getPhotoUrl(miPhoto.storage_path)}" alt="${miPhoto.caption || room}" /><span class="photo-number">${i + 1}</span></div>`
+                  ? `<div class="photo-wrapper"><img src="${imageMap.get(miPhoto.storage_path) || PDF_IMAGE_FALLBACK}" alt="${miPhoto.caption || room}" /><span class="photo-number">${i + 1}</span></div>`
                   : `<div class="no-photo">${ct.noPhoto}</div>`
               }
               ${miPhoto?.caption ? `<p class="caption">${miPhoto.caption}</p>` : ''}
@@ -376,7 +382,7 @@ function generateComparisonHtml(
             <td class="photo-cell">
               ${
                 moPhoto
-                  ? `<div class="photo-wrapper"><img src="${getPhotoUrl(moPhoto.storage_path)}" alt="${moPhoto.caption || room}" /><span class="photo-number">${i + 1}</span></div>`
+                  ? `<div class="photo-wrapper"><img src="${imageMap.get(moPhoto.storage_path) || PDF_IMAGE_FALLBACK}" alt="${moPhoto.caption || room}" /><span class="photo-number">${i + 1}</span></div>`
                   : `<div class="no-photo">${ct.noPhoto}</div>`
               }
               ${moPhoto?.caption ? `<p class="caption">${moPhoto.caption}</p>` : ''}

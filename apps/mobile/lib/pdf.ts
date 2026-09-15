@@ -14,8 +14,9 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import qrcode from 'qrcode-generator';
 import { InspectionWithPhotos } from './types';
-import { getPhotoUrl } from './storage';
+import { buildPhotoDataUris, PDF_IMAGE_FALLBACK } from './pdfImages';
 import { APP_CONFIG, getProvince, type ProvinceConfig } from '@propertycheck/shared';
 
 // Room type configuration for grouping and display - with translations
@@ -98,14 +99,16 @@ const PDF_TRANSLATIONS = {
 type Locale = 'en' | 'fr';
 
 /**
- * Generate a QR code as SVG for embedding in HTML
- * Using a simple QR code pattern generator
+ * Generate a QR code as an inline SVG string. Pure-JS (qrcode-generator, no
+ * native module, no network) so the PDF renders fully offline — the old
+ * implementation fetched the QR from api.qrserver.com at print time.
  */
 function generateQRCodeSVG(url: string, size: number = 100): string {
-  // For proper QR codes, we'd use a library, but for PDF we can use a web service
-  // or encode a simple data URL pattern. Using Google Charts API as fallback.
-  const encodedUrl = encodeURIComponent(url);
-  return `<img src="https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedUrl}" alt="QR Code" style="width: ${size}px; height: ${size}px;" />`;
+  const qr = qrcode(0, 'M');
+  qr.addData(url);
+  qr.make();
+  const svg = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+  return `<div style="width: ${size}px; height: ${size}px;">${svg}</div>`;
 }
 
 /**
@@ -198,6 +201,7 @@ const BRAND_COLORS = {
 function generateReportHtml(
   inspection: InspectionWithPhotos,
   propertyAddress: string,
+  imageMap: Map<string, string>,
   options: PDFOptions = {}
 ): string {
   const {
@@ -264,7 +268,7 @@ function generateReportHtml(
           (photo, index) => `
           <div class="photo-item">
             <div class="photo-wrapper">
-              <img src="${getPhotoUrl(photo.storage_path)}" alt="${photo.caption || roomLabel}" />
+              <img src="${imageMap.get(photo.storage_path) || PDF_IMAGE_FALLBACK}" alt="${photo.caption || roomLabel}" />
               <div class="photo-number">${index + 1}</div>
             </div>
             <div class="photo-meta">
@@ -672,7 +676,8 @@ export async function generateInspectionPdf(
   propertyAddress: string,
   options?: PDFOptions
 ): Promise<string> {
-  const html = generateReportHtml(inspection, propertyAddress, options);
+  const imageMap = await buildPhotoDataUris(inspection.photos.map((p) => p.storage_path));
+  const html = generateReportHtml(inspection, propertyAddress, imageMap, options);
 
   // Generate PDF
   const { uri } = await Print.printToFileAsync({
@@ -723,7 +728,8 @@ export async function printInspectionReport(
   options?: PDFOptions
 ): Promise<{ success: boolean; error: string | null }> {
   try {
-    const html = generateReportHtml(inspection, propertyAddress, options);
+    const imageMap = await buildPhotoDataUris(inspection.photos.map((p) => p.storage_path));
+    const html = generateReportHtml(inspection, propertyAddress, imageMap, options);
     await Print.printAsync({ html });
     return { success: true, error: null };
   } catch (err) {

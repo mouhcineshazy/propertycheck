@@ -18,11 +18,11 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  Image,
   Modal,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter, useLocalSearchParams, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Sharing from 'expo-sharing';
@@ -79,12 +79,15 @@ function PhotoThumbnail({
       <Image
         source={{ uri: photoUrl }}
         style={[styles.thumbnailImage, (isLoading || hasError) && { position: 'absolute', opacity: 0 }]}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        transition={150}
         onLoad={() => {
           setIsLoading(false);
           setHasError(false);
         }}
         onError={(e) => {
-          console.error('Image load error:', e.nativeEvent.error, 'URL:', photoUrl);
+          console.error('Image load error:', e.error, 'URL:', photoUrl);
           setIsLoading(false);
           setHasError(true);
         }}
@@ -436,7 +439,8 @@ export default function InspectionDetailScreen() {
           <Image
             source={{ uri: getPhotoUrl(photo.storage_path) }}
             style={styles.modalImage}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
           />
 
           <View style={styles.modalInfo}>

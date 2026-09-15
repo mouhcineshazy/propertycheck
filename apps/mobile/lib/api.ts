@@ -15,6 +15,12 @@ import type {
   LocalPhoto,
 } from './types';
 import { uploadInspectionPhoto, deleteInspectionPhotos } from './storage';
+import { mapLimit } from './concurrency';
+
+// Photos uploaded at once during inspection creation. Enough to hide latency,
+// low enough not to saturate the connection or spike memory with many base64
+// blobs resident simultaneously.
+const UPLOAD_CONCURRENCY = 4;
 
 // ============================================
 // PROPERTIES
@@ -207,7 +213,8 @@ export async function fetchInspectionWithPhotos(
 export async function createInspection(
   propertyId: string,
   notes: string | undefined,
-  photos: LocalPhoto[]
+  photos: LocalPhoto[],
+  onProgress?: (uploaded: number, total: number) => void
 ): Promise<Inspection> {
   const supabase = getMobileSupabaseClient();
 
@@ -240,11 +247,13 @@ export async function createInspection(
     throw new Error(inspError.message);
   }
 
-  // Upload photos and create photo records
-  for (let i = 0; i < photos.length; i++) {
-    const photo = photos[i];
-    console.log(`Uploading photo ${i + 1}/${photos.length}:`, photo.uri);
+  // Upload photos in parallel (bounded pool) instead of serially — a 20-photo
+  // inspection on cellular was minutes of blocking otherwise. sort_order keeps
+  // the original per-room ordering regardless of which upload finishes first.
+  let uploaded = 0;
+  onProgress?.(0, photos.length);
 
+  await mapLimit(photos, UPLOAD_CONCURRENCY, async (photo, i) => {
     const { path, error: uploadError } = await uploadInspectionPhoto(
       photo.uri,
       inspection.id,
@@ -252,28 +261,24 @@ export async function createInspection(
     );
 
     if (uploadError) {
-      console.error('Photo upload failed:', uploadError);
-      continue;
-    }
-
-    console.log('Photo uploaded successfully, storage_path:', path);
-
-    // Create photo record
-    const { error: insertError } = await supabase.from('inspection_photos').insert({
-      inspection_id: inspection.id,
-      storage_path: path,
-      caption: photo.caption || null,
-      room_type: photo.room_type || 'other',
-      room_label: photo.room_label || null,
-      sort_order: i,
-    });
-
-    if (insertError) {
-      console.error('Failed to create photo record:', insertError);
+      console.error(`Photo ${i + 1} upload failed:`, uploadError);
     } else {
-      console.log('Photo record created successfully');
+      const { error: insertError } = await supabase.from('inspection_photos').insert({
+        inspection_id: inspection.id,
+        storage_path: path,
+        caption: photo.caption || null,
+        room_type: photo.room_type || 'other',
+        room_label: photo.room_label || null,
+        sort_order: i,
+      });
+      if (insertError) {
+        console.error(`Photo ${i + 1} record failed:`, insertError);
+      }
     }
-  }
+
+    uploaded += 1;
+    onProgress?.(uploaded, photos.length);
+  });
 
   return inspection;
 }

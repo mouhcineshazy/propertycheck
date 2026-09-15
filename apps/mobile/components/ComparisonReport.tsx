@@ -9,7 +9,6 @@ import { useState } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -17,6 +16,7 @@ import {
   ActivityIndicator,
   Modal,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { RoomType, InspectionPhoto } from '@propertycheck/database';
@@ -102,6 +102,9 @@ function ComparisonPhoto({
       <Image
         source={{ uri: photoUrl }}
         style={[styles.photo, (isLoading || hasError) && styles.hiddenPhoto]}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        transition={150}
         onLoad={() => {
           setIsLoading(false);
           setHasError(false);
@@ -345,7 +348,8 @@ export function ComparisonReport({
             <Image
               source={{ uri: getPhotoUrl(selectedPhoto.storage_path) }}
               style={styles.modalImage}
-              resizeMode="contain"
+              contentFit="contain"
+              cachePolicy="memory-disk"
             />
             <View style={styles.modalInfo}>
               <Text style={styles.modalRoomType}>

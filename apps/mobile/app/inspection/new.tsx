@@ -17,8 +17,8 @@ import {
   Alert,
   ScrollView,
   TextInput,
-  Image,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -34,6 +34,8 @@ import {
 } from '@propertycheck/shared';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { createInspection, checkFreeTierLimits } from '../../lib';
+import { compressImage } from '../../lib/image';
+import { mapLimit } from '../../lib/concurrency';
 import type { LocalPhoto } from '../../lib';
 import { UpgradeModal } from '../../components';
 import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
@@ -61,6 +63,8 @@ export default function NewInspectionScreen() {
   const [selectedPhoto, setSelectedPhoto] = useState<{ roomId: string; index: number } | null>(null);
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAddingPhotos, setIsAddingPhotos] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
 
   // Free tier limit enforcement
   const [isCheckingLimits, setIsCheckingLimits] = useState(true);
@@ -166,7 +170,7 @@ export default function NewInspectionScreen() {
   };
 
   // Add photos to a room, enforcing the per-room and per-inspection caps.
-  const addPhotosToRoom = (roomId: string, incoming: LocalPhoto[]) => {
+  const addPhotosToRoom = async (roomId: string, incoming: LocalPhoto[]) => {
     const room = rooms.find((r) => r.id === roomId);
     if (!room) return;
 
@@ -185,9 +189,21 @@ export default function NewInspectionScreen() {
     }
 
     const toAdd = incoming.slice(0, allowed);
-    setRooms((prev) =>
-      prev.map((r) => (r.id === roomId ? { ...r, photos: [...r.photos, ...toAdd] } : r))
-    );
+
+    // Compress at capture time so submit stays upload-only and previews are
+    // lightweight. compressImage falls back to the original uri on failure.
+    setIsAddingPhotos(true);
+    try {
+      const compressed = await mapLimit(toAdd, 4, async (p) => ({
+        ...p,
+        uri: await compressImage(p.uri),
+      }));
+      setRooms((prev) =>
+        prev.map((r) => (r.id === roomId ? { ...r, photos: [...r.photos, ...compressed] } : r))
+      );
+    } finally {
+      setIsAddingPhotos(false);
+    }
 
     if (toAdd.length < incoming.length) {
       Alert.alert('Some photos skipped', `Only ${toAdd.length} photo(s) fit within the limit.`);
@@ -228,8 +244,8 @@ export default function NewInspectionScreen() {
     try {
       const photo = await cameraRef.current.takePictureAsync();
       if (photo) {
-        addPhotosToRoom(activeRoomId, [{ uri: photo.uri, caption: '' }]);
         setIsCameraActive(false);
+        await addPhotosToRoom(activeRoomId, [{ uri: photo.uri, caption: '' }]);
       }
     } catch (err) {
       console.error('Error taking photo:', err);
@@ -250,7 +266,7 @@ export default function NewInspectionScreen() {
     });
 
     if (!result.canceled) {
-      addPhotosToRoom(
+      await addPhotosToRoom(
         roomId,
         result.assets.map((asset) => ({ uri: asset.uri, caption: '' }))
       );
@@ -276,8 +292,11 @@ export default function NewInspectionScreen() {
     });
 
     setIsSubmitting(true);
+    setUploadProgress({ done: 0, total: photos.length });
     try {
-      await createInspection(propertyId, notes, photos);
+      await createInspection(propertyId, notes, photos, (done, total) =>
+        setUploadProgress({ done, total })
+      );
       Alert.alert('Success', 'Inspection created successfully', [
         { text: 'OK', onPress: () => router.back() },
       ]);
@@ -286,6 +305,7 @@ export default function NewInspectionScreen() {
       Alert.alert('Error', message);
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(null);
     }
   };
 
@@ -498,15 +518,17 @@ export default function NewInspectionScreen() {
                 ) : (
                   <View style={styles.roomActions}>
                     <TouchableOpacity
-                      style={styles.roomActionButton}
+                      style={[styles.roomActionButton, isAddingPhotos && styles.submitButtonDisabled]}
                       onPress={() => handleOpenCamera(room.id)}
+                      disabled={isAddingPhotos}
                     >
                       <Ionicons name="camera-outline" size={20} color={th.semantic.primary} />
                       <Text style={styles.roomActionText}>Take Photo</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={styles.roomActionButton}
+                      style={[styles.roomActionButton, isAddingPhotos && styles.submitButtonDisabled]}
                       onPress={() => handlePickImage(room.id)}
+                      disabled={isAddingPhotos}
                     >
                       <Ionicons name="images-outline" size={20} color={th.semantic.primary} />
                       <Text style={styles.roomActionText}>Library</Text>
@@ -521,6 +543,13 @@ export default function NewInspectionScreen() {
             <Ionicons name="add" size={20} color={th.semantic.primary} />
             <Text style={styles.addRoomText}>Add room</Text>
           </TouchableOpacity>
+
+          {isAddingPhotos && (
+            <View style={styles.processingRow}>
+              <ActivityIndicator size="small" color={th.semantic.primary} />
+              <Text style={styles.processingText}>Processing photos…</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -538,12 +567,22 @@ export default function NewInspectionScreen() {
         </View>
 
         <TouchableOpacity
-          style={[styles.submitButton, (isSubmitting || totalPhotos === 0) && styles.submitButtonDisabled]}
+          style={[
+            styles.submitButton,
+            (isSubmitting || isAddingPhotos || totalPhotos === 0) && styles.submitButtonDisabled,
+          ]}
           onPress={handleSubmit}
-          disabled={isSubmitting || totalPhotos === 0}
+          disabled={isSubmitting || isAddingPhotos || totalPhotos === 0}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <>
+              <ActivityIndicator color="#FFFFFF" />
+              {uploadProgress && uploadProgress.total > 0 && (
+                <Text style={styles.submitButtonText}>
+                  Uploading {uploadProgress.done}/{uploadProgress.total}…
+                </Text>
+              )}
+            </>
           ) : (
             <>
               <Ionicons name="checkmark-circle-outline" size={20} color="#FFFFFF" />
@@ -726,6 +765,17 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: th.semantic.primary,
+  },
+  processingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 12,
+  },
+  processingText: {
+    fontSize: 14,
+    color: th.semantic.fgMuted,
   },
   pickerHint: {
     fontSize: 14,

@@ -7,14 +7,17 @@
 
 import { INSPECTION_PHOTOS_BUCKET } from '@propertycheck/database';
 import { getMobileSupabaseClient } from './supabase';
-import { compressImage } from './image';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 
 /**
- * Upload a photo to Supabase Storage
+ * Upload a photo to Supabase Storage.
  *
- * @param uri - Local file URI from camera/picker
+ * The uri is expected to be already compressed/resized (done at capture time in
+ * the inspection form, so the cost is spread across the session rather than
+ * stacked into the submit). Always uploaded as JPEG.
+ *
+ * @param uri - Local file URI (already compressed) from camera/picker
  * @param inspectionId - ID of the inspection this photo belongs to
  * @param index - Photo index for unique naming
  * @returns Storage path or null on error
@@ -27,9 +30,7 @@ export async function uploadInspectionPhoto(
   try {
     const supabase = getMobileSupabaseClient();
 
-    // Compress + resize before upload (always JPEG) to minimize storage use.
-    const compressedUri = await compressImage(uri);
-    const base64 = await FileSystem.readAsStringAsync(compressedUri, {
+    const base64 = await FileSystem.readAsStringAsync(uri, {
       encoding: 'base64',
     });
 
