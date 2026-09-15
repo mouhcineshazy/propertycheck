@@ -230,7 +230,11 @@
       "unlockReportButton": "Unlock — $14.99",
       "reportUnlocked": "Report Unlocked",
       "reportUnlockedDesc": "Your PDF has no watermark. Tap PDF to generate your clean report.",
-      "purchaseFailed": "Could not open checkout. Please try again."
+      "purchaseFailed": "Could not open checkout. Please try again.",
+      "exportTitle": "Export Report",
+      "exportMessage": "Get a clean, watermark-free report to share with your landlord, or export a free watermarked copy.",
+      "exportUnlockOption": "Watermark-free — $14.99",
+      "exportWatermarkedOption": "Free watermarked copy"
     },
     "compare": {
       "title": "Compare Inspections",

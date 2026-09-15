@@ -280,7 +280,9 @@ export default function InspectionDetailScreen() {
     );
   };
 
-  const handleGeneratePdf = async () => {
+  // Generate + share the PDF. `clean` = watermark-free (premium / unlocked);
+  // otherwise the report carries a "Sample Copy" watermark.
+  const runPdfExport = async (clean: boolean) => {
     if (!inspection) return;
 
     setIsGeneratingPdf(true);
@@ -301,7 +303,7 @@ export default function InspectionDetailScreen() {
       }
 
       const pdfOptions: PDFOptions = {
-        isPremium: isPremium || !!inspection.report_unlocked,
+        isPremium: clean,
         isFirstInspection,
         locale: locale as 'en' | 'fr',
         shareUrl,
@@ -322,6 +324,58 @@ export default function InspectionDetailScreen() {
     } finally {
       setIsGeneratingPdf(false);
     }
+  };
+
+  // Buy the one-time report unlock, wait for the webhook to grant it, then export
+  // the clean report. Entitlement is webhook-driven, never granted client-side.
+  const unlockThenExport = async () => {
+    if (!inspection || !id) return;
+    setIsPurchasingReport(true);
+    try {
+      const result = await purchaseReportUnlock(id);
+      if (result.status === 'cancelled') return;
+      if (result.status === 'error') {
+        Alert.alert(t('common.error'), result.message || t('inspection.detail.purchaseFailed'));
+        return;
+      }
+      let unlocked = false;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        const fresh = await fetchInspectionWithPhotos(id);
+        if (fresh) setInspection(fresh);
+        if (fresh?.report_unlocked) {
+          unlocked = true;
+          break;
+        }
+        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1200));
+      }
+      if (unlocked) {
+        await runPdfExport(true);
+      } else {
+        Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
+      }
+    } catch {
+      Alert.alert(t('common.error'), t('inspection.detail.purchaseFailed'));
+    } finally {
+      setIsPurchasingReport(false);
+    }
+  };
+
+  const handleGeneratePdf = () => {
+    if (!inspection) return;
+
+    // Premium or already-unlocked users export the clean report directly.
+    if (isPremium || inspection.report_unlocked) {
+      runPdfExport(true);
+      return;
+    }
+
+    // Free users choose: pay $14.99 for a watermark-free report, or export a
+    // watermarked copy for free.
+    Alert.alert(t('inspection.detail.exportTitle'), t('inspection.detail.exportMessage'), [
+      { text: t('inspection.detail.exportUnlockOption'), onPress: () => unlockThenExport() },
+      { text: t('inspection.detail.exportWatermarkedOption'), onPress: () => runPdfExport(false) },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
   };
 
   const handleEmailButtonPress = () => {
@@ -641,11 +695,11 @@ export default function InspectionDetailScreen() {
         )}
 
         <TouchableOpacity
-          style={[styles.pdfButton, isGeneratingPdf && styles.buttonDisabled]}
+          style={[styles.pdfButton, (isGeneratingPdf || isPurchasingReport) && styles.buttonDisabled]}
           onPress={handleGeneratePdf}
-          disabled={isGeneratingPdf}
+          disabled={isGeneratingPdf || isPurchasingReport}
         >
-          {isGeneratingPdf ? (
+          {isGeneratingPdf || isPurchasingReport ? (
             <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
             <>

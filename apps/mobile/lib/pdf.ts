@@ -70,6 +70,7 @@ const PDF_TRANSLATIONS = {
     shareNotice: 'Share this report with your landlord, property manager, or rental tribunal as proof of property condition.',
     reportGeneratedOn: 'Report generated on',
     at: 'at',
+    watermarkText: 'Sample Copy',
   },
   fr: {
     propertyInspectionReport: 'Rapport d\'inspection de propriété',
@@ -93,6 +94,7 @@ const PDF_TRANSLATIONS = {
     shareNotice: 'Partagez ce rapport avec votre propriétaire, gestionnaire immobilier ou tribunal des loyers comme preuve de l\'état de la propriété.',
     reportGeneratedOn: 'Rapport généré le',
     at: 'à',
+    watermarkText: 'Copie Échantillon',
   },
 } as const;
 
@@ -567,9 +569,30 @@ function generateReportHtml(
         @media print {
           .room-section, .photo-item, .qr-section { page-break-inside: avoid; }
         }
+        .watermark {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transform: rotate(-32deg);
+          font-size: 90px;
+          font-weight: 800;
+          letter-spacing: 10px;
+          color: rgba(15, 23, 42, 0.08);
+          text-transform: uppercase;
+          z-index: 9999;
+          pointer-events: none;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
       </style>
     </head>
     <body>
+      ${isPremium ? '' : `<div class="watermark">${t.watermarkText}</div>`}
 
       <div class="content-wrapper">
       <div class="main-content">
