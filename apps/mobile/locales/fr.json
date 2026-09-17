@@ -115,7 +115,21 @@
     "card": {
       "inspections": "{{count}} inspections",
       "noInspections": "Aucune inspection",
-      "lastInspection": "Dernière: {{date}}"
+      "lastInspection": "Dernière: {{date}}",
+      "completed": "Terminé le {{date}}",
+      "inProgress": "En cours",
+      "oneInspection": "1 inspection",
+      "roomsDocumented": "{{count}} pièces",
+      "moveIn": "Emménagement",
+      "moveOut": "Déménagement",
+      "inspection": "Inspection",
+      "newInspection": "Nouvelle inspection",
+      "open": "Ouvrir",
+      "noPhotosYet": "Aucune photo",
+      "completedOf": "{{count}} / {{max}} terminées",
+      "finalized": "Finalisé",
+      "finalizedNote": "Finalisé — lecture seule",
+      "limitReachedNote": "{{max}} inspections sur {{max}} terminées"
     }
   },
   "property": {
@@ -124,7 +138,7 @@
       "nameLabel": "Nom de la propriété",
       "namePlaceholder": "ex: Mon appartement",
       "addressLabel": "Adresse",
-      "addressPlaceholder": "123 rue Principale, Ville",
+      "addressPlaceholder": "123 rue Principale, app. 4, Montréal QC  H2X 1Y6",
       "unitLabel": "Numéro d'unité/apt (optionnel)",
       "unitPlaceholder": "ex: Apt 4B",
       "typeLabel": "Type de propriété",
@@ -139,7 +153,11 @@
       "success": "Propriété créée avec succès",
       "errors": {
         "createFailed": "Échec de la création de la propriété"
-      }
+      },
+      "addressHint": "Indiquez l'adresse civique complète telle qu'elle figure sur votre bail — elle apparaît sur votre rapport PDF.",
+      "editTitle": "Modifier la propriété",
+      "updateButton": "Enregistrer",
+      "updateSuccess": "Propriété mise à jour"
     },
     "detail": {
       "title": "Détails de la propriété",
@@ -153,7 +171,7 @@
       "added": "Ajoutée le",
       "loadError": "Échec du chargement de la propriété",
       "total": "total",
-      "limitReached": "limite atteinte",
+      "limitReached": "Limite atteinte",
       "deleteConfirm": {
         "title": "Supprimer la propriété",
         "message": "Êtes-vous sûr de vouloir supprimer cette propriété? Cela supprimera également toutes les inspections et photos.",
@@ -164,7 +182,9 @@
       "bundleButton": "Acheter le forfait — 24,99 $",
       "bundleActive": "Forfait déménagement actif",
       "bundleActiveDesc": "Votre forfait couvre cette propriété pour 18 mois. Le PDF de comparaison est sans filigrane.",
-      "bundlePurchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer."
+      "bundlePurchaseFailed": "Impossible d'ouvrir la caisse. Veuillez réessayer.",
+      "completedCount": "{{count}} / {{max}} terminées",
+      "finalized": "Finalisé"
     }
   },
   "inspection": {
@@ -248,7 +268,8 @@
       "exportSingleTitle": "Ce rapport seulement",
       "exportSingleDesc": "Rapport unique sans filigrane",
       "exportFreeTitle": "Copie gratuite avec filigrane",
-      "exportFreeDesc": "Niveaux de gris, avec la mention « Copie échantillon »"
+      "exportFreeDesc": "Niveaux de gris, avec la mention « Copie échantillon »",
+      "finalizedBanner": "Cette propriété est finalisée avec le forfait déménagement. Les inspections sont verrouillées comme preuve — vous pouvez toujours générer des PDF sans filigrane."
     },
     "compare": {
       "title": "Comparer les inspections",
@@ -282,7 +303,7 @@
       "premiumPlan": "Plan Premium",
       "freePlan": "Plan gratuit",
       "premiumDescription": "Propriétés et inspections illimitées",
-      "freeDescription": "Jusqu'à {{maxProperties}} propriété, {{maxInspections}} inspection",
+      "freeDescription": "Propriétés illimitées · entrée + sortie par propriété",
       "statusActive": "Actif",
       "statusFree": "Gratuit",
       "upgradeButton": "Passer à Premium",

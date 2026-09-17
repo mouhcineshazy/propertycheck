@@ -29,13 +29,11 @@ import { getMobileSupabaseClient } from '../../lib/supabase';
 import {
   fetchPropertyWithInspections,
   deleteProperty,
-  checkFreeTierLimits,
   canGenerateComparison,
   checkBundleAccess,
   purchaseMovingBundle,
 } from '../../lib';
 import type { PropertyWithInspections } from '../../lib';
-import { UpgradeModal } from '../../components';
 import { useTranslation } from '../../contexts';
 import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
@@ -50,11 +48,7 @@ export default function PropertyDetailScreen() {
   const [property, setProperty] = useState<PropertyWithInspections | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [totalInspections, setTotalInspections] = useState(0);
-  const [canAddInspection, setCanAddInspection] = useState(false);
   const [canCompare, setCanCompare] = useState(false);
-  const [userProvince, setUserProvince] = useState<string | undefined>();
   const [isPremium, setIsPremium] = useState(false);
   const [hasBundle, setHasBundle] = useState(false);
   const [isPurchasingBundle, setIsPurchasingBundle] = useState(false);
@@ -65,31 +59,17 @@ export default function PropertyDetailScreen() {
         if (!id) return;
         try {
           const supabase = getMobileSupabaseClient();
-          const [data, limitsResult, comparisonResult, userResult, subResult, bundleResult] =
-            await Promise.all([
-              fetchPropertyWithInspections(id),
-              checkFreeTierLimits(),
-              canGenerateComparison(id),
-              supabase.from('users').select('province').single(),
-              supabase.from('subscriptions').select('status').single(),
-              checkBundleAccess(id),
-            ]);
+          const [data, comparisonResult, subResult, bundleResult] = await Promise.all([
+            fetchPropertyWithInspections(id),
+            canGenerateComparison(id),
+            supabase.from('subscriptions').select('status').single(),
+            checkBundleAccess(id),
+          ]);
 
           setProperty(data);
           setCanCompare(comparisonResult.canCompare);
-          setUserProvince(userResult.data?.province || undefined);
           setHasBundle(bundleResult.hasBundle);
-
-          const userIsPremium = subResult.data?.status === 'premium';
-          setIsPremium(userIsPremium);
-
-          if (limitsResult.data) {
-            setTotalInspections(limitsResult.data.inspectionCount);
-            setCanAddInspection(userIsPremium || limitsResult.data.canAddInspection);
-          } else {
-            console.warn('Failed to check limits:', limitsResult.error);
-            setCanAddInspection(userIsPremium);
-          }
+          setIsPremium(subResult.data?.status === 'premium');
         } catch (err) {
           console.error('Error loading property:', err);
           Alert.alert(t('alerts.error'), t('property.detail.loadError'), [
@@ -158,11 +138,6 @@ export default function PropertyDetailScreen() {
   };
 
   const handleStartInspection = () => {
-    if (!property) return;
-    if (!canAddInspection) {
-      setShowUpgradeModal(true);
-      return;
-    }
     router.push(`/inspection/new?propertyId=${id}` as Href);
   };
 
@@ -216,6 +191,10 @@ export default function PropertyDetailScreen() {
   }
 
   const inspectionCount = property.inspections?.length || 0;
+  const completedCount = property.inspections.filter((i) => i.status === 'completed').length;
+  const isLocked = hasBundle;
+  const maxCompleted = FREE_TIER_LIMITS.maxCompletedInspectionsPerProperty;
+  const canAddInspection = !isLocked && completedCount < maxCompleted;
 
   return (
     <View style={styles.container}>
@@ -227,13 +206,22 @@ export default function PropertyDetailScreen() {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {t('property.detail.title')}
         </Text>
-        <TouchableOpacity onPress={handleDelete} style={styles.iconButton} hitSlop={8}>
-          {isDeleting ? (
-            <ActivityIndicator size="small" color={semantic.danger} />
-          ) : (
-            <Ionicons name="trash-outline" size={22} color={semantic.danger} />
-          )}
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => router.push(`/property/new?editId=${id}` as Href)}
+            style={styles.iconButton}
+            hitSlop={8}
+          >
+            <Ionicons name="create-outline" size={22} color={semantic.fg} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleDelete} style={styles.iconButton} hitSlop={8}>
+            {isDeleting ? (
+              <ActivityIndicator size="small" color={semantic.danger} />
+            ) : (
+              <Ionicons name="trash-outline" size={22} color={semantic.danger} />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentInner} showsVerticalScrollIndicator={false}>
@@ -270,16 +258,14 @@ export default function PropertyDetailScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('property.detail.inspections')}</Text>
-            {isPremium ? (
-              <Text style={styles.inspectionCount}>
-                {totalInspections} {t('property.detail.total')}
-              </Text>
-            ) : (
-              <Text style={[styles.inspectionCount, !canAddInspection && styles.inspectionCountWarning]}>
-                {totalInspections} / {FREE_TIER_LIMITS.maxInspectionsTotal} {t('property.detail.total')}
-                {!canAddInspection && ` (${t('property.detail.limitReached')})`}
-              </Text>
-            )}
+            <Text style={[styles.inspectionCount, !canAddInspection && styles.inspectionCountWarning]}>
+              {t('property.detail.completedCount', { count: completedCount, max: maxCompleted })}
+              {isLocked
+                ? ` · ${t('property.detail.finalized')}`
+                : !canAddInspection
+                  ? ` · ${t('property.detail.limitReached')}`
+                  : ''}
+            </Text>
           </View>
 
           {inspectionCount === 0 ? (
@@ -345,23 +331,25 @@ export default function PropertyDetailScreen() {
           </TouchableOpacity>
         )}
         <TouchableOpacity
-          style={[styles.startButton, !canAddInspection && styles.startButtonWarning]}
+          style={[styles.startButton, !canAddInspection && styles.startButtonDisabled]}
           onPress={handleStartInspection}
+          disabled={!canAddInspection}
           activeOpacity={0.85}
         >
-          <Ionicons name={canAddInspection ? 'camera-outline' : 'star'} size={20} color={semantic.primaryContrast} />
+          <Ionicons
+            name={isLocked ? 'lock-closed' : canAddInspection ? 'camera-outline' : 'checkmark-done'}
+            size={20}
+            color={semantic.primaryContrast}
+          />
           <Text style={styles.startButtonText}>
-            {canAddInspection ? t('property.detail.startInspection') : t('upgrade.title')}
+            {isLocked
+              ? t('property.detail.finalized')
+              : canAddInspection
+                ? t('property.detail.startInspection')
+                : t('property.detail.limitReached')}
           </Text>
         </TouchableOpacity>
       </View>
-
-      <UpgradeModal
-        visible={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        reason="inspections_limit"
-        userProvince={userProvince}
-      />
     </View>
   );
 }
@@ -385,6 +373,10 @@ const makeStyles = ({ semantic, shadows }: AppTheme) =>
     backgroundColor: semantic.card,
     borderBottomWidth: 1,
     borderBottomColor: semantic.line,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   iconButton: {
     width: 40,
@@ -605,7 +597,7 @@ const makeStyles = ({ semantic, shadows }: AppTheme) =>
     gap: spacing.sm,
   },
   startButtonText: { color: semantic.primaryContrast, fontSize: 16, fontWeight: '600' },
-  startButtonWarning: { backgroundColor: semantic.warning },
+  startButtonDisabled: { opacity: 0.55 },
   compareButton: {
     backgroundColor: semantic.primarySoft,
     flexDirection: 'row',

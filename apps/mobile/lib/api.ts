@@ -6,12 +6,16 @@
  */
 
 import * as FileSystem from 'expo-file-system/legacy';
+import { FREE_TIER_LIMITS } from '@propertycheck/shared';
 import { getMobileSupabaseClient } from './supabase';
 import type { Property, Inspection } from '@propertycheck/database';
 import type {
   PropertyFormData,
   InspectionWithPhotos,
   PropertyWithInspections,
+  PropertyWithSummaries,
+  InspectionSummary,
+  RoomSummaryPhoto,
   LocalPhoto,
 } from './types';
 import { uploadInspectionPhoto, deleteInspectionPhotos } from './storage';
@@ -80,6 +84,127 @@ export async function fetchPropertyWithInspections(
   }
 
   return { ...property, inspections: inspections || [] };
+}
+
+// Category ordering for room groups (matches the PDF report grouping).
+const ROOM_ORDER: Record<string, number> = {
+  living_room: 1,
+  kitchen: 2,
+  bedroom: 3,
+  bathroom: 4,
+  other: 5,
+};
+
+type RawSummaryPhoto = {
+  id: string;
+  storage_path: string;
+  room_type: string | null;
+  room_label: string | null;
+  sort_order: number;
+};
+
+// Reduce one inspection's photos to a single representative photo per room,
+// grouped the same way the report is (room_label, else room_type category).
+function summarizeRoomPhotos(photos: RawSummaryPhoto[]): RoomSummaryPhoto[] {
+  const groups = new Map<string, RoomSummaryPhoto & { order: number; sort: number }>();
+  for (const photo of photos) {
+    const key = photo.room_label || photo.room_type || 'other';
+    const existing = groups.get(key);
+    if (!existing || photo.sort_order < existing.sort) {
+      groups.set(key, {
+        id: photo.id,
+        roomType: photo.room_type,
+        roomLabel: photo.room_label,
+        storagePath: photo.storage_path,
+        order: ROOM_ORDER[photo.room_type ?? 'other'] ?? 99,
+        sort: photo.sort_order,
+      });
+    }
+  }
+  return Array.from(groups.values())
+    .sort((a, b) => (a.order !== b.order ? a.order - b.order : a.sort - b.sort))
+    .map(({ id, roomType, roomLabel, storagePath }) => ({ id, roomType, roomLabel, storagePath }));
+}
+
+/**
+ * Fetch every property with a lightweight summary of each inspection: one photo
+ * per documented room, a photo count, and the derived move-in / move-out role
+ * (first / last inspection chronologically). Powers the photo-first property list.
+ */
+export async function fetchPropertiesWithSummaries(): Promise<PropertyWithSummaries[]> {
+  const supabase = getMobileSupabaseClient();
+  const { data, error } = await supabase
+    .from('properties')
+    .select(
+      '*, inspections(*, inspection_photos(id, storage_path, room_type, room_label, sort_order)), bundle_purchases(expires_at)'
+    )
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  // The nested embeds aren't in the generated Row types; shape them explicitly.
+  const rows = (data ?? []) as unknown as (Property & {
+    inspections: (Inspection & { inspection_photos: RawSummaryPhoto[] })[];
+    bundle_purchases: { expires_at: string }[];
+  })[];
+
+  const now = Date.now();
+
+  return rows.map((property) => {
+    const chronological = [...property.inspections].sort(
+      (a, b) => new Date(a.inspection_date).getTime() - new Date(b.inspection_date).getTime()
+    );
+    const lastIndex = chronological.length - 1;
+
+    const inspections: InspectionSummary[] = chronological.map((inspection, index) => {
+      const photos = inspection.inspection_photos ?? [];
+      const role: InspectionSummary['role'] =
+        index === 0 ? 'moveIn' : index === lastIndex ? 'moveOut' : 'inspection';
+      const { inspection_photos: _photos, ...rest } = inspection;
+      return {
+        ...rest,
+        role,
+        roomPhotos: summarizeRoomPhotos(photos),
+        photoCount: photos.length,
+      };
+    });
+
+    const completedCount = inspections.filter((i) => i.status === 'completed').length;
+    const isLocked = (property.bundle_purchases ?? []).some(
+      (b) => new Date(b.expires_at).getTime() > now
+    );
+
+    return { ...property, inspections, completedCount, isLocked };
+  });
+}
+
+/**
+ * Per-property inspection gate — mirrors the DB rule (universal 2-completed cap
+ * plus the Moving Bundle lock). The database triggers are the real guard; this
+ * lets the UI block before the user does any work.
+ */
+export async function getPropertyInspectionAccess(propertyId: string): Promise<{
+  completedCount: number;
+  isLocked: boolean;
+  canAdd: boolean;
+}> {
+  const supabase = getMobileSupabaseClient();
+  const [{ count }, bundle] = await Promise.all([
+    supabase
+      .from('inspections')
+      .select('id', { count: 'exact', head: true })
+      .eq('property_id', propertyId)
+      .eq('status', 'completed'),
+    checkBundleAccess(propertyId),
+  ]);
+
+  const completedCount = count ?? 0;
+  const isLocked = bundle.hasBundle;
+  return {
+    completedCount,
+    isLocked,
+    canAdd: !isLocked && completedCount < FREE_TIER_LIMITS.maxCompletedInspectionsPerProperty,
+  };
 }
 
 /**
@@ -218,20 +343,18 @@ export async function createInspection(
 ): Promise<Inspection> {
   const supabase = getMobileSupabaseClient();
 
-  // CRITICAL: Server-side enforcement of free tier limits
-  // This is the final guard - even if client-side checks are bypassed
-  const { data: limitsData, error: limitsError } = await supabase.rpc('check_free_tier_limits');
-
-  if (limitsError) {
-    throw new Error('Failed to verify account limits. Please try again.');
+  // Pre-check the per-property rule (2 completed max, or finalized by a bundle)
+  // so we fail before uploading anything. The DB triggers are the real guard.
+  const access = await getPropertyInspectionAccess(propertyId);
+  if (!access.canAdd) {
+    throw new Error(
+      access.isLocked
+        ? 'This property has been finalized with a Moving Bundle and can no longer be changed.'
+        : 'This property already has 2 completed inspections (move-in and move-out).'
+    );
   }
 
-  const limits = limitsData?.[0];
-  if (!limits?.can_create_inspection) {
-    throw new Error('Inspection limit reached. Please upgrade to Premium to add more inspections.');
-  }
-
-  // Create inspection record
+  // Create inspection record (DB trigger enforces the same rules)
   const { data: inspection, error: inspError } = await supabase
     .from('inspections')
     .insert({
@@ -352,42 +475,6 @@ export async function getShareableLink(
 // USER & SUBSCRIPTION
 // ============================================
 
-/**
- * Check free tier limits for the current user
- */
-export async function checkFreeTierLimits(): Promise<{
-  data: {
-    propertyCount: number;
-    inspectionCount: number;
-    canAddProperty: boolean;
-    canAddInspection: boolean;
-  } | null;
-  error: string | null;
-}> {
-  try {
-    const supabase = getMobileSupabaseClient();
-
-    // Call the database function
-    const { data, error } = await supabase.rpc('check_free_tier_limits');
-
-    if (error) {
-      return { data: null, error: error.message };
-    }
-
-    const limits = data?.[0];
-    return {
-      data: {
-        propertyCount: limits?.properties_count || 0,
-        inspectionCount: limits?.inspections_count || 0,
-        canAddProperty: limits?.can_create_property || false,
-        canAddInspection: limits?.can_create_inspection || false,
-      },
-      error: null,
-    };
-  } catch {
-    return { data: null, error: 'Failed to check limits' };
-  }
-}
 
 // ============================================
 // COMPARISON REPORTS

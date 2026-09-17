@@ -6,11 +6,12 @@
  */
 
 import { useSyncExternalStore, useCallback } from 'react';
-import { Property } from '@propertycheck/database';
 import { getMobileSupabaseClient } from '../lib/supabase';
+import { fetchPropertiesWithSummaries } from '../lib/api';
+import type { PropertyWithSummaries } from '../lib/types';
 
 type PropertiesState = {
-  properties: Property[];
+  properties: PropertyWithSummaries[];
   isLoading: boolean;
   error: string | null;
 };
@@ -30,16 +31,10 @@ function emitChange() {
 
 async function fetchPropertiesInternal() {
   try {
-    const supabase = getMobileSupabaseClient();
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
+    const properties = await fetchPropertiesWithSummaries();
 
     state = {
-      properties: data || [],
+      properties,
       isLoading: false,
       error: null,
     };

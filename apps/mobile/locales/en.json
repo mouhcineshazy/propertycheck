@@ -115,7 +115,21 @@
     "card": {
       "inspections": "{{count}} inspections",
       "noInspections": "No inspections yet",
-      "lastInspection": "Last: {{date}}"
+      "lastInspection": "Last: {{date}}",
+      "completed": "Completed {{date}}",
+      "inProgress": "In progress",
+      "oneInspection": "1 inspection",
+      "roomsDocumented": "{{count}} rooms",
+      "moveIn": "Move-in",
+      "moveOut": "Move-out",
+      "inspection": "Inspection",
+      "newInspection": "New inspection",
+      "open": "Open",
+      "noPhotosYet": "No photos yet",
+      "completedOf": "{{count}} / {{max}} complete",
+      "finalized": "Finalized",
+      "finalizedNote": "Finalized — read-only",
+      "limitReachedNote": "{{max}} of {{max}} inspections complete"
     }
   },
   "property": {
@@ -124,7 +138,7 @@
       "nameLabel": "Property Name",
       "namePlaceholder": "e.g., My Apartment",
       "addressLabel": "Address",
-      "addressPlaceholder": "123 Main Street, City",
+      "addressPlaceholder": "123 Main St, Unit 4, Toronto ON  M5V 2T6",
       "unitLabel": "Unit/Apt Number (optional)",
       "unitPlaceholder": "e.g., Apt 4B",
       "typeLabel": "Property Type",
@@ -139,7 +153,11 @@
       "success": "Property created successfully",
       "errors": {
         "createFailed": "Failed to create property"
-      }
+      },
+      "addressHint": "Use the full civic address exactly as it appears on your lease — it prints on your PDF report.",
+      "editTitle": "Edit Property",
+      "updateButton": "Save Changes",
+      "updateSuccess": "Property updated"
     },
     "detail": {
       "title": "Property Details",
@@ -153,7 +171,7 @@
       "added": "Added",
       "loadError": "Failed to load property",
       "total": "total",
-      "limitReached": "limit reached",
+      "limitReached": "Limit reached",
       "deleteConfirm": {
         "title": "Delete Property",
         "message": "Are you sure you want to delete this property? This will also delete all inspections and photos.",
@@ -164,7 +182,9 @@
       "bundleButton": "Buy Moving Bundle — $24.99",
       "bundleActive": "Moving Bundle Active",
       "bundleActiveDesc": "Your bundle covers this property for 18 months. Comparison PDF is watermark-free.",
-      "bundlePurchaseFailed": "Could not open checkout. Please try again."
+      "bundlePurchaseFailed": "Could not open checkout. Please try again.",
+      "completedCount": "{{count}} / {{max}} complete",
+      "finalized": "Finalized"
     }
   },
   "inspection": {
@@ -248,7 +268,8 @@
       "exportSingleTitle": "This report only",
       "exportSingleDesc": "Watermark-free single report",
       "exportFreeTitle": "Free watermarked copy",
-      "exportFreeDesc": "Grayscale, with a \"Sample Copy\" mark"
+      "exportFreeDesc": "Grayscale, with a \"Sample Copy\" mark",
+      "finalizedBanner": "This property is finalized with a Moving Bundle. Inspections are locked as evidence — you can still generate watermark-free PDFs."
     },
     "compare": {
       "title": "Compare Inspections",
@@ -282,7 +303,7 @@
       "premiumPlan": "Premium Plan",
       "freePlan": "Free Plan",
       "premiumDescription": "Unlimited properties and inspections",
-      "freeDescription": "Up to {{maxProperties}} property, {{maxInspections}} inspection",
+      "freeDescription": "Unlimited properties · move-in + move-out per property",
       "statusActive": "Active",
       "statusFree": "Free",
       "upgradeButton": "Upgrade to Premium",

@@ -5,7 +5,7 @@
  * - Trust Ink theme tokens (lib/theme.ts)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { z } from 'zod';
 import { formatZodError } from '@propertycheck/shared';
 import { useActionState } from '../../hooks';
-import { createProperty, purchaseMovingBundle, checkBundleAccess, deleteProperty } from '../../lib';
+import { createProperty, updateProperty } from '../../lib';
+import { getMobileSupabaseClient } from '../../lib/supabase';
 import { useTranslation } from '../../contexts';
 import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
@@ -43,13 +44,13 @@ const newPropertySchema = z.object({
 type NewPropertyState = { errors: Record<string, string> };
 const initialState: NewPropertyState = { errors: {} };
 
-async function createPropertyAction(
+async function savePropertyAction(
   _prevState: NewPropertyState,
   payload: {
+    editId?: string;
     address: string;
     property_type: string;
     notes: string;
-    requireBundle: boolean;
     onSuccess: () => void;
     t: (key: string) => string;
   }
@@ -64,33 +65,18 @@ async function createPropertyAction(
     return { errors: formatZodError(result.error) };
   }
 
+  const data = {
+    address: result.data.address,
+    property_type: result.data.property_type,
+    notes: result.data.notes,
+  };
+
   try {
-    const property = await createProperty({
-      address: result.data.address,
-      property_type: result.data.property_type,
-      notes: result.data.notes,
-    });
-
-    // Properties beyond the free one require a Moving Bundle. Buy it for the new
-    // property; if the user cancels or it fails, roll the property back so the
-    // free cap stays honest. On success the webhook grants the bundle — poll
-    // briefly, but keep the property regardless (the grant may land moments later).
-    if (payload.requireBundle) {
-      const purchase = await purchaseMovingBundle(property.id);
-      if (purchase.status !== 'success') {
-        await deleteProperty(property.id);
-        if (purchase.status === 'error') {
-          Alert.alert(payload.t('alerts.error'), purchase.message || payload.t('property.new.errors.createFailed'));
-        }
-        return { errors: {} };
-      }
-      for (let attempt = 0; attempt < 4; attempt++) {
-        const bundle = await checkBundleAccess(property.id);
-        if (bundle.hasBundle) break;
-        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 1200));
-      }
+    if (payload.editId) {
+      await updateProperty(payload.editId, data);
+    } else {
+      await createProperty(data);
     }
-
     payload.onSuccess();
     return { errors: {} };
   } catch (err) {
@@ -102,8 +88,8 @@ async function createPropertyAction(
 
 export default function NewPropertyScreen() {
   const router = useRouter();
-  const { intent } = useLocalSearchParams<{ intent?: string }>();
-  const requireBundle = intent === 'bundle';
+  const { editId } = useLocalSearchParams<{ editId?: string }>();
+  const isEdit = !!editId;
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { semantic } = useTheme();
@@ -112,19 +98,38 @@ export default function NewPropertyScreen() {
   const [propertyType, setPropertyType] = useState<string>('apartment');
   const [notes, setNotes] = useState('');
 
-  const [state, dispatch, isPending] = useActionState(createPropertyAction, initialState);
+  const [state, dispatch, isPending] = useActionState(savePropertyAction, initialState);
+
+  useEffect(() => {
+    if (!editId) return;
+    (async () => {
+      const supabase = getMobileSupabaseClient();
+      const { data } = await supabase
+        .from('properties')
+        .select('address, property_type, notes')
+        .eq('id', editId)
+        .single();
+      if (data) {
+        setAddress(data.address ?? '');
+        setPropertyType(data.property_type ?? 'apartment');
+        setNotes(data.notes ?? '');
+      }
+    })();
+  }, [editId]);
 
   const handleSubmit = () => {
     dispatch({
+      editId,
       address,
       property_type: propertyType,
       notes,
-      requireBundle,
       t,
       onSuccess: () => {
-        Alert.alert(t('common.success'), t('property.new.success'), [
-          { text: t('common.ok'), onPress: () => router.back() },
-        ]);
+        Alert.alert(
+          t('common.success'),
+          isEdit ? t('property.new.updateSuccess') : t('property.new.success'),
+          [{ text: t('common.ok'), onPress: () => router.back() }]
+        );
       },
     });
   };
@@ -138,7 +143,9 @@ export default function NewPropertyScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.iconButton} hitSlop={8}>
           <Ionicons name="close" size={24} color={semantic.fg} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('property.new.title')}</Text>
+        <Text style={styles.headerTitle}>
+          {isEdit ? t('property.new.editTitle') : t('property.new.title')}
+        </Text>
         <View style={styles.iconButton} />
       </View>
 
@@ -156,7 +163,11 @@ export default function NewPropertyScreen() {
             autoComplete="street-address"
             editable={!isPending}
           />
-          {state.errors.address && <Text style={styles.errorText}>{state.errors.address}</Text>}
+          {state.errors.address ? (
+            <Text style={styles.errorText}>{state.errors.address}</Text>
+          ) : (
+            <Text style={styles.hint}>{t('property.new.addressHint')}</Text>
+          )}
         </View>
 
         {/* Property type */}
@@ -214,8 +225,14 @@ export default function NewPropertyScreen() {
             <ActivityIndicator color={semantic.primaryContrast} />
           ) : (
             <>
-              <Ionicons name="add-circle-outline" size={20} color={semantic.primaryContrast} />
-              <Text style={styles.submitButtonText}>{t('property.new.createButton')}</Text>
+              <Ionicons
+                name={isEdit ? 'checkmark-circle-outline' : 'add-circle-outline'}
+                size={20}
+                color={semantic.primaryContrast}
+              />
+              <Text style={styles.submitButtonText}>
+                {isEdit ? t('property.new.updateButton') : t('property.new.createButton')}
+              </Text>
             </>
           )}
         </TouchableOpacity>
@@ -295,4 +312,5 @@ const makeStyles = ({ semantic, shadows }: AppTheme) =>
   },
   submitButtonDisabled: { opacity: 0.7 },
   submitButtonText: { color: semantic.primaryContrast, fontSize: 16, fontWeight: '600' },
+  hint: { fontSize: 12, color: semantic.fgSubtle, marginTop: 6, lineHeight: 16 },
 });

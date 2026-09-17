@@ -6,7 +6,7 @@
  * - Trust Ink theme tokens (lib/theme.ts)
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -15,57 +15,34 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from 'react-native';
 import { useRouter, Href, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Property } from '@propertycheck/database';
-import { getMobileSupabaseClient } from '../../lib/supabase';
-import { FREE_TIER_LIMITS } from '@propertycheck/shared';
-import { useProperties, useOptimistic, useAuth } from '../../hooks';
-import { checkFreeTierLimits } from '../../lib';
-import { UpgradeModal, AddPropertySheet } from '../../components';
+import { useProperties, useOptimistic } from '../../hooks';
+import type { PropertyWithSummaries } from '../../lib';
+import { PropertyCard } from '../../components';
 import { useTranslation } from '../../contexts';
 import { useTheme, useThemedStyles, spacing, radius, type AppTheme } from '../../lib/theme';
 
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 export default function PropertiesScreen() {
   const router = useRouter();
-  const { user } = useAuth();
   const { t } = useTranslation();
-  const { semantic, colors } = useTheme();
+  const { semantic } = useTheme();
   const styles = useThemedStyles(makeStyles);
   const { properties, isLoading, error, refetch } = useProperties();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showAddSheet, setShowAddSheet] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
-  // Free property slot available? Driven by the server RPC, which excludes
-  // bundle-backed properties from the free cap.
-  const [canAddFreeProperty, setCanAddFreeProperty] = useState(true);
-  const [freePropertyCount, setFreePropertyCount] = useState(0);
-
-  useEffect(() => {
-    const fetchSubscription = async () => {
-      if (!user) return;
-      const supabase = getMobileSupabaseClient();
-      const { data } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', user.id)
-        .single();
-      setIsPremium(data?.status === 'premium');
-    };
-    fetchSubscription();
-  }, [user]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       refetch();
-      checkFreeTierLimits().then(({ data }) => {
-        if (data) {
-          setCanAddFreeProperty(data.canAddProperty);
-          setFreePropertyCount(data.propertyCount);
-        }
-      });
     }, [refetch])
   );
 
@@ -82,27 +59,20 @@ export default function PropertiesScreen() {
     setIsRefreshing(false);
   };
 
-  const renderProperty = ({ item }: { item: Property }) => (
-    <TouchableOpacity
-      style={styles.propertyCard}
-      activeOpacity={0.7}
-      onPress={() => router.push(`/property/${item.id}` as Href)}
-    >
-      <View style={styles.propertyAvatar}>
-        <Ionicons name="home" size={20} color={semantic.primary} />
-      </View>
-      <View style={styles.propertyInfo}>
-        <Text style={styles.propertyAddress} numberOfLines={1}>
-          {item.address}
-        </Text>
-        <View style={styles.propertyMeta}>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{t(`property.new.types.${item.property_type}`)}</Text>
-          </View>
-        </View>
-      </View>
-      <Ionicons name="chevron-forward" size={20} color={semantic.fgSubtle} />
-    </TouchableOpacity>
+  const handleToggleCard = (id: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedId((prev) => (prev === id ? null : id));
+  };
+
+  const renderProperty = ({ item }: { item: PropertyWithSummaries }) => (
+    <PropertyCard
+      property={item}
+      expanded={expandedId === item.id}
+      onToggle={() => handleToggleCard(item.id)}
+      onOpen={() => router.push(`/property/${item.id}` as Href)}
+      onNewInspection={() => router.push(`/inspection/new?propertyId=${item.id}` as Href)}
+      onOpenInspection={(inspectionId) => router.push(`/inspection/${inspectionId}` as Href)}
+    />
   );
 
   const renderEmptyState = () => (
@@ -145,44 +115,12 @@ export default function PropertiesScreen() {
     );
   }
 
-  // "At the free slot" — the free property is used. Additional properties need a
-  // bundle or Premium, offered via the add-property sheet (not a hard wall).
-  const isAtLimit = !isPremium && !canAddFreeProperty;
-
-  const handleAddProperty = () => {
-    if (isAtLimit) {
-      setShowAddSheet(true);
-    } else {
-      router.push('/property/new' as Href);
-    }
-  };
-
   return (
     <View style={styles.container}>
       {optimisticProperties.length === 0 ? (
         renderEmptyState()
       ) : (
         <>
-          {!isPremium && (
-            <TouchableOpacity
-              style={[styles.limitBanner, isAtLimit && styles.limitBannerWarning]}
-              activeOpacity={isAtLimit ? 0.7 : 1}
-              onPress={isAtLimit ? () => setShowAddSheet(true) : undefined}
-            >
-              <Ionicons
-                name={isAtLimit ? 'star' : 'information-circle-outline'}
-                size={15}
-                color={isAtLimit ? colors.amber[700] : semantic.fgMuted}
-              />
-              <Text style={[styles.limitText, isAtLimit && styles.limitTextWarning]}>
-                {t('properties.limitBanner.text', {
-                  current: Math.min(freePropertyCount, FREE_TIER_LIMITS.maxProperties),
-                  max: FREE_TIER_LIMITS.maxProperties,
-                })}
-                {isAtLimit && t('properties.limitBanner.tapToUpgrade')}
-              </Text>
-            </TouchableOpacity>
-          )}
           <FlatList
             data={optimisticProperties}
             renderItem={renderProperty}
@@ -198,38 +136,19 @@ export default function PropertiesScreen() {
             }
           />
           <TouchableOpacity
-            style={[styles.fab, isAtLimit && styles.fabWarning]}
+            style={styles.fab}
             activeOpacity={0.85}
-            onPress={handleAddProperty}
+            onPress={() => router.push('/property/new' as Href)}
           >
-            <Ionicons name={isAtLimit ? 'star' : 'add'} size={26} color={semantic.primaryContrast} />
+            <Ionicons name="add" size={26} color={semantic.primaryContrast} />
           </TouchableOpacity>
         </>
       )}
-
-      <AddPropertySheet
-        visible={showAddSheet}
-        onBundle={() => {
-          setShowAddSheet(false);
-          router.push({ pathname: '/property/new', params: { intent: 'bundle' } } as Href);
-        }}
-        onSubscribe={() => {
-          setShowAddSheet(false);
-          setShowUpgradeModal(true);
-        }}
-        onClose={() => setShowAddSheet(false)}
-      />
-
-      <UpgradeModal
-        visible={showUpgradeModal}
-        onClose={() => setShowUpgradeModal(false)}
-        reason="properties_limit"
-      />
     </View>
   );
 }
 
-const makeStyles = ({ semantic, colors, shadows }: AppTheme) =>
+const makeStyles = ({ semantic, shadows }: AppTheme) =>
   StyleSheet.create({
   container: {
     flex: 1,
@@ -245,75 +164,6 @@ const makeStyles = ({ semantic, colors, shadows }: AppTheme) =>
   list: {
     padding: spacing.md,
     paddingBottom: 120,
-  },
-  limitBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingVertical: 10,
-    paddingHorizontal: spacing.md,
-    backgroundColor: semantic.cardMuted,
-    borderBottomWidth: 1,
-    borderBottomColor: semantic.line,
-  },
-  limitBannerWarning: {
-    backgroundColor: colors.amber[50],
-    borderBottomColor: colors.amber[100],
-  },
-  limitText: {
-    fontSize: 13,
-    color: semantic.fgMuted,
-  },
-  limitTextWarning: {
-    color: colors.amber[700],
-    fontWeight: '600',
-  },
-  propertyCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: semantic.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: semantic.line,
-    padding: spacing.md,
-    marginBottom: spacing.sm + 4,
-    ...shadows.sm,
-  },
-  propertyAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.md,
-    backgroundColor: semantic.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  propertyInfo: {
-    flex: 1,
-  },
-  propertyAddress: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: semantic.fg,
-    marginBottom: 5,
-  },
-  propertyMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  badge: {
-    backgroundColor: semantic.cardMuted,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: radius.sm,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: semantic.fgMuted,
-    textTransform: 'capitalize',
   },
   emptyState: {
     flex: 1,
@@ -370,10 +220,6 @@ const makeStyles = ({ semantic, colors, shadows }: AppTheme) =>
     justifyContent: 'center',
     alignItems: 'center',
     ...shadows.primary,
-  },
-  fabWarning: {
-    backgroundColor: semantic.warning,
-    shadowColor: semantic.warning,
   },
   errorIcon: {
     width: 72,

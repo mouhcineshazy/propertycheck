@@ -515,6 +515,8 @@ export default function InspectionDetailScreen() {
 
   const isCompleted = inspection.status === 'completed';
   const isEntitled = isPremium || !!inspection.report_unlocked || hasBundle;
+  // A Moving Bundle finalizes the property: inspections become read-only.
+  const isLocked = hasBundle;
   const photoCount = inspection.photos?.length || 0;
 
   // Photo modal
@@ -594,13 +596,17 @@ export default function InspectionDetailScreen() {
           <Ionicons name="arrow-back" size={24} color={th.semantic.fg} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('inspection.detail.title')}</Text>
-        <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
-          {isDeleting ? (
-            <ActivityIndicator size="small" color={th.semantic.danger} />
-          ) : (
-            <Ionicons name="trash-outline" size={22} color={th.semantic.danger} />
-          )}
-        </TouchableOpacity>
+        {isLocked ? (
+          <View style={styles.deleteButton} />
+        ) : (
+          <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
+            {isDeleting ? (
+              <ActivityIndicator size="small" color={th.semantic.danger} />
+            ) : (
+              <Ionicons name="trash-outline" size={22} color={th.semantic.danger} />
+            )}
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView style={styles.content}>
@@ -647,6 +653,13 @@ export default function InspectionDetailScreen() {
             </View>
           )}
         </View>
+
+        {isLocked && (
+          <View style={styles.finalizedBanner}>
+            <Ionicons name="lock-closed" size={16} color={th.semantic.verified} />
+            <Text style={styles.finalizedBannerText}>{t('inspection.detail.finalizedBanner')}</Text>
+          </View>
+        )}
 
         {/* Photos Section */}
         <View style={styles.section}>
@@ -717,7 +730,7 @@ export default function InspectionDetailScreen() {
 
       {/* Bottom Actions */}
       <View style={styles.bottomBar}>
-        {!isCompleted && (
+        {!isCompleted && !isLocked && (
           <TouchableOpacity
             style={[styles.completeButton, isCompleting && styles.buttonDisabled]}
             onPress={handleComplete}
@@ -949,6 +962,23 @@ const makeStyles = (th: AppTheme) => StyleSheet.create({
     fontSize: 14,
     color: th.semantic.fg,
     lineHeight: 20,
+  },
+  finalizedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: th.semantic.verifiedSoft,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    marginBottom: 16,
+  },
+  finalizedBannerText: {
+    flex: 1,
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: th.semantic.verified,
+    lineHeight: 17,
   },
   section: {
     marginBottom: 100,

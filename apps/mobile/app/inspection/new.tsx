@@ -33,11 +33,10 @@ import {
   type RoomTypeValue,
 } from '@propertycheck/shared';
 import { getMobileSupabaseClient } from '../../lib/supabase';
-import { createInspection, checkFreeTierLimits } from '../../lib';
+import { createInspection, getPropertyInspectionAccess } from '../../lib';
 import { compressImage } from '../../lib/image';
 import { mapLimit } from '../../lib/concurrency';
 import type { LocalPhoto } from '../../lib';
-import { UpgradeModal } from '../../components';
 import { useTheme, useThemedStyles, type AppTheme } from '../../lib/theme';
 
 type Room = {
@@ -68,27 +67,27 @@ export default function NewInspectionScreen() {
 
   // Free tier limit enforcement
   const [isCheckingLimits, setIsCheckingLimits] = useState(true);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [userProvince, setUserProvince] = useState<string | undefined>();
   const [maxTotalPhotos, setMaxTotalPhotos] = useState<number>(FREE_TIER_LIMITS.maxPhotosPerInspection);
 
   const totalPhotos = rooms.reduce((sum, room) => sum + room.photos.length, 0);
 
   useEffect(() => {
     async function checkLimits() {
+      if (!propertyId) {
+        setIsCheckingLimits(false);
+        return;
+      }
       try {
         const supabase = getMobileSupabaseClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        const [limitsResult, userResult, subResult] = await Promise.all([
-          checkFreeTierLimits(),
-          supabase.from('users').select('province').single(),
+        const [access, subResult] = await Promise.all([
+          getPropertyInspectionAccess(propertyId),
           user
             ? supabase.from('subscriptions').select('status').eq('user_id', user.id).single()
             : Promise.resolve({ data: null }),
         ]);
 
-        setUserProvince(userResult.data?.province || undefined);
         const isPremium = subResult.data?.status === 'premium';
         setMaxTotalPhotos(
           isPremium
@@ -96,25 +95,31 @@ export default function NewInspectionScreen() {
             : FREE_TIER_LIMITS.maxPhotosPerInspection
         );
 
-        if (!limitsResult.data?.canAddInspection) {
-          setShowUpgradeModal(true);
+        // Per-property rule: at most 2 completed inspections, and a bundle
+        // finalizes the property. Entry is normally gated upstream; guard the
+        // deep-link case here (the DB trigger is the hard backstop).
+        if (!access.canAdd) {
+          Alert.alert(
+            access.isLocked ? 'Property finalized' : 'Inspection limit reached',
+            access.isLocked
+              ? 'This property has been finalized with a Moving Bundle and can no longer be changed.'
+              : 'This property already has 2 completed inspections (move-in and move-out).',
+            [{ text: 'OK', onPress: () => router.back() }]
+          );
           return;
         }
       } catch (err) {
         console.error('Error checking limits:', err);
-        setShowUpgradeModal(true);
+        Alert.alert('Error', 'Could not verify this property. Please try again.', [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
       } finally {
         setIsCheckingLimits(false);
       }
     }
 
     checkLimits();
-  }, []);
-
-  const handleUpgradeModalClose = () => {
-    setShowUpgradeModal(false);
-    router.back();
-  };
+  }, [propertyId, router]);
 
   const activeRoom = rooms.find((r) => r.id === activeRoomId) ?? null;
 
@@ -314,19 +319,6 @@ export default function NewInspectionScreen() {
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={th.semantic.primary} />
         <Text style={styles.loadingText}>Checking limits...</Text>
-      </View>
-    );
-  }
-
-  if (showUpgradeModal) {
-    return (
-      <View style={styles.container}>
-        <UpgradeModal
-          visible={true}
-          onClose={handleUpgradeModalClose}
-          reason="inspections_limit"
-          userProvince={userProvince}
-        />
       </View>
     );
   }

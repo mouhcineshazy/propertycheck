@@ -12,6 +12,29 @@ export type PropertyWithInspections = Property & {
   inspections: Inspection[];
 };
 
+// One representative photo per documented room, for list summaries.
+export type RoomSummaryPhoto = {
+  id: string;
+  roomType: string | null;
+  roomLabel: string | null;
+  storagePath: string;
+};
+
+// An inspection reduced to what the property list card needs: its derived
+// move-in / move-out role, a photo per room, and totals.
+export type InspectionSummary = Inspection & {
+  role: 'moveIn' | 'moveOut' | 'inspection';
+  roomPhotos: RoomSummaryPhoto[];
+  photoCount: number;
+};
+
+export type PropertyWithSummaries = Property & {
+  inspections: InspectionSummary[];
+  completedCount: number;
+  // Finalized by a Moving Bundle — inspections/photos are read-only.
+  isLocked: boolean;
+};
+
 export type InspectionWithPhotos = Inspection & {
   photos: InspectionPhoto[];
   property?: Property;
