@@ -31,61 +31,53 @@ import { useTheme, useThemedStyles, type AppTheme } from '../lib/theme';
 interface UpgradeModalProps {
   visible: boolean;
   onClose: () => void;
-  reason?: 'properties_limit' | 'inspections_limit' | 'pdf_storage' | 'share_link' | 'comparison_report' | 'general';
+  reason?: 'pdf_storage' | 'share_link' | 'comparison_report' | 'general';
   userProvince?: string; // Province code (ON, BC, AB, QC)
 }
 
-// Dynamic upgrade reasons based on context
+// Dynamic upgrade reasons based on context. Premium's real value in the
+// transaction-first model is: watermark-free reports everywhere, permanent
+// storage, and priority support — not property/inspection caps (those are free).
 function getUpgradeReasons(province?: ProvinceConfig) {
-  const provinceMessage = province?.upgradeMessage || 'Unlock premium features';
+  const provinceMessage = province?.upgradeMessage || 'Watermark-free reports, permanent storage, priority support';
 
   return {
-    properties_limit: {
-      title: 'Ready for More Properties?',
-      description: `You've completed your free move-in & move-out cycle. Upgrade to manage multiple properties.`,
-      subtext: province ? `${provinceMessage}` : undefined,
-      icon: 'home-outline' as const,
-    },
-    inspections_limit: {
-      title: 'Move-In & Move-Out Complete!',
-      description: `Great job documenting your rental! You've used both free inspections. Upgrade to track multiple properties.`,
-      subtext: province ? `${provinceMessage}` : undefined,
-      icon: 'clipboard-outline' as const,
-    },
     pdf_storage: {
       title: 'Keep Your Evidence Safe',
-      description: `Free PDFs expire after ${FREE_TIER_LIMITS.pdfRetentionDays} days. Upgrade for permanent storage you can access anytime.`,
-      subtext: province ? `${province.disputeBody} disputes can take months - don't lose your evidence.` : undefined,
+      description: `Free PDFs expire after ${FREE_TIER_LIMITS.pdfRetentionDays} days. Premium keeps every report permanently and watermark-free.`,
+      subtext: province ? `${province.disputeBody} disputes can take months — don't lose your evidence.` : undefined,
       icon: 'document-text-outline' as const,
     },
     share_link: {
       title: 'Share Secure Links',
       description: 'Send timestamped inspection reports your landlord can trust and verify.',
-      subtext: province ? `Create legally defensible evidence per ${province.tenancyActShort}` : 'Premium: Send secure links landlords trust',
+      subtext: province ? `Create legally defensible evidence per ${province.tenancyActShort}` : 'Premium: send secure links landlords trust',
       icon: 'link-outline' as const,
     },
     comparison_report: {
-      title: 'Save Your Comparison Report',
-      description: 'Your move-in vs move-out comparison is ready! Upgrade to save it permanently without watermarks.',
+      title: 'Go Watermark-Free',
+      description: 'Your move-in vs move-out comparison is ready. Premium removes the watermark and keeps it permanently.',
       subtext: province ? `Perfect evidence for ${province.disputeBody} if needed` : undefined,
       icon: 'git-compare-outline' as const,
     },
     general: {
       title: 'Upgrade to Premium',
-      description: 'Unlock unlimited properties, inspections, and shareable secure links.',
+      description: 'Watermark-free reports on every property, permanent cloud storage, and priority support.',
       subtext: province ? `${provinceMessage}` : undefined,
       icon: 'star-outline' as const,
     },
   };
 }
 
-// Lead with shareable links as top feature
+// Lead with the true premium value: watermark-free reports. Properties are
+// unlimited and inspections are capped per-property for everyone, so neither is
+// a Premium unlock.
 const PREMIUM_FEATURES = [
-  { icon: 'link', text: 'Shareable secure links landlords trust' },
-  { icon: 'home', text: 'Unlimited properties' },
-  { icon: 'clipboard', text: 'Unlimited inspections' },
-  { icon: 'git-compare', text: 'Comparison reports without watermarks' },
-  { icon: 'cloud', text: 'Permanent PDF storage' },
+  { icon: 'sparkles', text: 'Watermark-free reports on every property' },
+  { icon: 'git-compare', text: 'Move-in vs move-out comparisons, watermark-free' },
+  { icon: 'cloud', text: 'Permanent PDF storage — never expires' },
+  { icon: 'infinite', text: 'Unlimited photo storage' },
+  { icon: 'link', text: 'Secure shareable report links' },
   { icon: 'shield-checkmark', text: 'Priority support' },
 ];
 
@@ -242,7 +234,7 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
               ) : (
                 <>
                   <Ionicons name="flash" size={20} color="#FFFFFF" />
-                  <Text style={styles.upgradeButtonText}>Start 7-Day Free Trial</Text>
+                  <Text style={styles.upgradeButtonText}>Start 14-Day Free Trial</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -253,7 +245,10 @@ export function UpgradeModal({ visible, onClose, reason = 'general', userProvinc
 
             {/* Trial info */}
             <Text style={styles.trialInfo}>
-              7-day free trial, then {isAnnual ? PRICING.annual.annualTotal : `${PRICING.monthly.displayPrice}/month`}. Cancel anytime.
+              14-day free trial, then {isAnnual ? PRICING.annual.annualTotal : `${PRICING.monthly.displayPrice}/month`}. Cancel anytime.
+            </Text>
+            <Text style={styles.trialInfo}>
+              Just moving once? Buy a one-time Moving Bundle when you export a report — no subscription.
             </Text>
           </ScrollView>
         </View>

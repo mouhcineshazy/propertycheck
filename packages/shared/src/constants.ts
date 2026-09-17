@@ -30,7 +30,7 @@ export type RoomTypeValue = (typeof ROOM_TYPES)[number]['value'];
 // Free tier limits - single source of truth
 // 2 inspections = complete move-in & move-out cycle for 1 property
 export const FREE_TIER_LIMITS = {
-  maxProperties: 1,
+  maxProperties: -1, // Unlimited for all tiers (no property cap)
   maxInspectionsTotal: 2, // Move-in + move-out
   // Universal rule (all tiers): a property may hold at most 2 COMPLETED
   // inspections. Enforced in the DB (see 20260916_inspection_completion_rules).

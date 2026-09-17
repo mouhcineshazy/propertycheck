@@ -26,7 +26,7 @@ import { User, Subscription } from '@propertycheck/database';
 import { getMobileSupabaseClient } from '../../lib/supabase';
 import { deleteAccount } from '../../lib/api';
 import { restorePurchases, hasActivePremium } from '../../lib/revenuecat';
-import { APP_CONFIG, FREE_TIER_LIMITS, getProvince, getProvinceOptions } from '@propertycheck/shared';
+import { APP_CONFIG, getProvince, getProvinceOptions } from '@propertycheck/shared';
 import { useAuth } from '../../hooks';
 import { UpgradeModal } from '../../components';
 import { useI18n, type Locale } from '../../contexts';
@@ -344,7 +344,7 @@ export default function SettingsScreen() {
               <Text style={styles.planDescription}>
                 {isPremium
                   ? t('settings.subscription.premiumDescription')
-                  : t('settings.subscription.freeDescription', { maxProperties: FREE_TIER_LIMITS.maxProperties, maxInspections: FREE_TIER_LIMITS.maxInspectionsTotal })}
+                  : t('settings.subscription.freeDescription')}
               </Text>
             </View>
             <View
