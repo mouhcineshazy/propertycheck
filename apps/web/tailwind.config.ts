@@ -53,33 +53,33 @@ const config: Config = {
           950: '#0B1524',
         },
 
-        // Primary — brand blue (trust, security). 600 = #2563EB.
+        // Primary — brand indigo (trust, security, premium). 600 = #4F46E5.
         primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#3B82F6',
-          600: '#2563EB',
-          700: '#1D4ED8',
-          800: '#1E40AF',
-          900: '#1E3A8A',
-          950: '#172554',
+          50: '#EEF2FF',
+          100: '#E0E7FF',
+          200: '#C7D2FE',
+          300: '#A5B4FC',
+          400: '#818CF8',
+          500: '#6366F1',
+          600: '#4F46E5',
+          700: '#4338CA',
+          800: '#3730A3',
+          900: '#312E81',
+          950: '#1E1B4B',
         },
 
-        // Verified — the "protected / documented" success signal
+        // Verified — the "protected / documented" success signal (emerald). 500 = #10B981.
         verified: {
-          50: '#E9F7F1',
-          100: '#C9EFDF',
-          200: '#95E0C1',
-          300: '#5CCda0',
-          400: '#2FB981',
-          500: '#15966E',
-          600: '#0F7757',
-          700: '#0C5F46',
-          800: '#0A4B38',
-          900: '#083B2D',
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
+          400: '#34D399',
+          500: '#10B981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065F46',
+          900: '#064E3B',
         },
 
         // Amber — plan limits / warnings
@@ -114,9 +114,9 @@ const config: Config = {
         md: '0 8px 24px -6px rgb(11 21 36 / 0.10), 0 3px 8px -4px rgb(11 21 36 / 0.06)',
         lg: '0 20px 40px -12px rgb(11 21 36 / 0.14), 0 6px 14px -8px rgb(11 21 36 / 0.08)',
         xl: '0 32px 64px -16px rgb(11 21 36 / 0.20)',
-        'primary': '0 8px 24px -6px rgb(37 99 235 / 0.35)',
-        'primary-lg': '0 16px 40px -10px rgb(37 99 235 / 0.45)',
-        'focus': '0 0 0 4px rgb(37 99 235 / 0.15)',
+        'primary': '0 8px 24px -6px rgb(79 70 229 / 0.35)',
+        'primary-lg': '0 16px 40px -10px rgb(79 70 229 / 0.45)',
+        'focus': '0 0 0 4px rgb(79 70 229 / 0.15)',
       },
       backgroundImage: {
         'grid-ink':

@@ -25,7 +25,8 @@
     "reports": "Rapports",
     "settings": "Paramètres",
     "signOut": "Déconnexion",
-    "getApp": "Télécharger l'app"
+    "getApp": "Télécharger l'app",
+    "app": "L'appli"
   },
   "landing": {
     "hero": {
@@ -139,8 +140,8 @@
         "description": "Complétez vos inspections d'emménagement et de déménagement",
         "cta": "Commencer gratuitement",
         "features": {
-          "property": "{count} propriété",
-          "inspections": "{count} inspections (emménagement + déménagement)",
+          "property": "Propriétés illimitées",
+          "inspections": "Entrée + sortie par propriété",
           "basicPdf": "Rapports PDF de base",
           "photoDoc": "Documentation photo",
           "storage": "Stockage infonuagique de {days} jours"
@@ -234,6 +235,40 @@
         "easyToUse": "Facile à utiliser",
         "freePlan": "Plan gratuit pour 1 propriété",
         "freeTrial": "Essai gratuit de 14 jours pour Premium"
+      }
+    },
+    "appShowcase": {
+      "badge": "Découvrez l'appli",
+      "title": "Tout ce qu'il vous faut,",
+      "titleHighlight": "dans votre poche",
+      "subtitle": "De la première photo au PDF prêt pour un tribunal, toute l'inspection tient dans votre téléphone.",
+      "stepLabel": "Étape {step}",
+      "organize": {
+        "title": "Gardez chaque logement organisé",
+        "description": "Ajoutez votre logement en quelques secondes et gardez les inspections d'entrée et de sortie côte à côte, au même endroit.",
+        "bullets": {
+          "a": "Appartements, condos et maisons",
+          "b": "Entrée et sortie sur une même chronologie",
+          "c": "Votre premier logement est gratuit"
+        }
+      },
+      "capture": {
+        "title": "Documentez chaque pièce en minutes",
+        "description": "Photographiez pièce par pièce. Chaque photo est horodatée et téléversée automatiquement comme preuve infalsifiable.",
+        "bullets": {
+          "a": "Horodatage automatique sur chaque photo",
+          "b": "Signalez les dommages dès que vous les voyez",
+          "c": "Téléversement en arrière-plan"
+        }
+      },
+      "report": {
+        "title": "Générez un rapport que les propriétaires respectent",
+        "description": "Transformez votre inspection en un PDF professionnel et vérifié, à exporter ou partager en un seul geste.",
+        "bullets": {
+          "a": "PDF professionnels sans filigrane",
+          "b": "Partagez un lien sécurisé qui expire",
+          "c": "Avertissement juridique inclus"
+        }
       }
     }
   },

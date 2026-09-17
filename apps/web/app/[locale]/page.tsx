@@ -2,6 +2,7 @@ import {
   Navigation,
   HeroSection,
   FeaturesSection,
+  AppShowcaseSection,
   HowItWorksSection,
   DownloadSection,
   PricingSection,
@@ -42,6 +43,7 @@ export default function HomePage() {
       <Navigation />
       <HeroSection />
       <FeaturesSection />
+      <AppShowcaseSection />
       <HowItWorksSection />
       <DownloadSection />
       <PricingSection />

@@ -2,6 +2,7 @@ export { Navigation } from './Navigation';
 export { HeroSection } from './HeroSection';
 export { FeaturesSection } from './FeaturesSection';
 export { HowItWorksSection } from './HowItWorksSection';
+export { AppShowcaseSection } from './AppShowcaseSection';
 // Testimonials and Case Studies commented out for MVP - no real data yet
 // export { TestimonialsSection } from './TestimonialsSection';
 // export { CaseStudiesSection } from './CaseStudiesSection';

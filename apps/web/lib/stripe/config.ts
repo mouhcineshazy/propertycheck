@@ -37,9 +37,9 @@ export const PLANS = {
     priceId: null,
     annualPriceId: null,
     features: [
-      `${FREE_TIER_LIMITS.maxProperties} property`,
-      `${FREE_TIER_LIMITS.maxInspectionsTotal} inspection`,
-      `PDF reports (${FREE_TIER_LIMITS.pdfRetentionDays}-day storage)`,
+      'Unlimited properties',
+      'Move-in + move-out inspections',
+      `Watermarked PDF reports (${FREE_TIER_LIMITS.pdfRetentionDays}-day storage)`,
       'Email support',
     ],
     limits: FREE_TIER_LIMITS,

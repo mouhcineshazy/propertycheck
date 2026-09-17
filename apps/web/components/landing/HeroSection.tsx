@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { PhoneFrame, ReportScreen } from './AppScreens';
 
 const valueProps = [
   {
@@ -136,29 +137,31 @@ export function HeroSection() {
           </motion.dl>
         </div>
 
-        {/* ---- Report mockup ---- */}
+        {/* ---- App mockup ---- */}
         <motion.div
-          initial={{ opacity: 0, y: 30, rotate: -1 }}
-          animate={{ opacity: 1, y: 0, rotate: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: easeOut }}
-          className="relative mx-auto w-full min-w-0 max-w-md lg:mx-0"
+          className="relative mx-auto w-full min-w-0 max-w-sm lg:mx-0"
         >
-          <ReportMockup t={t} />
+          <PhoneHero t={t} />
         </motion.div>
       </div>
     </section>
   );
 }
 
-function ReportMockup({ t }: { t: ReturnType<typeof useTranslations> }) {
+function PhoneHero({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <div className="relative">
+      <div className="pointer-events-none absolute inset-0 -z-10 mx-auto max-w-xs rounded-full bg-primary-500/15 blur-3xl" />
+
       {/* Floating verified stamp */}
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.5, ease: easeOut }}
-        className="absolute -right-3 -top-4 z-20 flex items-center gap-2 rounded-full border border-verified-100 bg-card px-3 py-1.5 shadow-md"
+        className="absolute -right-2 top-10 z-20 flex items-center gap-2 rounded-full border border-verified-100 bg-card px-3 py-1.5 shadow-md sm:-right-6"
       >
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-verified-500 text-white">
           <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,60 +171,16 @@ function ReportMockup({ t }: { t: ReturnType<typeof useTranslations> }) {
         <span className="text-xs font-semibold text-verified-600">{t('mockup.verified')}</span>
       </motion.div>
 
-      {/* Report card */}
-      <div className="overflow-hidden rounded-3xl border border-line bg-card shadow-xl">
-        <div className="flex items-center justify-between border-b border-line bg-card-muted px-5 py-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fg-subtle">
-              {t('mockup.reportLabel')}
-            </p>
-            <p className="mt-0.5 text-sm font-bold text-fg">{t('mockup.address')}</p>
-          </div>
-          <span className="badge-primary">{t('mockup.moveIn')}</span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5 p-5">
-          {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-ink-100 to-ink-200"
-            >
-              <svg
-                className="absolute inset-0 m-auto h-7 w-7 text-ink-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z"
-                />
-              </svg>
-              {i === 2 && (
-                <span className="absolute bottom-1.5 left-1.5 rounded-md bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
-                  {t('mockup.damageNoted')}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 border-t border-line px-5 py-3.5 text-xs text-fg-muted">
-          <svg className="h-4 w-4 text-fg-subtle" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 7v5l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="font-medium tabular-nums">{t('mockup.timestamp')}</span>
-        </div>
-      </div>
+      <PhoneFrame>
+        <ReportScreen />
+      </PhoneFrame>
 
       {/* Supporting stat card */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6, ease: easeOut }}
-        className="absolute -bottom-6 -left-5 z-20 hidden rounded-2xl border border-line bg-card px-4 py-3 shadow-lg sm:block"
+        className="absolute -bottom-4 -left-2 z-20 hidden rounded-2xl border border-line bg-card px-4 py-3 shadow-lg sm:block"
       >
         <p className="text-2xl font-bold tracking-tight text-fg tabular-nums">$2,000</p>
         <p className="text-xs font-medium text-fg-muted">{t('mockup.depositProtected')}</p>

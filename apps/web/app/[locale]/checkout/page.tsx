@@ -18,9 +18,9 @@ const itemVariants: Variants = {
 };
 
 const FREE_FEATURES = [
-  `${FREE_TIER_LIMITS.maxProperties} property`,
-  `${FREE_TIER_LIMITS.maxInspectionsTotal} inspections (move-in + move-out)`,
-  'Basic PDF reports',
+  'Unlimited properties',
+  'Move-in + move-out inspections',
+  'Watermarked PDF reports',
   'Photo documentation',
   `${FREE_TIER_LIMITS.pdfRetentionDays}-day cloud storage`,
 ];

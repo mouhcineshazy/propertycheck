@@ -29,8 +29,8 @@ export function PricingSection() {
       descriptionKey: 'free.description',
       price: { monthly: 0, annual: 0 },
       features: [
-        t('free.features.property', { count: FREE_TIER_LIMITS.maxProperties }),
-        t('free.features.inspections', { count: FREE_TIER_LIMITS.maxInspectionsTotal }),
+        t('free.features.property'),
+        t('free.features.inspections'),
         t('free.features.basicPdf'),
         t('free.features.photoDoc'),
         t('free.features.storage', { days: FREE_TIER_LIMITS.pdfRetentionDays }),

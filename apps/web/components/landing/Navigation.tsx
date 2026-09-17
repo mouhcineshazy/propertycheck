@@ -14,6 +14,7 @@ interface NavigationProps {
 
 const links = [
   { href: '#features', key: 'features' },
+  { href: '#app', key: 'app' },
   { href: '#how-it-works', key: 'howItWorks' },
   { href: '#pricing', key: 'pricing' },
 ] as const;

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useTranslations } from 'next-intl';
+import { RoomThumb, ROOMS } from './AppScreens';
 
 const easeOut = [0.25, 0.1, 0.25, 1] as const;
 
@@ -148,16 +149,8 @@ function StepAddProperty() {
 function StepPhotograph() {
   return (
     <div className="grid grid-cols-3 gap-2.5">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="relative aspect-square overflow-hidden rounded-lg bg-gradient-to-br from-ink-100 to-ink-200"
-        >
-          <svg className="absolute inset-0 m-auto h-5 w-5 text-ink-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z" />
-          </svg>
-          {i === 4 && <span className="absolute bottom-1 left-1 h-1.5 w-1.5 rounded-full bg-amber-500" />}
-        </div>
+      {ROOMS.map((room, i) => (
+        <RoomThumb key={room.label} room={room} flag={i === 0} rounded="rounded-lg" />
       ))}
     </div>
   );
@@ -180,9 +173,9 @@ function StepReport() {
         </div>
         <span className="badge-verified">PDF</span>
       </div>
-      <div className="space-y-2 rounded-xl bg-card p-3 shadow-xs">
-        {[3, 5, 4].map((w, i) => (
-          <div key={i} className={`h-2 rounded-full bg-ink-100`} style={{ width: `${w * 18}%` }} />
+      <div className="grid grid-cols-4 gap-2 rounded-xl bg-card p-3 shadow-xs">
+        {ROOMS.slice(0, 4).map((room, i) => (
+          <RoomThumb key={room.label} room={room} flag={i === 2} rounded="rounded-md" />
         ))}
       </div>
       <div className="flex items-center gap-2 rounded-xl bg-primary-600 px-3 py-2.5 text-white">

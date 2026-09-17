@@ -10,14 +10,14 @@
 @layer base {
   :root {
     color-scheme: light;
-    --canvas: 247 248 250; /* #F7F8FA page background */
+    --canvas: 250 250 252; /* #FAFAFC cool page background */
     --card: 255 255 255; /* card surface */
-    --card-muted: 242 244 248; /* ink-50 recessed surface */
-    --fg: 11 21 36; /* ink-950 primary text */
-    --fg-muted: 69 86 110; /* ink-600 secondary text */
-    --fg-subtle: 134 149 171; /* ink-400 tertiary text */
-    --line: 230 233 239; /* ink-100 hairline */
-    --line-strong: 211 218 228; /* ink-200 stronger border */
+    --card-muted: 243 244 249; /* recessed surface */
+    --fg: 11 18 32; /* #0B1220 near-black text */
+    --fg-muted: 71 84 110; /* secondary text */
+    --fg-subtle: 138 147 168; /* tertiary text */
+    --line: 231 232 241; /* hairline */
+    --line-strong: 213 216 228; /* stronger border */
   }
 
   /* Dark theme — applied by system preference (default) or an explicit
@@ -25,27 +25,27 @@
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
       color-scheme: dark;
-      --canvas: 11 21 36;
-      --card: 15 27 45;
-      --card-muted: 28 42 62;
-      --fg: 242 244 248;
-      --fg-muted: 174 185 201;
-      --fg-subtle: 99 116 141;
-      --line: 30 43 62;
-      --line-strong: 44 59 82;
+      --canvas: 11 13 26;
+      --card: 18 20 38;
+      --card-muted: 30 32 54;
+      --fg: 244 245 250;
+      --fg-muted: 176 182 201;
+      --fg-subtle: 108 116 141;
+      --line: 32 35 58;
+      --line-strong: 46 50 78;
     }
   }
 
   :root[data-theme='dark'] {
     color-scheme: dark;
-    --canvas: 11 21 36;
-    --card: 15 27 45;
-    --card-muted: 28 42 62;
-    --fg: 242 244 248;
-    --fg-muted: 174 185 201;
-    --fg-subtle: 99 116 141;
-    --line: 30 43 62;
-    --line-strong: 44 59 82;
+    --canvas: 11 13 26;
+    --card: 18 20 38;
+    --card-muted: 30 32 54;
+    --fg: 244 245 250;
+    --fg-muted: 176 182 201;
+    --fg-subtle: 108 116 141;
+    --line: 32 35 58;
+    --line-strong: 46 50 78;
   }
 
   * {

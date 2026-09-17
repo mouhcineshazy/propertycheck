@@ -96,7 +96,7 @@ Middleware (`middleware.ts`) handles auth redirects at the Edge:
 
 ### Brand
 
-- Primary: `primary-600` (#2563eb) — blue = trust, security, legal protection
+- Primary: `primary-600` (#4F46E5) — indigo = trust, security, legal protection. Verified/success = emerald (#10B981).
 - Trust is the product's core value proposition. Every design decision must reinforce it.
 
 ### Tailwind Utilities (extend, never duplicate)

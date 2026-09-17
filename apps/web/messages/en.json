@@ -25,7 +25,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "signOut": "Sign out",
-    "getApp": "Get the app"
+    "getApp": "Get the app",
+    "app": "The App"
   },
   "landing": {
     "hero": {
@@ -139,8 +140,8 @@
         "description": "Complete your move-in & move-out inspections",
         "cta": "Start Free",
         "features": {
-          "property": "{count} property",
-          "inspections": "{count} inspections (move-in + move-out)",
+          "property": "Unlimited properties",
+          "inspections": "Move-in + move-out per property",
           "basicPdf": "Basic PDF reports",
           "photoDoc": "Photo documentation",
           "storage": "{days}-day cloud storage"
@@ -234,6 +235,40 @@
         "easyToUse": "Easy to use",
         "freePlan": "Free plan for 1 property",
         "freeTrial": "14-day free trial for Premium"
+      }
+    },
+    "appShowcase": {
+      "badge": "See It In Action",
+      "title": "Everything you need,",
+      "titleHighlight": "in your pocket",
+      "subtitle": "From the first photo to a court-ready PDF, the whole inspection lives on your phone.",
+      "stepLabel": "Step {step}",
+      "organize": {
+        "title": "Keep every property organized",
+        "description": "Add your rental in seconds and keep move-in and move-out inspections side by side, all in one place.",
+        "bullets": {
+          "a": "Apartments, condos, and houses",
+          "b": "Move-in and move-out on one timeline",
+          "c": "Your first property is free"
+        }
+      },
+      "capture": {
+        "title": "Document every room in minutes",
+        "description": "Snap photos room by room. Each one is timestamped and uploaded automatically as tamper-evident evidence.",
+        "bullets": {
+          "a": "Automatic timestamps on every photo",
+          "b": "Flag damage the moment you see it",
+          "c": "Photos upload in the background"
+        }
+      },
+      "report": {
+        "title": "Generate a report landlords respect",
+        "description": "Turn your inspection into a professional, verified PDF you can export or share in a single tap.",
+        "bullets": {
+          "a": "Professional, watermark-free PDFs",
+          "b": "Share a secure link that expires",
+          "c": "Legal disclaimer built in"
+        }
       }
     }
   },
