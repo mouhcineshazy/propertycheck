@@ -55,15 +55,15 @@ function StatusBar() {
 /* ---- Shared bits -------------------------------------------------------- */
 
 export const ROOMS = [
-  { label: 'Kitchen', from: 'from-amber-100', to: 'to-amber-200/60' },
-  { label: 'Living', from: 'from-primary-100', to: 'to-primary-200/60' },
-  { label: 'Bath', from: 'from-verified-100', to: 'to-verified-200/60' },
-  { label: 'Bedroom', from: 'from-ink-100', to: 'to-ink-200/70' },
-  { label: 'Hallway', from: 'from-primary-100', to: 'to-verified-100' },
-  { label: 'Closet', from: 'from-ink-100', to: 'to-primary-100' },
+  { label: 'Kitchen', img: '/rooms/kitchen.jpg' },
+  { label: 'Living', img: '/rooms/living.jpg' },
+  { label: 'Bath', img: '/rooms/bath.jpg' },
+  { label: 'Bedroom', img: '/rooms/bedroom.jpg' },
+  { label: 'Hallway', img: '/rooms/hallway.jpg' },
+  { label: 'Closet', img: '/rooms/closet.jpg' },
 ] as const;
 
-/** Stylized "photo" tile — reads as documented content, never a broken image. */
+/** A documented-room "photo" tile: real interior photo + room label + optional damage flag. */
 export function RoomThumb({
   room,
   flag,
@@ -75,29 +75,15 @@ export function RoomThumb({
 }) {
   return (
     <div
-      className={`relative aspect-square overflow-hidden ${rounded} bg-gradient-to-br ${room.from} ${room.to}`}
+      className={`relative aspect-square overflow-hidden bg-card-muted bg-cover bg-center ${rounded}`}
+      style={{ backgroundImage: `url(${room.img})` }}
     >
-      <div className="absolute -right-3 -top-3 h-8 w-8 rounded-full bg-white/40 blur-md" />
-      <svg
-        className="absolute bottom-1.5 right-1.5 h-3.5 w-3.5 text-ink-950/25"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.6}
-          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M4 6h16v12H4V6z"
-        />
-      </svg>
-      <span className="absolute bottom-1 left-1 rounded bg-ink-950/60 px-1 py-px text-[7px] font-semibold text-white">
+      <div className="absolute inset-0 bg-gradient-to-t from-ink-950/55 via-transparent to-transparent" />
+      <span className="absolute bottom-1 left-1 rounded bg-ink-950/55 px-1 py-px text-[7px] font-semibold text-white">
         {room.label}
       </span>
       {flag && (
-        <span className="absolute left-1 top-1 flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-amber-500" />
-        </span>
+        <span className="absolute left-1 top-1 h-2 w-2 rounded-full bg-amber-500 ring-1 ring-white/70" />
       )}
     </div>
   );
