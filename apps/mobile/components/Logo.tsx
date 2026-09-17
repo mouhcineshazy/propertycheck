@@ -9,9 +9,9 @@ import { View, Text, StyleSheet } from 'react-native';
 
 // Brand colors — Trust Ink
 const BRAND = {
-  primary: '#2563eb',      // brand blue (primary-600)
-  primaryLight: '#3b82f6', // primary-500
-  primaryDark: '#1d4ed8',  // primary-700
+  primary: '#4F46E5',      // brand indigo (primary-600)
+  primaryLight: '#6366F1', // primary-500
+  primaryDark: '#4338CA',  // primary-700
   dark: '#0B1524',         // ink-950
   gray: '#45566E',         // ink-600
   lightGray: '#8695AB',    // ink-400

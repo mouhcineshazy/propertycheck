@@ -235,15 +235,15 @@ export default function ComparisonScreen() {
 
 // Brand colors - matching logo
 const BRAND_COLORS = {
-  primary: '#2563eb',      // Blue (Check)
-  primaryDark: '#1d4ed8',
-  primaryLight: '#3b82f6',
+  primary: '#4F46E5',      // Indigo (Check)
+  primaryDark: '#4338CA',
+  primaryLight: '#6366F1',
   dark: '#0B1524',         // Dark (Property)
   gray: '#45566E',
   lightGray: '#8695AB',
   background: '#F7F8FA',
   white: '#ffffff',
-  success: '#15966E',
+  success: '#10B981',
   warning: '#f59e0b',
 };
 
@@ -441,7 +441,7 @@ function generateComparisonHtml(
           --bg: ${colors.background};
           --line: #e5e7eb;
           --line-strong: #cbd5e1;
-          --move-in: #15966e;
+          --move-in: #10B981;
           --move-out: #d97706;
         }
 

@@ -97,7 +97,7 @@ style={{ color: colors.primary[600], padding: spacing.md }}
 ```
 
 Key values:
-- `colors.primary[600]` = #2563eb (brand blue)
+- `colors.primary[600]` = #4F46E5 (brand indigo); `colors.verified[500]` = #10B981 (emerald)
 - `spacing`: xs=4, sm=8, md=16, lg=24, xl=32
 - Tab bar: active = `colors.primary[600]`, inactive = `colors.gray[500]`, bg = white
 
